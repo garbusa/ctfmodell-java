@@ -1,0 +1,85 @@
+.root {
+
+}
+
+#saveItem > .label {
+    -fx-graphic: url("../image/menu/new.png")
+}
+
+#saveItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+#openItem > .label {
+    -fx-graphic: url("../image/menu/open.png")
+}
+
+#openItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+#printItem > .label {
+    -fx-graphic: url("../image/menu/print.png")
+}
+
+#printItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+#playItem > .label {
+    -fx-graphic: url("../image/menu/play.png")
+}
+
+#playItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+
+#pauseItem > .label {
+    -fx-graphic: url("../image/menu/pause.png")
+}
+
+#pauseItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+
+#stopItem > .label {
+    -fx-graphic: url("../image/menu/stop.png")
+}
+
+#stopItem .accelerator-text {
+    -fx-graphic: none;
+}
+
+#newButton {
+    -fx-graphic: url("../image/menu/new.png");
+}
+
+#openButton {
+    -fx-graphic: url("../image/menu/open.png")
+}
+
+
+#saveButton {
+    -fx-graphic: url("../image/menu/save.png")
+}
+
+#loadButton {
+    -fx-graphic: url("../image/menu/load.png")
+}
+
+#sizeButton {
+    -fx-graphic: url("../image/menu/size.png")
+}
+
+#avatarButton {
+    -fx-graphic: url("../image/menu/avatar.png")
+}
+
+#flagButton {
+    -fx-graphic: url("../image/menu/flag.png")
+}
+
+
+

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0" stylesheets="css/styles.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <VBox prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="Editor">
+                  <items>
+                        <MenuItem fx:id="saveItem" mnemonicParsing="false" text="Neu">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="openItem" mnemonicParsing="false" text="Öffnen">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Kompilieren">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="printItem" mnemonicParsing="false" text="Drucken">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Beenden">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Territorium">
+                  <items>
+                        <Menu mnemonicParsing="false" text="Speichern">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="XML" />
+                              <MenuItem mnemonicParsing="false" text="JAXB" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                          </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Laden">
+                           <items>
+                              <MenuItem mnemonicParsing="false" text="XML" />
+                              <MenuItem mnemonicParsing="false" text="JAXB" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                           </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Als Bild speichern">
+                           <items>
+                              <MenuItem mnemonicParsing="false" text="XML" />
+                              <MenuItem mnemonicParsing="false" text="JAXB" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                           </items>
+                        </Menu>
+                    <MenuItem mnemonicParsing="false" text="Drucken" />
+                        <MenuItem mnemonicParsing="false" text="Größe ändern..." />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <RadioMenuItem mnemonicParsing="false" text="Avatar platzieren">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="territoriumGroup" />
+                           </toggleGroup></RadioMenuItem>
+                        <RadioMenuItem mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" />
+                        <RadioMenuItem mnemonicParsing="false" text="SEK Beamten platzieren" toggleGroup="$territoriumGroup" />
+                        <RadioMenuItem mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Avatar">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Flaggen in der Hand..." />
+                        <MenuItem mnemonicParsing="false" text="linksUm">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem mnemonicParsing="false" text="vor">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem mnemonicParsing="false" text="nimm">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem mnemonicParsing="false" text="gib">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                           </accelerator></MenuItem>
+                  </items>
+                </Menu>
+                  <Menu mnemonicParsing="false" text="Simulation">
+                     <items>
+                        <MenuItem fx:id="playItem" mnemonicParsing="false" text="Start/Fortsetzen">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="F11" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="pauseItem" mnemonicParsing="false" text="Pause">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="F12" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" />
+                     </items>
+                  </Menu>
+              </menus>
+            </MenuBar>
+            <ToolBar prefHeight="40.0" prefWidth="200.0">
+              <items>
+                  <Button fx:id="newButton" mnemonicParsing="false" />
+                  <Button fx:id="openButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Separator orientation="VERTICAL" prefHeight="10.0" />
+                  <Button fx:id="saveButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Button fx:id="loadButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Separator layoutX="178.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
+                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="addingGroup" />
+                     </toggleGroup>
+                  </ToggleButton>
+                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup" />
+                  <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup" />
+                  <ToggleButton fx:id="sekButton" mnemonicParsing="false" toggleGroup="$addingGroup" />
+                  <ToggleButton fx:id="deleteButton" mnemonicParsing="false" toggleGroup="$addingGroup" />
+                  <Separator layoutX="358.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
+                  <Button fx:id="isFlagButton" layoutX="370.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Button fx:id="rotateButton" layoutX="454.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Button fx:id="forwardButton" layoutX="538.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Button fx:id="pickButton" layoutX="622.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Button fx:id="dropButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false" />
+                  <Separator layoutX="790.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
+                  <Button fx:id="playButton" layoutX="548.0" layoutY="20.0" mnemonicParsing="false" />
+                  <Button fx:id="pauseButton" layoutX="632.0" layoutY="20.0" mnemonicParsing="false" />
+                  <Button fx:id="stopButton" layoutX="716.0" layoutY="20.0" mnemonicParsing="false" />
+                  <Separator layoutX="800.0" layoutY="20.0" orientation="VERTICAL" prefHeight="10.0" />
+                  <Slider />
+              </items>
+            </ToolBar>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <SplitPane dividerPositions="0.5986622073578596" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <TextArea fx:id="codeEditor"
+                            AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+        </items>
+      </SplitPane>
+   </center>
+   <bottom>
+      <Label text="Herzlich Willkommen" BorderPane.alignment="CENTER" />
+   </bottom>
+</BorderPane>
