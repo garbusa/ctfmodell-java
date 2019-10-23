@@ -74,12 +74,53 @@
 }
 
 #avatarButton {
-    -fx-graphic: url("../image/menu/avatar.png")
+    -fx-graphic: url("../image/menu/police.png")
 }
 
 #flagButton {
     -fx-graphic: url("../image/menu/flag.png")
 }
 
+#terrorUnarmedButton {
+    -fx-graphic: url("../image/menu/terrorist.png")
+}
 
+#terrorArmedButton {
+    -fx-graphic: url("../image/menu/terrorist_2.png")
+}
 
+#deleteButton {
+    -fx-graphic: url("../image/menu/delete.png")
+}
+
+#isFlagButton {
+    -fx-graphic: url("../image/menu/police_with_flag.png")
+}
+
+#rotateButton {
+    -fx-graphic: url("../image/menu/police_turn.png")
+}
+
+#forwardButton {
+    -fx-graphic: url("../image/menu/police_forward.png")
+}
+
+#pickButton {
+     -fx-graphic: url("../image/menu/police_pick.png")
+}
+
+#dropButton {
+    -fx-graphic: url("../image/menu/police_drop.png")
+}
+
+#playButton {
+    -fx-graphic: url("../image/menu/play.png")
+}
+
+#pauseButton {
+    -fx-graphic: url("../image/menu/pause.png")
+}
+
+#stopButton {
+    -fx-graphic: url("../image/menu/stop.png")
+}
