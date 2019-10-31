@@ -1,0 +1,2 @@
+- Flag aufheben
+- Flag in Base ablegen
