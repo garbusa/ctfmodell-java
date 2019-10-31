@@ -51,7 +51,7 @@ public class PoliceOfficer {
     }
 
     public void attack() {
-        FieldEnum forwardField = getForwardField();
+        FieldEnum forwardField = this.getForwardField();
         if (forwardField == FieldEnum.UNARMED_TERRORIST) {
             this.setForwardField(FieldEnum.EMPTY);
         } else {
@@ -80,7 +80,7 @@ public class PoliceOfficer {
 
     public void pick() {
         //Check if there is a flag
-        FieldEnum actualField = getActualField();
+        FieldEnum actualField = this.getActualField();
         if (actualField != FieldEnum.OFFICER_AND_FLAG) {
             throw new FlagException("Auf diesem Feld gibt es keine Flagge zum aufheben!");
         } else {
@@ -106,7 +106,7 @@ public class PoliceOfficer {
     }
 
     public void drop() {
-        FieldEnum actualField = getActualField();
+        FieldEnum actualField = this.getActualField();
         if (actualField != FieldEnum.OFFICER_AND_BASE) {
             throw new BaseException("Du musst dich in der Base befinden, um deine Flaggen abzulegen!");
         } else if (!this.hasFlags()) {
@@ -130,13 +130,10 @@ public class PoliceOfficer {
     }
 
     public boolean hasWon() {
-        return hasWon;
+        return this.hasWon;
     }
 
-    private boolean isNotEndOfField(int y, int x) {
-        return (y > -1 && y < this.landscape.getLandscape().length)
-                && (x > -1 && x < this.landscape.getLandscape()[y].length);
-    }
+
 
 
     private FieldEnum getForwardField() {
@@ -174,6 +171,10 @@ public class PoliceOfficer {
         return null;
     }
 
+    private boolean isNotEndOfField(int y, int x) {
+        return this.landscape.isNotEndOfField(y, x);
+    }
+
     private void setForwardField(FieldEnum field) {
         int y = this.yPos;
         int x = this.xPos;
@@ -209,7 +210,7 @@ public class PoliceOfficer {
     }
 
     private void setNewPosition() {
-        FieldEnum actualField = getActualField();
+        FieldEnum actualField = this.getActualField();
         if (actualField == FieldEnum.BASE) {
             this.setActualField(FieldEnum.OFFICER_AND_BASE);
         } else if (actualField == FieldEnum.FLAG) {
@@ -231,13 +232,13 @@ public class PoliceOfficer {
     }
 
     private void forwardToDirection(int newX, int newY) {
-        FieldEnum forwardField = getForwardField();
+        FieldEnum forwardField = this.getForwardField();
         if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST &&
                 forwardField != FieldEnum.OUT_OF_FIELD) {
-            setOldPosition();
+            this.setOldPosition();
             this.xPos = newX;
             this.yPos = newY;
-            setNewPosition();
+            this.setNewPosition();
         } else {
             this.throwMoveError(forwardField);
         }

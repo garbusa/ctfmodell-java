@@ -93,12 +93,39 @@ public class Landscape {
         }
     }
 
+    public void deleteUnarmedTerrorist(int y, int x) {
+        if(!this.isNotEndOfField(y, x)) {
+            throw new LandscapeException("Es wurde versuch ein Terrorist aus einem nicht existierenden Feld zu löschen!");
+        } else if(this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
+            this.landscape[y][x] = FieldEnum.EMPTY;
+        } else {
+            throw new LandscapeException("Auf diesem Feld befindet sich kein Terrorist!");
+        }
+    }
+
     public void addArmedTerrorist(int y, int x) {
         if (this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
             this.landscape[y][x] = FieldEnum.ARMED_TERRORIST;
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
+    }
+
+    public void deleteArmedTerrorist(int y, int x) {
+        if(!this.isNotEndOfField(y, x)) {
+            throw new LandscapeException("Es wurde versuch ein Terrorist aus einem nicht existierenden Feld zu löschen!");
+        } else if(this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
+            this.landscape[y][x] = FieldEnum.EMPTY;
+        } else {
+            throw new LandscapeException("Auf diesem Feld befindet sich kein Terrorist!");
+        }
+    }
+
+    /* **************************************** HELPER ******************************************* */
+
+    protected boolean isNotEndOfField(int y, int x) {
+        return (y > -1 && y < this.landscape.length)
+                && (x > -1 && x < this.landscape[y].length);
     }
 
     /* **************************************** GETTER & SETTER ******************************************* */
