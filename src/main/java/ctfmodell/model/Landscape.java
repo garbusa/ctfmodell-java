@@ -70,6 +70,10 @@ public class Landscape {
         int y = flag.getyPos();
         FieldEnum field = this.landscape[flag.getyPos()][flag.getxPos()];
 
+        if(!this.isNotEndOfField(y, x)) {
+            throw new LandscapeException("Es wurde versuch eine Flagge aus einem nicht existierenden Feld zu löschen!");
+        }
+
         switch (field) {
             case FLAG:
                 this.landscape[y][x] = FieldEnum.EMPTY;
@@ -80,7 +84,7 @@ public class Landscape {
                 this.flags.remove(flag);
                 break;
             default:
-                break;
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann keine Flagge entfernt werden!", y, x));
         }
 
     }

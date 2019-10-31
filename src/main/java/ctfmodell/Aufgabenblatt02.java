@@ -16,9 +16,11 @@ public class Aufgabenblatt02 {
         landscape.setPoliceOfficer(policeOfficer);
         Flag flagOne = new Flag(2, 2);
         Flag flagTwo = new Flag(3, 3);
+        Flag flagThree = new Flag(4, 4);
 
         landscape.addFlag(flagOne);
         landscape.addFlag(flagTwo);
+        landscape.addFlag(flagThree);
         landscape.addUnarmedTerrorist(0, 1);
         landscape.addArmedTerrorist(1, 1);
         landscape.addArmedTerrorist(1, 0);
@@ -62,13 +64,13 @@ public class Aufgabenblatt02 {
             for (int y = 0; y < landscape.getLandscape()[x].length; y++) {
                 switch (landscape.getLandscape()[x][y]) {
                     case POLICE_OFFICER:
-                        if (direction == DirectionEnum.NORTH) System.out.print("^ ");
-                        if (direction == DirectionEnum.WEST) System.out.print("< ");
-                        if (direction == DirectionEnum.SOUTH) System.out.print("V ");
-                        if (direction == DirectionEnum.EAST) System.out.print("> ");
+                        if (direction == DirectionEnum.NORTH) System.out.print("^   ");
+                        if (direction == DirectionEnum.WEST) System.out.print("<   ");
+                        if (direction == DirectionEnum.SOUTH) System.out.print("V   ");
+                        if (direction == DirectionEnum.EAST) System.out.print(">   ");
                         break;
                     case FLAG:
-                        System.out.print("F ");
+                        System.out.print("F   ");
                         break;
                     case OFFICER_AND_FLAG:
                         if (direction == DirectionEnum.NORTH) System.out.print("^&F ");
@@ -77,13 +79,13 @@ public class Aufgabenblatt02 {
                         if (direction == DirectionEnum.EAST) System.out.print(">&F ");
                         break;
                     case UNARMED_TERRORIST:
-                        System.out.print("UT ");
+                        System.out.print("UT  ");
                         break;
                     case ARMED_TERRORIST:
-                        System.out.print("AT ");
+                        System.out.print("AT  ");
                         break;
                     case BASE:
-                        System.out.print("B ");
+                        System.out.print("B   ");
                         break;
                     case OFFICER_AND_BASE:
                         if (direction == DirectionEnum.NORTH) System.out.print("^&B ");
@@ -92,7 +94,7 @@ public class Aufgabenblatt02 {
                         if (direction == DirectionEnum.EAST) System.out.print(">&B ");
                         break;
                     default:
-                        System.out.print("0 ");
+                        System.out.print("0   ");
                 }
             }
             System.out.println();
