@@ -8,7 +8,7 @@ public class Flag {
     private Flag() {
     }
 
-    public Flag(boolean pickedUp, int xPos, int yPos) {
+    public Flag(int xPos, int yPos) {
         this.xPos = xPos;
         this.yPos = yPos;
     }

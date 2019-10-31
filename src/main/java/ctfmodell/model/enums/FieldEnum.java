@@ -1,6 +1,7 @@
 package ctfmodell.model.enums;
 
 public enum FieldEnum {
+    OUT_OF_FIELD,
     EMPTY,
     BASE,
     ARMED_TERRORIST,

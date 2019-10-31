@@ -1,6 +1,2 @@
-- Code aufräumen
-- NullPointerException berücksichtigen
-- Eigene Exceptions anlegen und werfen
 - Fälle berücksichtigen wie:
 -- Was wenn Feld sich verkleinert?
--- Was wenn Akteur ins nichts läuft?

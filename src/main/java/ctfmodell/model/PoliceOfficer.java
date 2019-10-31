@@ -2,6 +2,7 @@ package ctfmodell.model;
 
 import ctfmodell.model.enums.DirectionEnum;
 import ctfmodell.model.enums.FieldEnum;
+import ctfmodell.model.exception.*;
 
 import java.util.Iterator;
 import java.util.List;
@@ -26,94 +27,23 @@ public class PoliceOfficer {
         this.hasWon = false;
     }
 
-    public FieldEnum getForwardField() {
-        int y = this.yPos;
-        int x = this.xPos;
-        switch (this.direction) {
-            case NORTH:
-                return this.landscape.getLandscape()[y - 1][x];
-            case SOUTH:
-                return this.landscape.getLandscape()[y + 1][x];
-            case WEST:
-                return this.landscape.getLandscape()[y][x - 1];
-            case EAST:
-                return this.landscape.getLandscape()[y][x + 1];
-            default:
-                break;
-        }
-
-        return null;
-    }
-
-    public void setForwardField(FieldEnum field) {
-        int y = this.yPos;
-        int x = this.xPos;
-        switch (this.direction) {
-            case NORTH:
-                this.landscape.getLandscape()[y - 1][x] = field;
-            case SOUTH:
-                this.landscape.getLandscape()[y + 1][x] = field;
-            case WEST:
-                this.landscape.getLandscape()[y][x - 1] = field;
-            case EAST:
-                this.landscape.getLandscape()[y][x + 1] = field;
-            default:
-                break;
-        }
-
-    }
-
-    public FieldEnum getActualField() {
-        return this.landscape.getLandscape()[this.yPos][this.xPos];
-    }
-
-    public void setActualField(FieldEnum field) {
-        this.landscape.getLandscape()[this.yPos][this.xPos] = field;
-    }
+    /* **************************************** ACTIONS ******************************************* */
 
     public void forward() {
-
-        FieldEnum forwardField;
+        int x = this.xPos;
+        int y = this.yPos;
         switch (this.direction) {
             case NORTH:
-                forwardField = getForwardField();
-                if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST) {
-                    setOldPosition();
-                    this.yPos--;
-                    setNewPosition();
-                } else {
-                    System.out.println("Etwas versperrt dir den Weg!");
-                }
+                this.forwardToDirection(x, y - 1);
                 break;
             case SOUTH:
-                forwardField = getForwardField();
-                if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST) {
-                    setOldPosition();
-                    this.yPos++;
-                    setNewPosition();
-                } else {
-                    System.out.println("Etwas versperrt dir den Weg!");
-                }
+                this.forwardToDirection(x, y + 1);
                 break;
             case WEST:
-                forwardField = getForwardField();
-                if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST) {
-                    setOldPosition();
-                    this.xPos--;
-                    setNewPosition();
-                } else {
-                    System.out.println("Etwas versperrt dir den Weg!");
-                }
+                this.forwardToDirection(x - 1, y);
                 break;
             case EAST:
-                forwardField = getForwardField();
-                if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST) {
-                    setOldPosition();
-                    this.xPos++;
-                    setNewPosition();
-                } else {
-                    System.out.println("Etwas versperrt dir den Weg!");
-                }
+                this.forwardToDirection(x + 1, y);
                 break;
             default:
                 break;
@@ -125,29 +55,7 @@ public class PoliceOfficer {
         if (forwardField == FieldEnum.UNARMED_TERRORIST) {
             this.setForwardField(FieldEnum.EMPTY);
         } else {
-            System.out.println("Attackieren ist nicht möglich");
-        }
-    }
-
-    private void setNewPosition() {
-        FieldEnum actualField = getActualField();
-        if (actualField == FieldEnum.BASE) {
-            this.setActualField(FieldEnum.OFFICER_AND_BASE);
-        } else if (actualField == FieldEnum.FLAG) {
-            this.setActualField(FieldEnum.OFFICER_AND_FLAG);
-        } else {
-            this.setActualField(FieldEnum.POLICE_OFFICER);
-        }
-    }
-
-    private void setOldPosition() {
-        FieldEnum actualField = this.getActualField();
-        if (actualField == FieldEnum.OFFICER_AND_BASE) {
-            this.setActualField(FieldEnum.BASE);
-        } else if (actualField == FieldEnum.OFFICER_AND_FLAG) {
-            this.setActualField(FieldEnum.FLAG);
-        } else {
-            this.setActualField(FieldEnum.EMPTY);
+            throw new PoliceException("Du kannst nur unbewaffnete Terroristen attackieren!");
         }
     }
 
@@ -173,8 +81,8 @@ public class PoliceOfficer {
     public void pick() {
         //Check if there is a flag
         FieldEnum actualField = getActualField();
-        if(actualField != FieldEnum.OFFICER_AND_FLAG) {
-            System.out.println("Es gibt keine Flagge zum aufheben");
+        if (actualField != FieldEnum.OFFICER_AND_FLAG) {
+            throw new FlagException("Auf diesem Feld gibt es keine Flagge zum aufheben!");
         } else {
             //Update Field
             setActualField(FieldEnum.POLICE_OFFICER);
@@ -199,16 +107,150 @@ public class PoliceOfficer {
 
     public void drop() {
         FieldEnum actualField = getActualField();
-        if(actualField != FieldEnum.OFFICER_AND_BASE) {
-            System.out.println("Du befindest dich nicht in deiner Base!");
-        } else if(!this.hasFlags()) {
-            System.out.println("Du hast keine Flaggen!");
-        } else if(!this.hasAllFlags()) {
-            System.out.println("Du hast nicht alle Flaggen gesammelt!");
+        if (actualField != FieldEnum.OFFICER_AND_BASE) {
+            throw new BaseException("Du musst dich in der Base befinden, um deine Flaggen abzulegen!");
+        } else if (!this.hasFlags()) {
+            throw new FlagException("Du hast keine Flaggen im Besitz!");
+        } else if (!this.hasAllFlags()) {
+            throw new FlagException("Du hast nicht genügend Flaggen gesammelt!");
         } else {
             this.numberOfFlags = 0;
             this.hasWon = true;
         }
+    }
+
+    /* **************************************** HELPER ******************************************* */
+
+    private boolean hasFlags() {
+        return this.numberOfFlags > 0;
+    }
+
+    private boolean hasAllFlags() {
+        return this.landscape.getFlags().size() == 0;
+    }
+
+    public boolean hasWon() {
+        return hasWon;
+    }
+
+    private boolean isNotEndOfField(int y, int x) {
+        return (y > -1 && y < this.landscape.getLandscape().length)
+                && (x > -1 && x < this.landscape.getLandscape()[y].length);
+    }
+
+
+    private FieldEnum getForwardField() {
+        int y = this.yPos;
+        int x = this.xPos;
+        switch (this.direction) {
+            case NORTH:
+                if (this.isNotEndOfField(y - 1, x)) {
+                    return this.landscape.getLandscape()[y - 1][x];
+                } else {
+                    return FieldEnum.OUT_OF_FIELD;
+                }
+            case SOUTH:
+                if (this.isNotEndOfField(y + 1, x)) {
+                    return this.landscape.getLandscape()[y + 1][x];
+                } else {
+                    return FieldEnum.OUT_OF_FIELD;
+                }
+            case WEST:
+                if (this.isNotEndOfField(y, x - 1)) {
+                    return this.landscape.getLandscape()[y][x - 1];
+                } else {
+                    return FieldEnum.OUT_OF_FIELD;
+                }
+            case EAST:
+                if (this.isNotEndOfField(y, x + 1)) {
+                    return this.landscape.getLandscape()[y][x + 1];
+                } else {
+                    return FieldEnum.OUT_OF_FIELD;
+                }
+            default:
+                break;
+        }
+
+        return null;
+    }
+
+    private void setForwardField(FieldEnum field) {
+        int y = this.yPos;
+        int x = this.xPos;
+        switch (this.direction) {
+            case NORTH:
+                if (this.isNotEndOfField(y - 1, x)) {
+                    this.landscape.getLandscape()[y - 1][x] = field;
+                } else {
+                    System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
+                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y - 1, x));
+                }
+            case SOUTH:
+                if (this.isNotEndOfField(y + 1, x)) {
+                    this.landscape.getLandscape()[y + 1][x] = field;
+                } else {
+                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y + 1, x));
+                }
+            case WEST:
+                if (this.isNotEndOfField(y, x - 1)) {
+                    this.landscape.getLandscape()[y][x - 1] = field;
+                } else {
+                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x - 1));
+                }
+            case EAST:
+                if (this.isNotEndOfField(y, x + 1)) {
+                    this.landscape.getLandscape()[y][x + 1] = field;
+                } else {
+                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x + 1));
+                }
+            default:
+                break;
+        }
+    }
+
+    private void setNewPosition() {
+        FieldEnum actualField = getActualField();
+        if (actualField == FieldEnum.BASE) {
+            this.setActualField(FieldEnum.OFFICER_AND_BASE);
+        } else if (actualField == FieldEnum.FLAG) {
+            this.setActualField(FieldEnum.OFFICER_AND_FLAG);
+        } else {
+            this.setActualField(FieldEnum.POLICE_OFFICER);
+        }
+    }
+
+    private void setOldPosition() {
+        FieldEnum actualField = this.getActualField();
+        if (actualField == FieldEnum.OFFICER_AND_BASE) {
+            this.setActualField(FieldEnum.BASE);
+        } else if (actualField == FieldEnum.OFFICER_AND_FLAG) {
+            this.setActualField(FieldEnum.FLAG);
+        } else {
+            this.setActualField(FieldEnum.EMPTY);
+        }
+    }
+
+    private void forwardToDirection(int newX, int newY) {
+        FieldEnum forwardField = getForwardField();
+        if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST &&
+                forwardField != FieldEnum.OUT_OF_FIELD) {
+            setOldPosition();
+            this.xPos = newX;
+            this.yPos = newY;
+            setNewPosition();
+        } else {
+            this.throwMoveError(forwardField);
+        }
+    }
+
+    /* **************************************** STANDARD GETTER & SETTER ******************************************* */
+
+    private FieldEnum getActualField() {
+        return this.landscape.getLandscape()[this.yPos][this.xPos];
+    }
+
+    private void setActualField(FieldEnum field) {
+        this.landscape.getLandscape()[this.yPos][this.xPos] = field;
     }
 
     public int getyPos() {
@@ -243,10 +285,6 @@ public class PoliceOfficer {
         this.direction = direction;
     }
 
-    private boolean hasFlags() {
-        return this.numberOfFlags > 0;
-    }
-
     public Landscape getLandscape() {
         return landscape;
     }
@@ -255,11 +293,13 @@ public class PoliceOfficer {
         this.landscape = landscape;
     }
 
-    public boolean hasAllFlags() {
-        return this.landscape.getFlags().size() == 0;
-    }
+    /* **************************************** ERROR HANDLING ******************************************* */
 
-    public boolean hasWon() {
-        return hasWon;
+    private void throwMoveError(FieldEnum field) {
+        if (field == FieldEnum.UNARMED_TERRORIST || field == FieldEnum.ARMED_TERRORIST) {
+            throw new MoveException("Du kannst dich nicht fortbewegen, da dir etwas im Weg steht!");
+        } else if (field == FieldEnum.OUT_OF_FIELD) {
+            throw new MoveException("Du kannst dich nicht ins Nichts bewegen!");
+        }
     }
 }

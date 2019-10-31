@@ -1,6 +1,7 @@
 package ctfmodell.model;
 
 import ctfmodell.model.enums.FieldEnum;
+import ctfmodell.model.exception.LandscapeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +32,9 @@ public class Landscape {
     }
 
     private FieldEnum[][] generateFields() {
-        FieldEnum[][] fields  = new FieldEnum[this.height][this.width];
-        for(int y = 0; y < fields.length; y++) {
-            for(int x = 0; x < fields[y].length; x++) {
+        FieldEnum[][] fields = new FieldEnum[this.height][this.width];
+        for (int y = 0; y < fields.length; y++) {
+            for (int x = 0; x < fields[y].length; x++) {
                 if (x == this.baseX && y == this.baseY) {
                     fields[y][x] = FieldEnum.BASE;
                 } else {
@@ -45,8 +46,9 @@ public class Landscape {
         return fields;
     }
 
+    /* **************************************** ADD & DELETE ******************************************* */
+
     public void addFlag(Flag flag) {
-        //this.policeOfficer = policeOfficer;
         int x = flag.getxPos();
         int y = flag.getyPos();
         switch (this.landscape[y][x]) {
@@ -59,8 +61,7 @@ public class Landscape {
                 this.flags.add(flag);
                 break;
             default:
-                System.out.println("Auf diesem Feld kann keine Flagge platziert werden platziert werden!");
-                break;
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann keine Flagge platziert werden!", y, x));
         }
     }
 
@@ -85,20 +86,22 @@ public class Landscape {
     }
 
     public void addUnarmedTerrorist(int y, int x) {
-        if(this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
+        if (this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
             this.landscape[y][x] = FieldEnum.UNARMED_TERRORIST;
         } else {
-            System.out.println("Hier kann kein Terrorist eingefügt werden!");
+            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
     }
 
     public void addArmedTerrorist(int y, int x) {
-        if(this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
+        if (this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
             this.landscape[y][x] = FieldEnum.ARMED_TERRORIST;
         } else {
-            System.out.println("Hier kann kein Terrorist eingefügt werden!");
+            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
     }
+
+    /* **************************************** GETTER & SETTER ******************************************* */
 
     public PoliceOfficer getPoliceOfficer() {
         return policeOfficer;
@@ -116,8 +119,7 @@ public class Landscape {
                 this.landscape[y][x] = FieldEnum.OFFICER_AND_FLAG;
                 break;
             default:
-                System.out.println("Auf diesem Feld kann kein Officer platziert werden!");
-                break;
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
         }
     }
 
