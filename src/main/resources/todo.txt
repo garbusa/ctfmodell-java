@@ -1,3 +1,4 @@
+- Code aufräumen
 - NullPointerException berücksichtigen
 - Eigene Exceptions anlegen und werfen
 - Fälle berücksichtigen wie:
