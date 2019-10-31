@@ -132,6 +132,10 @@ public class Landscape {
                 && (x > -1 && x < this.landscape[y].length);
     }
 
+    private boolean hasOfficer() {
+        return this.policeOfficer != null;
+    }
+
     /* **************************************** GETTER & SETTER ******************************************* */
 
     public PoliceOfficer getPoliceOfficer() {
@@ -148,6 +152,28 @@ public class Landscape {
                 break;
             case FLAG:
                 this.landscape[y][x] = FieldEnum.OFFICER_AND_FLAG;
+                break;
+            case BASE:
+                this.landscape[y][x] = FieldEnum.OFFICER_AND_BASE;
+                break;
+            default:
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
+        }
+    }
+
+    public void unsetPoliceOfficer() {
+        int x = policeOfficer.getyPos();
+        int y = policeOfficer.getxPos();
+        this.policeOfficer = null;
+        switch (this.landscape[y][x]) {
+            case POLICE_OFFICER:
+                this.landscape[y][x] = FieldEnum.EMPTY;
+                break;
+            case OFFICER_AND_FLAG:
+                this.landscape[y][x] = FieldEnum.FLAG;
+                break;
+            case OFFICER_AND_BASE:
+                this.landscape[y][x] = FieldEnum.BASE;
                 break;
             default:
                 throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
