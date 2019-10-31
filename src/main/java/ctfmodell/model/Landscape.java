@@ -147,8 +147,11 @@ public class Landscape {
         this.landscape = landscape;
     }
 
-    public boolean allFlagsPickedUp() {
-        return this.policeOfficer.getNumberOfFlags() == this.flags.size();
+    public List<Flag> getFlags() {
+        return flags;
     }
 
+    public void setFlags(List<Flag> flags) {
+        this.flags = flags;
+    }
 }

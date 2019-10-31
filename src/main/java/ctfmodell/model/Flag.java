@@ -2,7 +2,6 @@ package ctfmodell.model;
 
 public class Flag {
 
-    private boolean pickedUp;
     private int xPos;
     private int yPos;
 
@@ -10,17 +9,8 @@ public class Flag {
     }
 
     public Flag(boolean pickedUp, int xPos, int yPos) {
-        this.pickedUp = pickedUp;
         this.xPos = xPos;
         this.yPos = yPos;
-    }
-
-    public boolean isPickedUp() {
-        return pickedUp;
-    }
-
-    public void setPickedUp(boolean pickedUp) {
-        this.pickedUp = pickedUp;
     }
 
     public int getxPos() {

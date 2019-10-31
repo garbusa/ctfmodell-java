@@ -3,6 +3,9 @@ package ctfmodell.model;
 import ctfmodell.model.enums.DirectionEnum;
 import ctfmodell.model.enums.FieldEnum;
 
+import java.util.Iterator;
+import java.util.List;
+
 public class PoliceOfficer {
 
     private int yPos;
@@ -10,6 +13,7 @@ public class PoliceOfficer {
     private int numberOfFlags;
     private DirectionEnum direction;
     private Landscape landscape;
+    private boolean hasWon;
 
     private PoliceOfficer() {
     }
@@ -19,6 +23,7 @@ public class PoliceOfficer {
         this.xPos = xPos;
         this.numberOfFlags = 0;
         this.direction = direction;
+        this.hasWon = false;
     }
 
     public FieldEnum getForwardField() {
@@ -155,24 +160,55 @@ public class PoliceOfficer {
                 this.direction = DirectionEnum.EAST;
                 break;
             case WEST:
-                this.direction = DirectionEnum.NORTH;
+                this.direction = DirectionEnum.SOUTH;
                 break;
             case EAST:
-                this.direction = DirectionEnum.SOUTH;
+                this.direction = DirectionEnum.NORTH;
                 break;
             default:
                 break;
         }
     }
 
-    public void pickUp() {
+    public void pick() {
         //Check if there is a flag
+        FieldEnum actualField = getActualField();
+        if(actualField != FieldEnum.OFFICER_AND_FLAG) {
+            System.out.println("Es gibt keine Flagge zum aufheben");
+        } else {
+            //Update Field
+            setActualField(FieldEnum.POLICE_OFFICER);
 
-        //Update Field
+            //Remove Flag from List
+            List<Flag> flags = this.landscape.getFlags();
+            Iterator<Flag> iter = flags.iterator();
 
-        //Remove Flag from List
+            while (iter.hasNext()) {
+                Flag flag = iter.next();
 
-        //add flag to officer
+                if (flag.getxPos() == this.getxPos() && flag.getyPos() == this.getyPos())
+                    iter.remove();
+            }
+
+            this.landscape.setFlags(flags);
+
+            //Add flag to officer
+            this.numberOfFlags++;
+        }
+    }
+
+    public void drop() {
+        FieldEnum actualField = getActualField();
+        if(actualField != FieldEnum.OFFICER_AND_BASE) {
+            System.out.println("Du befindest dich nicht in deiner Base!");
+        } else if(!this.hasFlags()) {
+            System.out.println("Du hast keine Flaggen!");
+        } else if(!this.hasAllFlags()) {
+            System.out.println("Du hast nicht alle Flaggen gesammelt!");
+        } else {
+            this.numberOfFlags = 0;
+            this.hasWon = true;
+        }
     }
 
     public int getyPos() {
@@ -217,5 +253,13 @@ public class PoliceOfficer {
 
     public void setLandscape(Landscape landscape) {
         this.landscape = landscape;
+    }
+
+    public boolean hasAllFlags() {
+        return this.landscape.getFlags().size() == 0;
+    }
+
+    public boolean hasWon() {
+        return hasWon;
     }
 }

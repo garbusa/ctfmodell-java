@@ -5,6 +5,8 @@ import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.enums.DirectionEnum;
 
+import java.util.Scanner;
+
 public class Aufgabenblatt02 {
 
     public static void main(String... args) {
@@ -17,18 +19,36 @@ public class Aufgabenblatt02 {
 
         landscape.addFlag(flagOne);
         landscape.addFlag(flagTwo);
-        landscape.addArmedTerrorist(0,1);
+        landscape.addUnarmedTerrorist(0,1);
         landscape.addArmedTerrorist(1, 1);
+        landscape.addArmedTerrorist(1, 0);
 
-        printBoard(landscape);
-        landscape.getPoliceOfficer().turnLeft();
-        landscape.getPoliceOfficer().attack();
-        printBoard(landscape);
+        Scanner scanner = new Scanner(System.in);
+        while(!policeOfficer.hasWon()) {
+            printBoard(landscape);
+            System.out.println("actions: (f) forward | (l) turn left | (a) attack | (p) pick up | (d) drop all");
+            String input = scanner.nextLine().toLowerCase();
 
-        //Ask for Input
+            if(input.length() == 1) {
+                if(input.contains("f")) {
+                    policeOfficer.forward();
+                } else if(input.contains("l")){
+                    policeOfficer.turnLeft();
+                } else if(input.contains("a")) {
+                    policeOfficer.attack();
+                } else if(input.contains("p")) {
+                    policeOfficer.pick();
+                } else if(input.contains("d")) {
+                    policeOfficer.drop();
+                } else {
+                    System.out.println("ungültige Eingabe");
+                }
+            } else {
+                System.out.println("ungültige Eingabe");
+            }
 
-        //Edit Data
-
+        }
+        System.out.println("Mission erledigt!");
 
     }
 
