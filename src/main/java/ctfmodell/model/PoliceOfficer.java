@@ -85,7 +85,7 @@ public class PoliceOfficer {
             throw new FlagException("Auf diesem Feld gibt es keine Flagge zum aufheben!");
         } else {
             //Update Field
-            setActualField(FieldEnum.POLICE_OFFICER);
+            this.setActualField(FieldEnum.POLICE_OFFICER);
 
             //Remove Flag from List
             List<Flag> flags = this.landscape.getFlags();
