@@ -16,8 +16,14 @@ public class Landscape {
     private FieldEnum[][] landscape;
     private List<Flag> flags;
 
-    private Landscape() {
+    public Landscape() {
+        this.height = 10;
+        this.width = 10;
+        this.baseX = 9;
+        this.baseY = 9;
 
+        this.landscape = this.generateFields();
+        this.flags = new ArrayList<Flag>();
     }
 
     public Landscape(int height, int width, int baseX, int baseY) {

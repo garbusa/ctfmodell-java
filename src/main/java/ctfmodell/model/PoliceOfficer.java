@@ -17,6 +17,11 @@ public class PoliceOfficer {
     private boolean hasWon;
 
     private PoliceOfficer() {
+        this.yPos = 0;
+        this.xPos = 0;
+        this.numberOfFlags = 0;
+        this.direction = DirectionEnum.EAST;
+        this.hasWon = false;
     }
 
     public PoliceOfficer(int yPos, int xPos, DirectionEnum direction) {
