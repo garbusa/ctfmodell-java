@@ -1,6 +1,2 @@
-- JavaDoc
-- Mehr helfer methoden für den nutzer
 - resize landscape
 -- Was wenn Feld sich verkleinert?
-
--

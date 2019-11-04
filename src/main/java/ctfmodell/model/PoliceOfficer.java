@@ -138,7 +138,22 @@ public class PoliceOfficer {
         return this.hasWon;
     }
 
+    public boolean isFree() {
+        FieldEnum field = this.getForwardField();
+        return field == FieldEnum.EMPTY || field == FieldEnum.FLAG || field == FieldEnum.BASE;
+    }
 
+    public boolean isAttackable() {
+        return this.getForwardField() == FieldEnum.UNARMED_TERRORIST;
+    }
+
+    public boolean isBase() {
+        return this.landscape.getLandscape()[this.yPos][this.xPos] == FieldEnum.OFFICER_AND_BASE;
+    }
+
+    public boolean isFlag() {
+        return this.landscape.getLandscape()[this.yPos][this.xPos] == FieldEnum.OFFICER_AND_FLAG;
+    }
 
 
     private FieldEnum getForwardField() {

@@ -3,6 +3,7 @@ package ctfmodell.model;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.LandscapeException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,26 +191,28 @@ public class Landscape {
         return height;
     }
 
-    public void setHeight(int height) {
-        this.height = height;
-        this.landscape = new FieldEnum[this.height][this.width];
-    }
-
     public int getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public void resize(int width, int height) {
         this.width = width;
-        this.landscape = new FieldEnum[this.height][this.width];
+        this.height = height;
+
+        //Kopiere alle möglichen Felder von der alten zur neuen
+
+        //Prüfe ob Akteur oder Base nicht mit kopiert worden sind
+
+        //Falls nicht dabei, setze Akteur auf (min,min) und Base (max, max)
+
+        //Falls feld 1x1 ist = fehlermeldung und initial restoren (min 2x2 erlaubt)
+
+        //Falls der Fall eintritt, das die Base auf ein Feld mit einer Flagge gesetzt wird, dann entwerne Flagge
+
     }
 
     public FieldEnum[][] getLandscape() {
         return landscape;
-    }
-
-    public void setLandscape(FieldEnum[][] landscape) {
-        this.landscape = landscape;
     }
 
     public List<Flag> getFlags() {
