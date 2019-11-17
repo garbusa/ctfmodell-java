@@ -1,2 +1,3 @@
-- resize landscape
--- Was wenn Feld sich verkleinert?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CODE REFRACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- Drag und Drop mit mehreren Pixel
+- MVC oder sonstiges richtig implementieren und ausplitten

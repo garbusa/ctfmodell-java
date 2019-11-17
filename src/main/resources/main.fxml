@@ -79,37 +79,38 @@
                         </Menu>
                     <MenuItem mnemonicParsing="false" text="Drucken" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" text="Größe ändern..." onAction="#resize" toggleGroup="$territoriumGroup">
+                        <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" text="Größe ändern..." toggleGroup="$territoriumGroup" onAction="#territoriumGroup">
                             <toggleGroup>
                                 <ToggleGroup fx:id="territoriumGroup" />
                             </toggleGroup>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" text="Avatar verschieben" toggleGroup="$territoriumGroup" onAction="#moveAvatar" />
-                        <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" />
-                        <RadioMenuItem fx:id="terroristMenu" mnemonicParsing="false" text="Terroristen platzieren" toggleGroup="$territoriumGroup"/>
-                        <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup"/>
+                        <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" text="Avatar verschieben" toggleGroup="$territoriumGroup" onAction="#territoriumGroup" />
+                        <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                        <RadioMenuItem fx:id="terroristUnarmedMenu" mnemonicParsing="false" text="Unbewaffneten Terroristen platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                      <RadioMenuItem fx:id="terroristArmedMenu" mnemonicParsing="false" text="Bewaffneten Terroristen platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                      <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Avatar">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Flaggen in der Hand..." />
-                        <MenuItem mnemonicParsing="false" text="linksUm">
+                    <MenuItem mnemonicParsing="false" text="Flaggen in der Hand..." onAction="#hasFlags"/>
+                        <MenuItem mnemonicParsing="false" text="linksUm" onAction="#turnLeft">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                            </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="vor">
+                        <MenuItem mnemonicParsing="false" text="vor" onAction="#forward">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                            </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="nimm">
+                        <MenuItem mnemonicParsing="false" text="nimm" onAction="#pick">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                            </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="gib">
+                        <MenuItem mnemonicParsing="false" text="gib" onAction="#drop">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                            </accelerator></MenuItem>
-                      <MenuItem mnemonicParsing="false" text="attackieren">
+                      <MenuItem mnemonicParsing="false" text="attackieren" onAction="#attack">
                           <accelerator>
                               <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                           </accelerator></MenuItem>
@@ -153,7 +154,7 @@
                         <Tooltip text="Kompilieren" />
                      </tooltip></Button>
                   <Separator layoutX="178.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false" onAction="#resize">
+                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <toggleGroup>
                         <ToggleGroup fx:id="addingGroup" />
                      </toggleGroup>
@@ -161,44 +162,44 @@
                         <Tooltip text="Größe der Simulation ändern" />
                      </tooltip>
                   </ToggleButton>
-                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#moveAvatar">
+                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <tooltip>
                         <Tooltip text="Avatar verschieben" />
                      </tooltip></ToggleButton>
-                  <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup">
+                  <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <tooltip>
                         <Tooltip text="Flagge hinzufügen" />
                      </tooltip></ToggleButton>
-                  <ToggleButton fx:id="terrorUnarmedButton" mnemonicParsing="false" toggleGroup="$addingGroup">
+                  <ToggleButton fx:id="terrorUnarmedButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <tooltip>
                         <Tooltip text="Terrorist hinzufügen" />
                      </tooltip></ToggleButton>
-                  <ToggleButton fx:id="terrorArmedButton" mnemonicParsing="false" toggleGroup="$addingGroup">
+                  <ToggleButton fx:id="terrorArmedButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <tooltip>
                         <Tooltip text="Terrorist mit Waffe hinzufügen" />
                      </tooltip></ToggleButton>
-                  <ToggleButton fx:id="deleteButton" mnemonicParsing="false" toggleGroup="$addingGroup">
+                  <ToggleButton fx:id="deleteButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
                      <tooltip>
                         <Tooltip text="Ausgewähltes Objekt löschen" />
                      </tooltip></ToggleButton>
                   <Separator layoutX="358.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Button fx:id="isFlagButton" layoutX="370.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="isFlagButton" layoutX="370.0" layoutY="10.0" mnemonicParsing="false" onAction="#hasFlags">
                      <tooltip>
                         <Tooltip text="Prüfen, ob Polizist Flaggen hat" />
                      </tooltip></Button>
-                  <Button fx:id="rotateButton" layoutX="454.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="rotateButton" layoutX="454.0" layoutY="10.0" mnemonicParsing="false" onAction="#turnLeft">
                      <tooltip>
-                        <Tooltip text="Polizist um 180° drehen" />
+                        <Tooltip text="Polizist um 90° drehen" />
                      </tooltip></Button>
-                  <Button fx:id="forwardButton" layoutX="538.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="forwardButton" layoutX="538.0" layoutY="10.0" mnemonicParsing="false" onAction="#forward">
                      <tooltip>
                         <Tooltip text="Polizist um ein Feld vorbewegen" />
                      </tooltip></Button>
-                  <Button fx:id="pickButton" layoutX="622.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="pickButton" layoutX="622.0" layoutY="10.0" mnemonicParsing="false" onAction="#pick">
                      <tooltip>
                         <Tooltip text="Flagge aufheben" />
                      </tooltip></Button>
-                  <Button fx:id="dropButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="dropButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false" onAction="#drop">
                      <tooltip>
                         <Tooltip text="Flagge ablegen" />
                      </tooltip></Button>

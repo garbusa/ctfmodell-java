@@ -1,9 +1,9 @@
 package ctfmodell;
 
 import ctfmodell.gui.LandscapePanel;
-import ctfmodell.model.exception.LandscapeException;
+import ctfmodell.model.enums.FieldEnum;
+import ctfmodell.model.exception.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -17,14 +17,150 @@ import java.util.Optional;
 public class Controller {
 
     @FXML
-    RadioMenuItem resizeMenu, avatarMenu, flagMenu, terroristMenu, fieldMenu;
+    RadioMenuItem resizeMenu, avatarMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
 
+    @FXML
+    ToggleButton sizeButton, avatarButton, flagButton, terrorUnarmedButton, terrorArmedButton, deleteButton;
 
     @FXML
     LandscapePanel landscapePanel;
 
     @FXML
-    private void resize(ActionEvent e) {
+    ToggleGroup territoriumGroup, addingGroup;
+
+    @FXML
+    private void territoriumGroup() {
+        landscapePanel.setMoveEnabled(false);
+        landscapePanel.setDeleteEnabled(false);
+        landscapePanel.setDragged(false);
+        landscapePanel.setItemToAdd(FieldEnum.OUT_OF_FIELD);
+        System.err.println(territoriumGroup.getSelectedToggle());
+        RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
+
+        if (item == null) return;
+        String str = item.getId();
+
+        if (str.contains("resizeMenu")) {
+            sizeButton.setSelected(true);
+            this.resize();
+        } else if (str.contains("avatarMenu")) {
+            avatarButton.setSelected(true);
+            landscapePanel.setMoveEnabled(true);
+        } else if (str.contains("flagMenu")) {
+            flagButton.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.FLAG);
+        } else if (str.contains("terroristUnarmedMenu")) {
+            terrorUnarmedButton.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.UNARMED_TERRORIST);
+        } else if (str.contains("terroristArmedMenu")) {
+            terrorArmedButton.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.ARMED_TERRORIST);
+        } else if (str.contains("fieldMenu")) {
+            deleteButton.setSelected(true);
+            landscapePanel.setDeleteEnabled(true);
+        }
+    }
+
+    @FXML
+    private void addingGroup() {
+        landscapePanel.setMoveEnabled(false);
+        landscapePanel.setDeleteEnabled(false);
+        landscapePanel.setDragged(false);
+        landscapePanel.setItemToAdd(FieldEnum.OUT_OF_FIELD);
+        System.err.println(addingGroup.getSelectedToggle());
+        ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
+
+        if (button == null) return;
+        String str = button.getId();
+
+        if (str.contains("sizeButton")) {
+            resizeMenu.setSelected(true);
+            this.resize();
+        } else if (str.contains("avatarButton")) {
+            avatarMenu.setSelected(true);
+            landscapePanel.setMoveEnabled(true);
+        } else if (str.contains("flagButton")) {
+            flagMenu.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.FLAG);
+        } else if (str.contains("terrorUnarmedButton")) {
+            terroristUnarmedMenu.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.UNARMED_TERRORIST);
+        } else if (str.contains("terrorArmedButton")) {
+            terroristArmedMenu.setSelected(true);
+            landscapePanel.setItemToAdd(FieldEnum.ARMED_TERRORIST);
+        } else if (str.contains("deleteButton")) {
+            fieldMenu.setSelected(true);
+            landscapePanel.setDeleteEnabled(true);
+        }
+    }
+
+    @FXML
+    private void hasFlags() {
+        if (landscapePanel.getLandscape() == null) return;
+        if (landscapePanel.getLandscape().getPoliceOfficer() == null) return;
+        int count = landscapePanel.getLandscape().getPoliceOfficer().getNumberOfFlags();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Anzahl der Flaggen");
+        alert.setHeaderText("Anzahl");
+        alert.setContentText("Der Officer hat " + count + " Flaggen.");
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void turnLeft() {
+        landscapePanel.getLandscape().getPoliceOfficer().turnLeft();
+        landscapePanel.draw();
+    }
+
+    @FXML
+    private void forward() {
+        try {
+            landscapePanel.getLandscape().getPoliceOfficer().forward();
+        } catch (MoveException ex) {
+            System.err.println(ex.getMessage());
+        }
+        landscapePanel.draw();
+    }
+
+    @FXML
+    private void pick() {
+        try {
+            landscapePanel.getLandscape().getPoliceOfficer().pick();
+        } catch (FlagException ex) {
+            System.err.println(ex.getMessage());
+        }
+        landscapePanel.draw();
+    }
+
+    @FXML
+    private void drop() {
+        try {
+            landscapePanel.getLandscape().getPoliceOfficer().drop();
+            if (landscapePanel.getLandscape().getPoliceOfficer().hasWon()) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Mission");
+                alert.setHeaderText("Mission");
+                alert.setContentText("Du hast deine Mission erfüllt!");
+                alert.showAndWait();
+            }
+        } catch (FlagException | BaseException ex) {
+            System.err.println(ex.getMessage());
+        }
+        landscapePanel.draw();
+    }
+
+    @FXML
+    private void attack() {
+        try {
+            landscapePanel.getLandscape().getPoliceOfficer().attack();
+        } catch (PoliceException ex) {
+            System.err.println(ex.getMessage());
+        }
+        landscapePanel.draw();
+    }
+
+
+    private void resize() {
         System.out.println("resizing...");
         resizeMenu.setSelected(true);
 
@@ -59,7 +195,7 @@ public class Controller {
 
         dialog.getDialogPane().setContent(grid);
 
-        Platform.runLater(() -> heightField.requestFocus());
+        Platform.runLater(heightField::requestFocus);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == resizeButtonType) {
@@ -83,13 +219,7 @@ public class Controller {
             }
         });
 
-
-
     }
 
-    @FXML
-    private void moveAvatar(ActionEvent e) {
-        avatarMenu.setSelected(true);
-    }
 
 }

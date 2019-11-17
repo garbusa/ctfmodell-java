@@ -4,7 +4,6 @@ import ctfmodell.model.enums.DirectionEnum;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.LandscapeException;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +92,7 @@ public class Landscape {
         int y = flag.getyPos();
         FieldEnum field = this.landscape[flag.getyPos()][flag.getxPos()];
 
-        if(!this.isNotEndOfField(y, x)) {
+        if (!this.isNotEndOfField(y, x)) {
             throw new LandscapeException("Es wurde versuch eine Flagge aus einem nicht existierenden Feld zu löschen!");
         }
 
@@ -121,9 +120,9 @@ public class Landscape {
     }
 
     public void deleteUnarmedTerrorist(int y, int x) {
-        if(!this.isNotEndOfField(y, x)) {
+        if (!this.isNotEndOfField(y, x)) {
             throw new LandscapeException("Es wurde versuch ein Terrorist aus einem nicht existierenden Feld zu löschen!");
-        } else if(this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
+        } else if (this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
             this.landscape[y][x] = FieldEnum.EMPTY;
         } else {
             throw new LandscapeException("Auf diesem Feld befindet sich kein Terrorist!");
@@ -139,9 +138,9 @@ public class Landscape {
     }
 
     public void deleteArmedTerrorist(int y, int x) {
-        if(!this.isNotEndOfField(y, x)) {
+        if (!this.isNotEndOfField(y, x)) {
             throw new LandscapeException("Es wurde versuch ein Terrorist aus einem nicht existierenden Feld zu löschen!");
-        } else if(this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
+        } else if (this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
             this.landscape[y][x] = FieldEnum.EMPTY;
         } else {
             throw new LandscapeException("Auf diesem Feld befindet sich kein Terrorist!");
@@ -156,9 +155,9 @@ public class Landscape {
     }
 
     private boolean hasPoliceOfficerOnLandscape(FieldEnum[][] landscape) {
-        for(int y = 0; y < landscape.length; y++) {
-            for(int x = 0; x < landscape[y].length; x++) {
-                if(landscape[y][x] == FieldEnum.OFFICER_AND_FLAG ||
+        for (int y = 0; y < landscape.length; y++) {
+            for (int x = 0; x < landscape[y].length; x++) {
+                if (landscape[y][x] == FieldEnum.OFFICER_AND_FLAG ||
                         landscape[y][x] == FieldEnum.OFFICER_AND_BASE ||
                         landscape[y][x] == FieldEnum.POLICE_OFFICER) {
                     return true;
@@ -169,9 +168,9 @@ public class Landscape {
     }
 
     private boolean hasBaseOnLandscape(FieldEnum[][] landscape) {
-        for(int y = 0; y < landscape.length; y++) {
-            for(int x = 0; x < landscape[y].length; x++) {
-                if(landscape[y][x] == FieldEnum.OFFICER_AND_BASE ||
+        for (int y = 0; y < landscape.length; y++) {
+            for (int x = 0; x < landscape[y].length; x++) {
+                if (landscape[y][x] == FieldEnum.OFFICER_AND_BASE ||
                         landscape[y][x] == FieldEnum.BASE) {
                     return true;
                 }
@@ -241,15 +240,17 @@ public class Landscape {
     }
 
     public void resize(int width, int height) {
-        if(this.landscape == null) throw new LandscapeException("Du kannst nicht die Größe einer nicht existierenden Landschaft verändern!");
-        if(width < 2 || height < 2) throw new LandscapeException("Eine neue Landschaft muss mindestens 2x2 groß sein!");
+        if (this.landscape == null)
+            throw new LandscapeException("Du kannst nicht die Größe einer nicht existierenden Landschaft verändern!");
+        if (width < 2 || height < 2)
+            throw new LandscapeException("Eine neue Landschaft muss mindestens 2x2 groß sein!");
 
         this.width = width;
         this.height = height;
         FieldEnum[][] resizedLandscape = new FieldEnum[height][width];
 
         //Kopiere alle möglichen Felder von der alten zur neuen
-        for(int y = 0; y < resizedLandscape.length; y++) {
+        for (int y = 0; y < resizedLandscape.length; y++) {
             if (y >= this.landscape.length) break;
             for (int x = 0; x < resizedLandscape[y].length; x++) {
                 if (x >= this.landscape[y].length) break;
@@ -257,7 +258,7 @@ public class Landscape {
             }
         }
 
-        for(int y = 0; y < resizedLandscape.length; y++) {
+        for (int y = 0; y < resizedLandscape.length; y++) {
             for (int x = 0; x < resizedLandscape[y].length; x++) {
                 if (resizedLandscape[y][x] == null) {
                     resizedLandscape[y][x] = FieldEnum.EMPTY;
@@ -267,17 +268,17 @@ public class Landscape {
 
         //Falls das vorherige Feld einen Akteur und oder eine Base hatte aber nicht zum neuen übernommen wurde,
         //Füge Officer hinzu
-        if(hasPoliceOfficerOnLandscape(this.landscape) && !hasPoliceOfficerOnLandscape(resizedLandscape)){
+        if (hasPoliceOfficerOnLandscape(this.landscape) && !hasPoliceOfficerOnLandscape(resizedLandscape)) {
             FieldEnum fieldToCheck = getFieldEnum(0, 0);
-            if(fieldToCheck == FieldEnum.BASE) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
-            else if(fieldToCheck == FieldEnum.FLAG) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_FLAG;
+            if (fieldToCheck == FieldEnum.BASE) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
+            else if (fieldToCheck == FieldEnum.FLAG) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_FLAG;
             else resizedLandscape[0][0] = FieldEnum.POLICE_OFFICER;
         }
 
-        if(hasBaseOnLandscape(this.landscape) && !hasBaseOnLandscape(resizedLandscape)){
+        if (hasBaseOnLandscape(this.landscape) && !hasBaseOnLandscape(resizedLandscape)) {
             FieldEnum fieldToCheck = getFieldEnum(resizedLandscape.length, resizedLandscape[0].length);
-            if(fieldToCheck == FieldEnum.POLICE_OFFICER) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
-            else resizedLandscape[height-1][width-1] = FieldEnum.BASE;
+            if (fieldToCheck == FieldEnum.POLICE_OFFICER) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
+            else resizedLandscape[height - 1][width - 1] = FieldEnum.BASE;
         }
 
         this.landscape = resizedLandscape;
