@@ -19,8 +19,10 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
+<?import ctfmodell.gui.LandscapePanel?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0" stylesheets="css/icons.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.ScrollPane?>
+<BorderPane fx:controller="ctfmodell.Controller" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0" stylesheets="css/icons.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <VBox prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
@@ -76,15 +78,16 @@
                            </items>
                         </Menu>
                     <MenuItem mnemonicParsing="false" text="Drucken" />
-                        <MenuItem mnemonicParsing="false" text="Größe ändern..." />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <RadioMenuItem mnemonicParsing="false" text="Avatar platzieren">
-                           <toggleGroup>
-                              <ToggleGroup fx:id="territoriumGroup" />
-                           </toggleGroup></RadioMenuItem>
-                        <RadioMenuItem mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" />
-                        <RadioMenuItem mnemonicParsing="false" text="SEK Beamten platzieren" toggleGroup="$territoriumGroup" />
-                        <RadioMenuItem mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup" />
+                        <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" text="Größe ändern..." onAction="#resize" toggleGroup="$territoriumGroup">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="territoriumGroup" />
+                            </toggleGroup>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" text="Avatar verschieben" toggleGroup="$territoriumGroup" onAction="#moveAvatar" />
+                        <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" />
+                        <RadioMenuItem fx:id="terroristMenu" mnemonicParsing="false" text="Terroristen platzieren" toggleGroup="$territoriumGroup"/>
+                        <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup"/>
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Avatar">
@@ -106,6 +109,10 @@
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                            </accelerator></MenuItem>
+                      <MenuItem mnemonicParsing="false" text="attackieren">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                          </accelerator></MenuItem>
                   </items>
                 </Menu>
                   <Menu mnemonicParsing="false" text="Simulation">
@@ -143,10 +150,10 @@
                      </tooltip></Button>
                   <Button fx:id="loadButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false">
                      <tooltip>
-                        <Tooltip text="Serialisieren" />
+                        <Tooltip text="Kompilieren" />
                      </tooltip></Button>
                   <Separator layoutX="178.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false">
+                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false" onAction="#resize">
                      <toggleGroup>
                         <ToggleGroup fx:id="addingGroup" />
                      </toggleGroup>
@@ -154,9 +161,9 @@
                         <Tooltip text="Größe der Simulation ändern" />
                      </tooltip>
                   </ToggleButton>
-                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup">
+                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#moveAvatar">
                      <tooltip>
-                        <Tooltip text="Avatar hinzufügen" />
+                        <Tooltip text="Avatar verschieben" />
                      </tooltip></ToggleButton>
                   <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup">
                      <tooltip>
@@ -229,6 +236,9 @@
                      </tooltip></TextArea>
                </children>
             </AnchorPane>
+            <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
+                <LandscapePanel fx:id="landscapePanel"/>
+            </ScrollPane>
         </items>
       </SplitPane>
    </center>
