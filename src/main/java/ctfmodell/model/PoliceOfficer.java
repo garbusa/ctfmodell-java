@@ -4,10 +4,10 @@ import ctfmodell.model.enums.DirectionEnum;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.*;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.Observable;
 
-public class PoliceOfficer {
+public class PoliceOfficer extends Observable {
 
     private int yPos;
     private int xPos;
@@ -16,23 +16,17 @@ public class PoliceOfficer {
     private Landscape landscape;
     private boolean hasWon;
 
-    private PoliceOfficer() {
-        this.yPos = 0;
-        this.xPos = 0;
-        this.numberOfFlags = 0;
-        this.direction = DirectionEnum.EAST;
-        this.hasWon = false;
+    public PoliceOfficer() {
+        this(0, 0, DirectionEnum.EAST);
     }
 
-    public PoliceOfficer(int yPos, int xPos, DirectionEnum direction) {
+    private PoliceOfficer(int yPos, int xPos, DirectionEnum direction) {
         this.yPos = yPos;
         this.xPos = xPos;
         this.numberOfFlags = 0;
         this.direction = direction;
         this.hasWon = false;
     }
-
-    /* **************************************** ACTIONS ******************************************* */
 
     public void forward() {
         int x = this.xPos;
@@ -55,58 +49,124 @@ public class PoliceOfficer {
         }
     }
 
+    private void forwardToDirection(int newX, int newY) {
+        FieldEnum forwardField = this.getForwardField();
+        if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST &&
+                forwardField != FieldEnum.OUT_OF_FIELD) {
+            this.setOldPosition();
+            this.xPos = newX;
+            this.yPos = newY;
+            this.setNewPosition();
+        } else {
+            this.throwMoveError(forwardField);
+        }
+    }
+
+    private FieldEnum getForwardField() {
+        int y = this.yPos;
+        int x = this.xPos;
+        switch (this.direction) {
+            case NORTH:
+                return this.checkEndAndGetForward(y - 1, x);
+            case SOUTH:
+                return this.checkEndAndGetForward(y + 1, x);
+            case WEST:
+                return this.checkEndAndGetForward(y, x - 1);
+            case EAST:
+                return this.checkEndAndGetForward(y, x + 1);
+            default:
+                break;
+        }
+
+        return null;
+    }
+
+    private void setOldPosition() {
+        FieldEnum actualField = this.getActualField();
+        if (actualField == FieldEnum.OFFICER_AND_BASE) {
+            this.setActualField(FieldEnum.BASE);
+        } else if (actualField == FieldEnum.OFFICER_AND_FLAG) {
+            this.setActualField(FieldEnum.FLAG);
+        } else {
+            this.setActualField(FieldEnum.EMPTY);
+        }
+    }
+
+    private void setNewPosition() {
+        FieldEnum actualField = this.getActualField();
+        if (actualField == FieldEnum.BASE) {
+            this.setActualField(FieldEnum.OFFICER_AND_BASE);
+        } else if (actualField == FieldEnum.FLAG) {
+            this.setActualField(FieldEnum.OFFICER_AND_FLAG);
+        } else {
+            this.setActualField(FieldEnum.POLICE_OFFICER);
+        }
+    }
+
+    private void throwMoveError(FieldEnum field) {
+        if (field == FieldEnum.UNARMED_TERRORIST || field == FieldEnum.ARMED_TERRORIST) {
+            throw new MoveException("Du kannst dich nicht fortbewegen, da dir etwas im Weg steht!");
+        } else if (field == FieldEnum.OUT_OF_FIELD) {
+            throw new MoveException("Du kannst dich nicht ins Nichts bewegen!");
+        }
+    }
+
+    private FieldEnum checkEndAndGetForward(int y, int x) {
+        if (this.isNotEndOfField(y, x)) {
+            return this.landscape.getField(y, x);
+        } else {
+            return FieldEnum.OUT_OF_FIELD;
+        }
+    }
+
+    private FieldEnum getActualField() {
+        return this.landscape.getLandscape()[this.yPos][this.xPos];
+    }
+
+    private boolean isNotEndOfField(int y, int x) {
+        return this.landscape.isNotEndOfField(y, x);
+    }
+
+    private void setActualField(FieldEnum field) {
+        this.landscape.setField(this.yPos, this.xPos, field);
+    }
+
     public void attack() {
         FieldEnum forwardField = this.getForwardField();
         if (forwardField == FieldEnum.UNARMED_TERRORIST) {
-            this.setForwardField(FieldEnum.EMPTY);
+            this.clearForwardField();
         } else {
             throw new PoliceException("Du kannst nur unbewaffnete Terroristen attackieren!");
         }
     }
 
-    public void turnLeft() {
+    private void clearForwardField() {
+        int y = this.yPos;
+        int x = this.xPos;
         switch (this.direction) {
             case NORTH:
-                this.direction = DirectionEnum.WEST;
+                this.checkEndAndClearForward(y - 1, x);
                 break;
             case SOUTH:
-                this.direction = DirectionEnum.EAST;
+                this.checkEndAndClearForward(y + 1, x);
                 break;
             case WEST:
-                this.direction = DirectionEnum.SOUTH;
+                this.checkEndAndClearForward(y, x - 1);
                 break;
             case EAST:
-                this.direction = DirectionEnum.NORTH;
+                this.checkEndAndClearForward(y, x + 1);
                 break;
             default:
                 break;
         }
     }
 
-    public void pick() {
-        //Check if there is a flag
-        FieldEnum actualField = this.getActualField();
-        if (actualField != FieldEnum.OFFICER_AND_FLAG) {
-            throw new FlagException("Auf diesem Feld gibt es keine Flagge zum aufheben!");
+    private void checkEndAndClearForward(int y, int x) {
+        if (this.isNotEndOfField(y, x)) {
+            this.landscape.setField(y, x, FieldEnum.EMPTY);
         } else {
-            //Update Field
-            this.setActualField(FieldEnum.POLICE_OFFICER);
-
-            //Remove Flag from List
-            List<Flag> flags = this.landscape.getFlags();
-            Iterator<Flag> iter = flags.iterator();
-
-            while (iter.hasNext()) {
-                Flag flag = iter.next();
-
-                if (flag.getxPos() == this.getxPos() && flag.getyPos() == this.getyPos())
-                    iter.remove();
-            }
-
-            this.landscape.setFlags(flags);
-
-            //Add flag to officer
-            this.numberOfFlags++;
+            System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
+            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x));
         }
     }
 
@@ -123,8 +183,6 @@ public class PoliceOfficer {
             this.hasWon = true;
         }
     }
-
-    /* **************************************** HELPER ******************************************* */
 
     private boolean hasFlags() {
         return this.numberOfFlags > 0;
@@ -155,172 +213,73 @@ public class PoliceOfficer {
         return this.landscape.getLandscape()[this.yPos][this.xPos] == FieldEnum.OFFICER_AND_FLAG;
     }
 
-
-    private FieldEnum getForwardField() {
-        int y = this.yPos;
-        int x = this.xPos;
+    public void turnLeft() {
         switch (this.direction) {
             case NORTH:
-                if (this.isNotEndOfField(y - 1, x)) {
-                    return this.landscape.getLandscape()[y - 1][x];
-                } else {
-                    return FieldEnum.OUT_OF_FIELD;
-                }
-            case SOUTH:
-                if (this.isNotEndOfField(y + 1, x)) {
-                    return this.landscape.getLandscape()[y + 1][x];
-                } else {
-                    return FieldEnum.OUT_OF_FIELD;
-                }
+                this.direction = DirectionEnum.WEST;
+                break;
             case WEST:
-                if (this.isNotEndOfField(y, x - 1)) {
-                    return this.landscape.getLandscape()[y][x - 1];
-                } else {
-                    return FieldEnum.OUT_OF_FIELD;
-                }
+                this.direction = DirectionEnum.SOUTH;
+                break;
+            case SOUTH:
+                this.direction = DirectionEnum.EAST;
+                break;
             case EAST:
-                if (this.isNotEndOfField(y, x + 1)) {
-                    return this.landscape.getLandscape()[y][x + 1];
-                } else {
-                    return FieldEnum.OUT_OF_FIELD;
-                }
+                this.direction = DirectionEnum.NORTH;
+                break;
             default:
                 break;
         }
-
-        return null;
+        this.setChanged();
+        this.notifyObservers(this);
     }
 
-    private boolean isNotEndOfField(int y, int x) {
-        return this.landscape.isNotEndOfField(y, x);
-    }
-
-    private void setForwardField(FieldEnum field) {
-        int y = this.yPos;
-        int x = this.xPos;
-        switch (this.direction) {
-            case NORTH:
-                if (this.isNotEndOfField(y - 1, x)) {
-                    this.landscape.getLandscape()[y - 1][x] = field;
-                } else {
-                    System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
-                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y - 1, x));
-                }
-            case SOUTH:
-                if (this.isNotEndOfField(y + 1, x)) {
-                    this.landscape.getLandscape()[y + 1][x] = field;
-                } else {
-                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y + 1, x));
-                }
-            case WEST:
-                if (this.isNotEndOfField(y, x - 1)) {
-                    this.landscape.getLandscape()[y][x - 1] = field;
-                } else {
-                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x - 1));
-                }
-            case EAST:
-                if (this.isNotEndOfField(y, x + 1)) {
-                    this.landscape.getLandscape()[y][x + 1] = field;
-                } else {
-                    throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x + 1));
-                }
-            default:
-                break;
-        }
-    }
-
-    private void setNewPosition() {
+    public void pick() {
+        //Check if there is a flag
         FieldEnum actualField = this.getActualField();
-        if (actualField == FieldEnum.BASE) {
-            this.setActualField(FieldEnum.OFFICER_AND_BASE);
-        } else if (actualField == FieldEnum.FLAG) {
-            this.setActualField(FieldEnum.OFFICER_AND_FLAG);
+        if (actualField != FieldEnum.OFFICER_AND_FLAG) {
+            throw new FlagException("Auf diesem Feld gibt es keine Flagge zum aufheben!");
         } else {
+            //Update Field
             this.setActualField(FieldEnum.POLICE_OFFICER);
+
+            //Remove Flag from List
+            List<Flag> flags = this.landscape.getFlags();
+
+            flags.removeIf(flag -> flag.getxPos() == this.getxPos() && flag.getyPos() == this.getyPos());
+
+            this.landscape.setFlags(flags);
+
+            //Add flag to officer
+            this.numberOfFlags++;
         }
     }
 
-    private void setOldPosition() {
-        FieldEnum actualField = this.getActualField();
-        if (actualField == FieldEnum.OFFICER_AND_BASE) {
-            this.setActualField(FieldEnum.BASE);
-        } else if (actualField == FieldEnum.OFFICER_AND_FLAG) {
-            this.setActualField(FieldEnum.FLAG);
-        } else {
-            this.setActualField(FieldEnum.EMPTY);
-        }
-    }
-
-    private void forwardToDirection(int newX, int newY) {
-        FieldEnum forwardField = this.getForwardField();
-        if (forwardField != FieldEnum.UNARMED_TERRORIST && forwardField != FieldEnum.ARMED_TERRORIST &&
-                forwardField != FieldEnum.OUT_OF_FIELD) {
-            this.setOldPosition();
-            this.xPos = newX;
-            this.yPos = newY;
-            this.setNewPosition();
-        } else {
-            this.throwMoveError(forwardField);
-        }
-    }
-
-    /* **************************************** STANDARD GETTER & SETTER ******************************************* */
-
-    private FieldEnum getActualField() {
-        return this.landscape.getLandscape()[this.yPos][this.xPos];
-    }
-
-    private void setActualField(FieldEnum field) {
-        this.landscape.getLandscape()[this.yPos][this.xPos] = field;
-    }
-
-    public int getyPos() {
-        return yPos;
-    }
-
-    public void setyPos(int yPos) {
-        this.yPos = yPos;
-    }
-
-    public int getxPos() {
+    int getxPos() {
         return xPos;
     }
 
-    public void setxPos(int xPos) {
+    int getyPos() {
+        return yPos;
+    }
+
+    void setyPos(int yPos) {
+        this.yPos = yPos;
+    }
+
+    void setxPos(int xPos) {
         this.xPos = xPos;
+    }
+
+    public DirectionEnum getDirection() {
+        return this.direction;
     }
 
     public int getNumberOfFlags() {
         return numberOfFlags;
     }
 
-    public void setNumberOfFlags(int numberOfFlags) {
-        this.numberOfFlags = numberOfFlags;
-    }
-
-    public DirectionEnum getDirection() {
-        return direction;
-    }
-
-    public void setDirection(DirectionEnum direction) {
-        this.direction = direction;
-    }
-
-    public Landscape getLandscape() {
-        return landscape;
-    }
-
-    public void setLandscape(Landscape landscape) {
+    void setLandscape(Landscape landscape) {
         this.landscape = landscape;
-    }
-
-    /* **************************************** ERROR HANDLING ******************************************* */
-
-    private void throwMoveError(FieldEnum field) {
-        if (field == FieldEnum.UNARMED_TERRORIST || field == FieldEnum.ARMED_TERRORIST) {
-            throw new MoveException("Du kannst dich nicht fortbewegen, da dir etwas im Weg steht!");
-        } else if (field == FieldEnum.OUT_OF_FIELD) {
-            throw new MoveException("Du kannst dich nicht ins Nichts bewegen!");
-        }
     }
 }

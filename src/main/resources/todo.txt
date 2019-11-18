@@ -1,3 +1,0 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CODE REFRACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- MVC oder sonstiges richtig implementieren und aufplitten
-- ScrollPane fixen
