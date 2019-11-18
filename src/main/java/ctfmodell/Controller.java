@@ -3,14 +3,17 @@ package ctfmodell;
 import ctfmodell.gui.LandscapePanel;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.*;
+import ctfmodell.util.PixelRectangle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
+import java.text.NumberFormat;
 import java.util.Optional;
 
 
@@ -30,11 +33,7 @@ public class Controller {
 
     @FXML
     private void territoriumGroup() {
-        landscapePanel.setMoveEnabled(false);
-        landscapePanel.setDeleteEnabled(false);
-        landscapePanel.setDragged(false);
-        landscapePanel.setItemToAdd(FieldEnum.OUT_OF_FIELD);
-        System.err.println(territoriumGroup.getSelectedToggle());
+        disableStates(territoriumGroup);
         RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
 
         if (item == null) return;
@@ -63,11 +62,7 @@ public class Controller {
 
     @FXML
     private void addingGroup() {
-        landscapePanel.setMoveEnabled(false);
-        landscapePanel.setDeleteEnabled(false);
-        landscapePanel.setDragged(false);
-        landscapePanel.setItemToAdd(FieldEnum.OUT_OF_FIELD);
-        System.err.println(addingGroup.getSelectedToggle());
+        disableStates(addingGroup);
         ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
 
         if (button == null) return;
@@ -92,6 +87,14 @@ public class Controller {
             fieldMenu.setSelected(true);
             landscapePanel.setDeleteEnabled(true);
         }
+    }
+
+    private void disableStates(ToggleGroup addingGroup) {
+        landscapePanel.setMoveEnabled(false);
+        landscapePanel.setDeleteEnabled(false);
+        landscapePanel.setDragged(false);
+        landscapePanel.setItemToAdd(FieldEnum.OUT_OF_FIELD);
+        System.err.println(addingGroup.getSelectedToggle());
     }
 
     @FXML
@@ -208,13 +211,19 @@ public class Controller {
 
         result.ifPresent(hoeheBreite -> {
             System.out.println("Höhe=" + hoeheBreite.getKey() + ", Breite=" + hoeheBreite.getValue());
-            int height = Integer.parseInt(hoeheBreite.getKey().trim());
-            int width = Integer.parseInt(hoeheBreite.getValue().trim());
+
             try {
+                int height = Integer.parseInt(hoeheBreite.getKey().trim());
+                int width = Integer.parseInt(hoeheBreite.getValue().trim());
                 landscapePanel.getLandscape().resize(width, height);
-                landscapePanel.draw();
+                landscapePanel.setLandscapeCoordinates(new PixelRectangle[height][width]);
+                landscapePanel.updateCanvasSizeAndDraw();
+
                 System.out.println("Größe wurde geändert");
-            } catch (LandscapeException ex) {
+            } catch(NumberFormatException ex){
+                System.err.println("Es wurden nicht valide Zahlen eingegeben!");
+            }
+            catch (LandscapeException ex) {
                 System.err.println("Es ist ein Fehler beim resizen aufgetreten.");
             }
         });

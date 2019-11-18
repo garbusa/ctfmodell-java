@@ -5,6 +5,7 @@ import ctfmodell.model.Landscape;
 import ctfmodell.model.enums.DirectionEnum;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.LandscapeException;
+import ctfmodell.util.PixelRectangle;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -21,7 +22,9 @@ public class LandscapePanel extends Region {
     private Landscape landscape;
     private Canvas fieldCanvas;
     private Canvas iconCanvas;
-    private Pair[][] landscapeCoordinates;
+
+    private PixelRectangle[][] landscapeCoordinates;
+
     private static final int RECT_SIZE = 35;
     private static final int GAP_SIZE = 1;
     private static final int TOTAL_RECT_SIZE = RECT_SIZE + GAP_SIZE;
@@ -35,9 +38,17 @@ public class LandscapePanel extends Region {
         this(new Landscape(), 500, 500);
     }
 
+    public void setFieldCanvas(Canvas fieldCanvas) {
+        this.fieldCanvas = fieldCanvas;
+    }
+
+    public void setIconCanvas(Canvas iconCanvas) {
+        this.iconCanvas = iconCanvas;
+    }
+
     public LandscapePanel(Landscape landscape, double prefHeight, double prefWidth) {
         this.landscape = landscape;
-        this.landscapeCoordinates = new Pair[landscape.getLandscape().length][landscape.getLandscape()[0].length];
+        this.landscapeCoordinates = new PixelRectangle[landscape.getLandscape().length][landscape.getLandscape()[0].length];
         this.prefHeight(prefWidth);
         this.prefWidth(prefHeight);
 
@@ -47,18 +58,17 @@ public class LandscapePanel extends Region {
         iconCanvas.setOnMouseClicked(itemEventHandler);
         fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
 
-
         this.draw();
         this.getChildren().add(fieldCanvas);
         this.getChildren().add(iconCanvas);
 
     }
 
-    private int getCanvasWidth() {
+    public int getCanvasWidth() {
         return this.landscape.getWidth() * TOTAL_RECT_SIZE;
     }
 
-    private int getCanvasHeight() {
+    public int getCanvasHeight() {
         return this.landscape.getHeight() * TOTAL_RECT_SIZE;
     }
 
@@ -80,7 +90,7 @@ public class LandscapePanel extends Region {
 
                 fieldGc.setFill(c);
                 fieldGc.fillRoundRect(posX, posY, RECT_SIZE, RECT_SIZE, 10, 10);
-                landscapeCoordinates[y][x] = new Pair<>(posY, posX);
+                landscapeCoordinates[y][x] = new PixelRectangle(posY, posY+RECT_SIZE, posX, posX+RECT_SIZE);
                 posX += RECT_SIZE + GAP_SIZE;
             }
             posX = 0;
@@ -176,7 +186,7 @@ public class LandscapePanel extends Region {
         @Override
         public void handle(MouseEvent mouseEvent)
         {
-            if(dragged) {
+            if(isDragged()) {
                 int newX = (int) Math.floor(mouseEvent.getX());
                 int newY = (int) Math.floor(mouseEvent.getY());
                 Pair<Integer, Integer> destinationFieldYX = getFieldByCoordinates(newY, newX);
@@ -294,6 +304,8 @@ public class LandscapePanel extends Region {
 
     private void setDestinationField(Integer y, Integer x) {
         FieldEnum field = landscape.getLandscape()[y][x];
+        landscape.getPoliceOfficer().setyPos(y);
+        landscape.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
                 landscape.getLandscape()[y][x] = FieldEnum.POLICE_OFFICER;
@@ -309,10 +321,9 @@ public class LandscapePanel extends Region {
 
 
     private Pair<Integer, Integer> getFieldByCoordinates(int yPos, int xPos) {
-        Pair<Integer, Integer> pairToFind = new Pair<>(yPos, xPos);
         for (int y = 0; y < landscapeCoordinates.length; y++) {
             for(int x = 0; x < landscapeCoordinates[y].length; x++) {
-                if(pairToFind.equals(landscapeCoordinates[y][x])){
+                if(landscapeCoordinates[y][x].isValidPixel(yPos, xPos)){
                     return new Pair<>(y,x);
                 }
             }
@@ -353,4 +364,21 @@ public class LandscapePanel extends Region {
     public void setDragged(boolean dragged) {
         this.dragged = dragged;
     }
+
+    public void setLandscapeCoordinates(PixelRectangle[][] landscapeCoordinates) {
+        this.landscapeCoordinates = landscapeCoordinates;
+    }
+
+    public void updateCanvasSizeAndDraw() {
+        this.iconCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+        this.fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+        iconCanvas.setOnMousePressed(policePressedEventHandler);
+        iconCanvas.setOnMouseDragged(policeDraggedEventHandler);
+        iconCanvas.setOnMouseClicked(itemEventHandler);
+        this.draw();
+        this.getChildren().clear();
+        this.getChildren().add(fieldCanvas);
+        this.getChildren().add(iconCanvas);
+    }
+
 }

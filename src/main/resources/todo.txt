@@ -1,3 +1,3 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CODE REFRACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- Drag und Drop mit mehreren Pixel
-- MVC oder sonstiges richtig implementieren und ausplitten
+- MVC oder sonstiges richtig implementieren und aufplitten
+- ScrollPane fixen
