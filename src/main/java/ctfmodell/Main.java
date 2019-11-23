@@ -58,7 +58,7 @@ public class Main extends Application {
 
     }
 
-    private String loadDefaultOfficerCode() {
+    private static String loadDefaultOfficerCode() {
         Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");
 
         if (Files.exists(directory)) {
