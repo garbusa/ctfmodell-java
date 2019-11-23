@@ -1,8 +1,8 @@
 package ctfmodell.util;
 
-public class PixelRectangle {
+public class Rectangle {
 
-    public PixelRectangle(int minY, int maxY, int minX, int maxX) {
+    public Rectangle(int minY, int maxY, int minX, int maxX) {
         this.minY = minY;
         this.maxY = maxY;
         this.minX = minX;

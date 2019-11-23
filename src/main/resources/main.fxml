@@ -22,7 +22,7 @@
                               <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Kompilieren">
+                        <MenuItem fx:id="compileItem" mnemonicParsing="false" text="Kompilieren" onAction="#compile">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
@@ -134,7 +134,7 @@
                      <tooltip>
                         <Tooltip text="Simulation speichern" />
                      </tooltip></Button>
-                  <Button fx:id="loadButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button fx:id="compileButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false" onAction="#compile">
                      <tooltip>
                         <Tooltip text="Kompilieren" />
                      </tooltip></Button>

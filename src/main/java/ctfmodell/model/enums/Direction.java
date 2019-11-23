@@ -1,6 +1,6 @@
 package ctfmodell.model.enums;
 
-public enum DirectionEnum {
+public enum Direction {
     NORTH,
     WEST,
     SOUTH,

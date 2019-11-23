@@ -65,7 +65,7 @@
     -fx-graphic: url("../image/menu/save.png")
 }
 
-#loadButton {
+#compileButton {
     -fx-graphic: url("../image/menu/load.png")
 }
 

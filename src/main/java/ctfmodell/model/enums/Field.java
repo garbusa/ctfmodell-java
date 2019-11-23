@@ -1,6 +1,6 @@
 package ctfmodell.model.enums;
 
-public enum FieldEnum {
+public enum Field {
     OUT_OF_FIELD,
     EMPTY,
     BASE,

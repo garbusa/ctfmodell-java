@@ -3,7 +3,7 @@ package ctfmodell;
 import ctfmodell.container.SimulationContainer;
 import ctfmodell.controller.Controller;
 import ctfmodell.model.Landscape;
-import ctfmodell.util.HelperFunction;
+import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -26,7 +26,9 @@ import java.nio.file.Paths;
 @SuppressWarnings("ConstantConditions")
 public class Main extends Application {
 
-    public static final String PROGAM_FOLDER = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "programs";
+    //public static final String PROGAM_FOLDER = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "programs";
+    public static final String PROGAM_FOLDER = "src" + File.separator + "main" + File.separator + "java"
+            + File.separator + "ctfmodell" + File.separator + "model" + File.separator + "programs";
     public static SimulationContainer simulations = new SimulationContainer();
 
     public static void main(String[] args) {
@@ -63,7 +65,9 @@ public class Main extends Application {
 
         if (Files.exists(directory)) {
             try {
-                String prefix = "public class DefaultOfficer extends PoliceOfficer {\n\npublic ";
+                String prefix = "package ctfmodell.model.programs;\n" +
+                        "import ctfmodell.model.PoliceOfficer;\n" +
+                        "public class DefaultOfficer extends PoliceOfficer {\n\npublic ";
                 String code = new String(Files.readAllBytes(directory));
                 if(code.length() < 1) return null;
                 code = code.replace(prefix, "");
@@ -79,7 +83,7 @@ public class Main extends Application {
     }
 
     public static void createAndStartSimulation(Stage primaryStage, String editorClass, String code) throws IOException {
-        if (!HelperFunction.isValidClassName(editorClass)) {
+        if (!Helper.isValidClassName(editorClass)) {
             System.err.println(editorClass + "ist kein valider Klassenname!");
             System.exit(0);
         }
@@ -96,7 +100,7 @@ public class Main extends Application {
         Landscape landscape = new Landscape();
         LandscapePanel landscapePanel = new LandscapePanel(landscape);
         landscape.addObserver(landscapePanel);
-        landscape.getPoliceOfficer().addObserver(landscapePanel);
+
 
         Controller controller = loader.getController();
         controller.setEditorClass(editorClass);

@@ -1,10 +1,10 @@
 package ctfmodell.model;
 
-import ctfmodell.model.enums.FieldEnum;
+import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.LandscapeException;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.GraphicSize;
-import ctfmodell.util.PixelRectangle;
+import ctfmodell.util.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,9 @@ public class Landscape extends Observable {
     private int width;
     private int baseX;
     private int baseY;
-    private FieldEnum[][] landscape;
+    private Field[][] landscape;
     private List<Flag> flags;
-    private PixelRectangle[][] landscapeCoordinates;
+    private Rectangle[][] landscapeCoordinates;
 
     public Landscape() {
         this.height = 10;
@@ -29,12 +29,14 @@ public class Landscape extends Observable {
 
         this.landscape = this.generateFields();
         this.flags = new ArrayList<>();
-        this.landscapeCoordinates = new PixelRectangle[landscape.length][landscape[0].length];
+        this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
         this.regeneratePixelLandscape();
 
+        //Nur Provisorisch, da beim kompilieren sofort ersetzt
         PoliceOfficer policeOfficer = new PoliceOfficer();
         policeOfficer.setLandscape(this);
         this.setPoliceOfficer(policeOfficer);
+
         Flag flagOne = new Flag(2, 2);
         Flag flagTwo = new Flag(3, 3);
 
@@ -45,14 +47,14 @@ public class Landscape extends Observable {
         this.addArmedTerrorist(1, 0);
     }
 
-    private FieldEnum[][] generateFields() {
-        FieldEnum[][] fields = new FieldEnum[this.height][this.width];
+    private Field[][] generateFields() {
+        Field[][] fields = new Field[this.height][this.width];
         for (int y = 0; y < fields.length; y++) {
             for (int x = 0; x < fields[y].length; x++) {
                 if (x == this.baseX && y == this.baseY) {
-                    fields[y][x] = FieldEnum.BASE;
+                    fields[y][x] = Field.BASE;
                 } else {
-                    fields[y][x] = FieldEnum.EMPTY;
+                    fields[y][x] = Field.EMPTY;
                 }
             }
         }
@@ -65,7 +67,7 @@ public class Landscape extends Observable {
         int posY = 0;
         for (int y = 0; y < this.landscape.length; y++) {
             for (int x = 0; x < this.landscape[y].length; x++) {
-                landscapeCoordinates[y][x] = new PixelRectangle(posY, posY + GraphicSize.RECT_SIZE, posX, posX + GraphicSize.RECT_SIZE);
+                landscapeCoordinates[y][x] = new Rectangle(posY, posY + GraphicSize.RECT_SIZE, posX, posX + GraphicSize.RECT_SIZE);
                 posX += GraphicSize.RECT_SIZE + GraphicSize.GAP_SIZE;
             }
             posX = 0;
@@ -79,11 +81,11 @@ public class Landscape extends Observable {
         int y = flag.getyPos();
         switch (this.landscape[y][x]) {
             case EMPTY:
-                this.landscape[y][x] = FieldEnum.FLAG;
+                this.landscape[y][x] = Field.FLAG;
                 this.flags.add(flag);
                 break;
             case POLICE_OFFICER:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_FLAG;
+                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
                 this.flags.add(flag);
                 break;
             default:
@@ -94,8 +96,8 @@ public class Landscape extends Observable {
     }
 
     public void addUnarmedTerrorist(int y, int x) {
-        if (this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.ARMED_TERRORIST) {
-            this.landscape[y][x] = FieldEnum.UNARMED_TERRORIST;
+        if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.ARMED_TERRORIST) {
+            this.landscape[y][x] = Field.UNARMED_TERRORIST;
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
@@ -104,8 +106,8 @@ public class Landscape extends Observable {
     }
 
     public void addArmedTerrorist(int y, int x) {
-        if (this.landscape[y][x] == FieldEnum.EMPTY || this.landscape[y][x] == FieldEnum.UNARMED_TERRORIST) {
-            this.landscape[y][x] = FieldEnum.ARMED_TERRORIST;
+        if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.UNARMED_TERRORIST) {
+            this.landscape[y][x] = Field.ARMED_TERRORIST;
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
@@ -113,8 +115,38 @@ public class Landscape extends Observable {
         this.notifyObservers();
     }
 
+    public PoliceOfficer unsetPoliceOfficer() {
+        int y = this.policeOfficer.getyPos();
+        int x = this.policeOfficer.getxPos();
+
+        Field field = this.landscape[y][x];
+
+        switch (field) {
+            case OFFICER_AND_BASE:
+                this.landscape[y][x] = Field.BASE;
+            case OFFICER_AND_FLAG:
+                this.landscape[y][x] = Field.FLAG;
+            case POLICE_OFFICER:
+                this.landscape[y][x] = Field.EMPTY;
+        }
+        this.setChanged();
+        this.notifyObservers();
+
+        return this.getPoliceOfficer();
+    }
+
     public void updatePoliceOfficer(PoliceOfficer policeOfficer) {
-        this.policeOfficer = policeOfficer;
+        PoliceOfficer oldOfficer = this.unsetPoliceOfficer();
+        if(oldOfficer != null) {
+            policeOfficer.setxPos(oldOfficer.getxPos());
+            policeOfficer.setyPos(oldOfficer.getyPos());
+            policeOfficer.setNumberOfFlags(oldOfficer.getNumberOfFlags());
+            policeOfficer.setDirection(oldOfficer.getDirection());
+        }
+        this.setPoliceOfficer(policeOfficer);
+        this.policeOfficer.setLandscape(this);
+        this.setChanged();
+        this.notifyObservers();
     }
 
     public void resize(int width, int height) {
@@ -125,8 +157,8 @@ public class Landscape extends Observable {
 
         this.width = width;
         this.height = height;
-        FieldEnum[][] resizedLandscape = new FieldEnum[height][width];
-        landscapeCoordinates = new PixelRectangle[height][width];
+        Field[][] resizedLandscape = new Field[height][width];
+        landscapeCoordinates = new Rectangle[height][width];
 
         //Kopiere alle möglichen Felder von der alten zur neuen
         for (int y = 0; y < resizedLandscape.length; y++) {
@@ -140,7 +172,7 @@ public class Landscape extends Observable {
         for (int y = 0; y < resizedLandscape.length; y++) {
             for (int x = 0; x < resizedLandscape[y].length; x++) {
                 if (resizedLandscape[y][x] == null) {
-                    resizedLandscape[y][x] = FieldEnum.EMPTY;
+                    resizedLandscape[y][x] = Field.EMPTY;
                 }
             }
         }
@@ -148,16 +180,16 @@ public class Landscape extends Observable {
         //Falls das vorherige Feld einen Akteur und oder eine Base hatte aber nicht zum neuen übernommen wurde,
         //Füge Officer hinzu
         if (hasPoliceOfficerOnLandscape(this.landscape) && !hasPoliceOfficerOnLandscape(resizedLandscape)) {
-            FieldEnum fieldToCheck = getFieldEnum(0, 0);
-            if (fieldToCheck == FieldEnum.BASE) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
-            else if (fieldToCheck == FieldEnum.FLAG) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_FLAG;
-            else resizedLandscape[0][0] = FieldEnum.POLICE_OFFICER;
+            Field fieldToCheck = getFieldEnum(0, 0);
+            if (fieldToCheck == Field.BASE) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
+            else if (fieldToCheck == Field.FLAG) resizedLandscape[0][0] = Field.OFFICER_AND_FLAG;
+            else resizedLandscape[0][0] = Field.POLICE_OFFICER;
         }
 
         if (hasBaseOnLandscape(this.landscape) && !hasBaseOnLandscape(resizedLandscape)) {
-            FieldEnum fieldToCheck = getFieldEnum(resizedLandscape.length, resizedLandscape[0].length);
-            if (fieldToCheck == FieldEnum.POLICE_OFFICER) resizedLandscape[0][0] = FieldEnum.OFFICER_AND_BASE;
-            else resizedLandscape[height - 1][width - 1] = FieldEnum.BASE;
+            Field fieldToCheck = getFieldEnum(resizedLandscape.length, resizedLandscape[0].length);
+            if (fieldToCheck == Field.POLICE_OFFICER) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
+            else resizedLandscape[height - 1][width - 1] = Field.BASE;
         }
 
         this.landscape = resizedLandscape;
@@ -166,12 +198,12 @@ public class Landscape extends Observable {
         this.notifyObservers();
     }
 
-    private boolean hasPoliceOfficerOnLandscape(FieldEnum[][] landscape) {
-        for (FieldEnum[] fieldEnums : landscape) {
-            for (FieldEnum fieldEnum : fieldEnums) {
-                if (fieldEnum == FieldEnum.OFFICER_AND_FLAG ||
-                        fieldEnum == FieldEnum.OFFICER_AND_BASE ||
-                        fieldEnum == FieldEnum.POLICE_OFFICER) {
+    private boolean hasPoliceOfficerOnLandscape(Field[][] landscape) {
+        for (Field[] fields : landscape) {
+            for (Field field : fields) {
+                if (field == Field.OFFICER_AND_FLAG ||
+                        field == Field.OFFICER_AND_BASE ||
+                        field == Field.POLICE_OFFICER) {
                     return true;
                 }
             }
@@ -179,15 +211,15 @@ public class Landscape extends Observable {
         return false;
     }
 
-    private FieldEnum getFieldEnum(int y, int x) {
+    private Field getFieldEnum(int y, int x) {
         return this.landscape[y][x];
     }
 
-    private boolean hasBaseOnLandscape(FieldEnum[][] landscape) {
-        for (FieldEnum[] fieldEnums : landscape) {
-            for (FieldEnum fieldEnum : fieldEnums) {
-                if (fieldEnum == FieldEnum.OFFICER_AND_BASE ||
-                        fieldEnum == FieldEnum.BASE) {
+    private boolean hasBaseOnLandscape(Field[][] landscape) {
+        for (Field[] fields : landscape) {
+            for (Field field : fields) {
+                if (field == Field.OFFICER_AND_BASE ||
+                        field == Field.BASE) {
                     return true;
                 }
             }
@@ -216,34 +248,34 @@ public class Landscape extends Observable {
     }
 
     public void clearOriginPolice(Integer y, Integer x) {
-        FieldEnum field = this.landscape[y][x];
+        Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
-                this.landscape[y][x] = FieldEnum.BASE;
+                this.landscape[y][x] = Field.BASE;
                 break;
             case OFFICER_AND_FLAG:
-                this.landscape[y][x] = FieldEnum.FLAG;
+                this.landscape[y][x] = Field.FLAG;
                 break;
             case POLICE_OFFICER:
-                this.landscape[y][x] = FieldEnum.EMPTY;
+                this.landscape[y][x] = Field.EMPTY;
         }
         this.setChanged();
         this.notifyObservers();
     }
 
     public void setDestinationPolice(Integer y, Integer x) {
-        FieldEnum field = this.landscape[y][x];
+        Field field = this.landscape[y][x];
         this.getPoliceOfficer().setyPos(y);
         this.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
-                this.landscape[y][x] = FieldEnum.POLICE_OFFICER;
+                this.landscape[y][x] = Field.POLICE_OFFICER;
                 break;
             case FLAG:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_FLAG;
+                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
                 break;
             case BASE:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_BASE;
+                this.landscape[y][x] = Field.OFFICER_AND_BASE;
         }
         this.setChanged();
         this.notifyObservers();
@@ -255,33 +287,37 @@ public class Landscape extends Observable {
 
     private void setPoliceOfficer(PoliceOfficer policeOfficer) {
         this.policeOfficer = policeOfficer;
-        int x = policeOfficer.getyPos();
-        int y = policeOfficer.getxPos();
+        int x = policeOfficer.getxPos();
+        int y = policeOfficer.getyPos();
         switch (this.landscape[y][x]) {
             case EMPTY:
-                this.landscape[y][x] = FieldEnum.POLICE_OFFICER;
+            case POLICE_OFFICER:
+                this.landscape[y][x] = Field.POLICE_OFFICER;
                 break;
             case FLAG:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_FLAG;
+            case OFFICER_AND_FLAG:
+                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
                 break;
             case BASE:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_BASE;
+            case OFFICER_AND_BASE:
+                this.landscape[y][x] = Field.OFFICER_AND_BASE;
                 break;
             default:
                 throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
+
         }
         this.setChanged();
         this.notifyObservers();
     }
 
     public void clearOriginBase(Integer y, Integer x) {
-        FieldEnum field = this.landscape[y][x];
+        Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
-                this.landscape[y][x] = FieldEnum.POLICE_OFFICER;
+                this.landscape[y][x] = Field.POLICE_OFFICER;
                 break;
             case BASE:
-                this.landscape[y][x] = FieldEnum.EMPTY;
+                this.landscape[y][x] = Field.EMPTY;
                 break;
         }
         this.setChanged();
@@ -289,32 +325,32 @@ public class Landscape extends Observable {
     }
 
     public void setDestinationBase(Integer y, Integer x) {
-        FieldEnum field = this.landscape[y][x];
+        Field field = this.landscape[y][x];
         this.getPoliceOfficer().setyPos(y);
         this.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
-                this.landscape[y][x] = FieldEnum.BASE;
+                this.landscape[y][x] = Field.BASE;
                 break;
             case POLICE_OFFICER:
-                this.landscape[y][x] = FieldEnum.OFFICER_AND_BASE;
+                this.landscape[y][x] = Field.OFFICER_AND_BASE;
                 break;
         }
         this.setChanged();
         this.notifyObservers();
     }
 
-    public void setField(int y, int x, FieldEnum field) {
+    public void setField(int y, int x, Field field) {
         this.landscape[y][x] = field;
         this.setChanged();
         this.notifyObservers();
     }
 
-    public FieldEnum getField(int y, int x) {
+    public Field getField(int y, int x) {
         return this.landscape[y][x];
     }
 
-    public FieldEnum[][] getLandscape() {
+    public Field[][] getLandscape() {
         return landscape;
     }
 
