@@ -1,22 +1,39 @@
 package ctfmodell.controller;
 
+import ctfmodell.Main;
 import ctfmodell.model.Flag;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.enums.FieldEnum;
 import ctfmodell.model.exception.*;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.DialogProvider;
+import ctfmodell.util.HelperFunction;
 import ctfmodell.view.LandscapePanel;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 
 public class Controller {
+
+    @FXML
+    BorderPane pane;
+
+    @FXML
+    MenuItem newItem;
 
     @FXML
     RadioMenuItem resizeMenu, avatarMenu, baseMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
@@ -27,6 +44,9 @@ public class Controller {
     @FXML
     ToggleGroup territoriumGroup, addingGroup;
 
+    @FXML
+    TextArea codeEditor;
+
     private Landscape landscape = new Landscape();
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
@@ -35,6 +55,9 @@ public class Controller {
     private boolean deleteEnabled = false;
     private boolean dragged;
     private LandscapePanel landscapePanel;
+    private String editorClass;
+    private String codeText = "";
+    private Stage stage;
 
     private Coordinates originFieldYX;
     private EventHandler<MouseEvent> pressedEventHandler = new EventHandler<MouseEvent>() {
@@ -156,15 +179,27 @@ public class Controller {
     };
 
     @FXML
-    public void initialize(Landscape landscape, LandscapePanel landscapePanel) {
+    public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code) {
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
+        Platform.runLater(() -> {
+            codeEditor.setText(code);
+            codeText = codeEditor.getText();
+        });
     }
 
     public void initializeEventHandler() {
         landscapePanel.setOnMousePressed(pressedEventHandler);
         landscapePanel.setOnMouseDragged(dragEventHandler);
         landscapePanel.setOnMouseClicked(itemEventHandler);
+    }
+
+    public void setEditorClass(String editorClass) {
+        this.editorClass = editorClass;
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
     @FXML
@@ -314,6 +349,109 @@ public class Controller {
             this.landscape.getPoliceOfficer().attack();
         } catch (PoliceException ex) {
             System.err.println(ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void createNewSimulation() {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Neue Simulation starten",
+                "Geben Sie einen gültigen Klassennamen ein", "Starten", "Name");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            if (HelperFunction.isValidClassName(name)) {
+                Path directory = Paths.get(Main.PROGAM_FOLDER, name + ".java");
+                if (!Files.exists(directory)) {
+                    try {
+                        Files.createFile(directory);
+                        this.createAndStartSimulation(name, null);
+                    } catch (IOException e) {
+                        System.err.println(e.getMessage());
+                    }
+                } else {
+                    System.err.println(name + ".java existiert schon. Öffne diese Simulation oder wähle einen anderen Namen!");
+                }
+            } else {
+                System.err.println(name + "ist kein valider Klassenname!");
+            }
+        });
+
+
+    }
+
+    private void createAndStartSimulation(String name, String code) {
+        Stage stage = new Stage();
+        try {
+            Main.createAndStartSimulation(stage, name, code);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void openSimulation() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(Main.PROGAM_FOLDER).toFile());
+        File simulationToOpen = fileChooser.showOpenDialog(pane.getScene().getWindow());
+        String file = simulationToOpen.getName();
+        String fileName = (file.contains(".java")) ? file.split("\\.")[0] : null;
+
+        if (fileName != null && Main.simulations.constainsSimulation(fileName)) {
+            System.err.println("Diese Simulation ist bereits geöffnet!");
+        } else if (fileName != null && !Main.simulations.constainsSimulation(fileName)) {
+            String code = null;
+            try {
+                String prefix = "public class " + fileName + " extends PoliceOfficer {\n\npublic ";
+                code = new String(Files.readAllBytes(simulationToOpen.toPath()));
+                code = code.replace(prefix, "");
+                code = code.substring(0, code.length() - 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            createAndStartSimulation(fileName, code);
+
+        } else {
+            System.err.println("Die ausgewählte Datei ist keine gültige Java-Datei!");
+        }
+
+
+    }
+
+    @FXML
+    private void updateCodeText() {
+        Platform.runLater(() -> {
+            codeText = codeEditor.getText();
+            System.out.println(codeText);
+        });
+    }
+
+    @FXML
+    private void closeSimulation() {
+        this.saveCode();
+        Main.simulations.removeSimulation(editorClass);
+
+        if (Main.simulations.isEmpty()) {
+            Platform.exit();
+        } else {
+            this.stage.close();
+        }
+
+    }
+
+    @FXML
+    public void saveCode() {
+        String prefix = "public class " + editorClass + " extends PoliceOfficer {\n\npublic ";
+        String postfix = "\n\n}";
+        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
+
+        StringBuilder builder = new StringBuilder(prefix);
+        builder.append(codeText)
+                .append(postfix);
+
+        try {
+            Files.write(codeFile, builder.toString().getBytes());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 
