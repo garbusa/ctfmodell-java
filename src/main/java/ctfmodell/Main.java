@@ -65,6 +65,7 @@ public class Main extends Application {
             try {
                 String prefix = "public class DefaultOfficer extends PoliceOfficer {\n\npublic ";
                 String code = new String(Files.readAllBytes(directory));
+                if(code.length() < 1) return null;
                 code = code.replace(prefix, "");
                 code = code.substring(0, code.length() - 1);
                 return code;
@@ -121,7 +122,9 @@ public class Main extends Application {
             controller.saveCode();
             simulations.removeSimulation(editorClass);
         });
+
         controller.setStage(primaryStage);
+        controller.saveCode();
 
         primaryStage.show();
     }

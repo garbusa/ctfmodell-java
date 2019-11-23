@@ -56,7 +56,6 @@ public class Controller {
     private boolean dragged;
     private LandscapePanel landscapePanel;
     private String editorClass;
-    private String codeText = "";
     private Stage stage;
 
     private Coordinates originFieldYX;
@@ -182,10 +181,7 @@ public class Controller {
     public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code) {
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
-        Platform.runLater(() -> {
-            codeEditor.setText(code);
-            codeText = codeEditor.getText();
-        });
+        codeEditor.setText(code);
     }
 
     public void initializeEventHandler() {
@@ -393,6 +389,12 @@ public class Controller {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(Paths.get(Main.PROGAM_FOLDER).toFile());
         File simulationToOpen = fileChooser.showOpenDialog(pane.getScene().getWindow());
+
+        if (simulationToOpen == null) {
+            System.err.println("Keine Datei ausgewählt!");
+            return;
+        }
+
         String file = simulationToOpen.getName();
         String fileName = (file.contains(".java")) ? file.split("\\.")[0] : null;
 
@@ -418,14 +420,6 @@ public class Controller {
     }
 
     @FXML
-    private void updateCodeText() {
-        Platform.runLater(() -> {
-            codeText = codeEditor.getText();
-            System.out.println(codeText);
-        });
-    }
-
-    @FXML
     private void closeSimulation() {
         this.saveCode();
         Main.simulations.removeSimulation(editorClass);
@@ -445,7 +439,7 @@ public class Controller {
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
 
         StringBuilder builder = new StringBuilder(prefix);
-        builder.append(codeText)
+        builder.append(codeEditor.getText())
                 .append(postfix);
 
         try {
