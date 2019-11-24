@@ -115,6 +115,20 @@ public class Landscape extends Observable {
         this.notifyObservers();
     }
 
+    public void updatePoliceOfficer(PoliceOfficer policeOfficer) {
+        PoliceOfficer oldOfficer = this.unsetPoliceOfficer();
+        if (oldOfficer != null) {
+            policeOfficer.setxPos(oldOfficer.getxPos());
+            policeOfficer.setyPos(oldOfficer.getyPos());
+            policeOfficer.setNumberOfFlags(oldOfficer.getNumberOfFlags());
+            policeOfficer.setDirection(oldOfficer.getDirection());
+        }
+        this.setPoliceOfficer(policeOfficer);
+        this.policeOfficer.setLandscape(this);
+        this.setChanged();
+        this.notifyObservers();
+    }
+
     public PoliceOfficer unsetPoliceOfficer() {
         int y = this.policeOfficer.getyPos();
         int x = this.policeOfficer.getxPos();
@@ -135,16 +149,31 @@ public class Landscape extends Observable {
         return this.getPoliceOfficer();
     }
 
-    public void updatePoliceOfficer(PoliceOfficer policeOfficer) {
-        PoliceOfficer oldOfficer = this.unsetPoliceOfficer();
-        if(oldOfficer != null) {
-            policeOfficer.setxPos(oldOfficer.getxPos());
-            policeOfficer.setyPos(oldOfficer.getyPos());
-            policeOfficer.setNumberOfFlags(oldOfficer.getNumberOfFlags());
-            policeOfficer.setDirection(oldOfficer.getDirection());
+    public PoliceOfficer getPoliceOfficer() {
+        return policeOfficer;
+    }
+
+    private void setPoliceOfficer(PoliceOfficer policeOfficer) {
+        this.policeOfficer = policeOfficer;
+        int x = policeOfficer.getxPos();
+        int y = policeOfficer.getyPos();
+        switch (this.landscape[y][x]) {
+            case EMPTY:
+            case POLICE_OFFICER:
+                this.landscape[y][x] = Field.POLICE_OFFICER;
+                break;
+            case FLAG:
+            case OFFICER_AND_FLAG:
+                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
+                break;
+            case BASE:
+            case OFFICER_AND_BASE:
+                this.landscape[y][x] = Field.OFFICER_AND_BASE;
+                break;
+            default:
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
+
         }
-        this.setPoliceOfficer(policeOfficer);
-        this.policeOfficer.setLandscape(this);
         this.setChanged();
         this.notifyObservers();
     }
@@ -276,35 +305,6 @@ public class Landscape extends Observable {
                 break;
             case BASE:
                 this.landscape[y][x] = Field.OFFICER_AND_BASE;
-        }
-        this.setChanged();
-        this.notifyObservers();
-    }
-
-    public PoliceOfficer getPoliceOfficer() {
-        return policeOfficer;
-    }
-
-    private void setPoliceOfficer(PoliceOfficer policeOfficer) {
-        this.policeOfficer = policeOfficer;
-        int x = policeOfficer.getxPos();
-        int y = policeOfficer.getyPos();
-        switch (this.landscape[y][x]) {
-            case EMPTY:
-            case POLICE_OFFICER:
-                this.landscape[y][x] = Field.POLICE_OFFICER;
-                break;
-            case FLAG:
-            case OFFICER_AND_FLAG:
-                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
-                break;
-            case BASE:
-            case OFFICER_AND_BASE:
-                this.landscape[y][x] = Field.OFFICER_AND_BASE;
-                break;
-            default:
-                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
-
         }
         this.setChanged();
         this.notifyObservers();

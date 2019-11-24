@@ -11,8 +11,8 @@ public class PoliceOfficer extends Observable {
 
     protected int yPos;
     protected int xPos;
-    private int numberOfFlags;
     protected Direction direction;
+    private int numberOfFlags;
     private Landscape landscape;
     private boolean hasWon;
 
@@ -274,6 +274,7 @@ public class PoliceOfficer extends Observable {
     public Direction getDirection() {
         return this.direction;
     }
+
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
@@ -281,6 +282,7 @@ public class PoliceOfficer extends Observable {
     public int getNumberOfFlags() {
         return numberOfFlags;
     }
+
     public void setNumberOfFlags(int numberOfFlags) {
         this.numberOfFlags = numberOfFlags;
     }
