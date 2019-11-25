@@ -10,9 +10,9 @@ import java.util.Observable;
 
 public class PoliceOfficer extends Observable {
 
-    protected int yPos;
-    protected int xPos;
-    protected Direction direction;
+    private int yPos;
+    private int xPos;
+    private Direction direction;
     private int numberOfFlags;
     private Landscape landscape;
     private boolean hasWon;
@@ -50,7 +50,7 @@ public class PoliceOfficer extends Observable {
         }
     }
 
-    protected void forwardToDirection(int newX, int newY) {
+    private void forwardToDirection(int newX, int newY) {
         Field forwardField = this.getForwardField();
         if (forwardField != Field.UNARMED_TERRORIST && forwardField != Field.ARMED_TERRORIST &&
                 forwardField != Field.OUT_OF_FIELD) {

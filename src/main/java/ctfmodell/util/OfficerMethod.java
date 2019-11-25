@@ -5,12 +5,18 @@ import java.util.List;
 
 public class OfficerMethod {
 
+    public enum Type {
+        BASIC,
+        NEW
+    }
+
     private String methodType;
     private String methodName;
     private List<String> paramTypes;
     public OfficerMethod() {
         paramTypes = new ArrayList<>();
     }
+
 
     public void setMethodType(String methodType) {
         this.methodType = methodType;
@@ -19,6 +25,8 @@ public class OfficerMethod {
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
+
+    public String getMethodName() { return this.methodName; }
 
     public List<String> getParamTypes() {
         return paramTypes;
@@ -39,6 +47,10 @@ public class OfficerMethod {
         str.append(");");
 
         return str.toString();
+    }
+
+    public boolean hasParam() {
+        return this.getParamTypes().size() > 0;
     }
 
     @Override

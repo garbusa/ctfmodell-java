@@ -200,14 +200,19 @@ public class Controller {
         this.landscapePanel = landscapePanel;
         codeEditor.setText(code);
         this.compile(false);
-        contextMenu = new OfficerContextMenu();
+        this.initializeContextMenu(landscape.getPoliceOfficer().getClass().getName());
+    }
+
+    private void initializeContextMenu(String officerType) {
+        contextMenu = new OfficerContextMenu(officerType);
+        landscapePanel.setOnContextMenuRequested(contextMenuHandler);
+        this.contextMenu.setLandscape(landscape);
     }
 
     public void initializeEventHandler() {
         landscapePanel.setOnMousePressed(pressedEventHandler);
         landscapePanel.setOnMouseDragged(dragEventHandler);
         landscapePanel.setOnMouseClicked(itemEventHandler);
-        landscapePanel.setOnContextMenuRequested(contextMenuHandler);
     }
 
     public void setEditorClass(String editorClass) {
@@ -253,7 +258,9 @@ public class Controller {
                 DialogProvider.alert(Alert.AlertType.ERROR, "Kompilierfehler", "Kompilierfehler",
                         compileMessage);
             }
-            this.landscape.updatePoliceOfficer(new PoliceOfficer());
+            PoliceOfficer policeOfficer = new PoliceOfficer();
+            this.landscape.updatePoliceOfficer(policeOfficer);
+            this.initializeContextMenu(policeOfficer.getClass().getName());
             this.deleteAndUpdateObserver();
         } else {
             try {
@@ -264,6 +271,7 @@ public class Controller {
                 PoliceOfficer compiledOfficer = (PoliceOfficer) cl.loadClass(editorClass).newInstance();
                 System.out.println(compiledOfficer);
                 this.landscape.updatePoliceOfficer(compiledOfficer);
+                this.initializeContextMenu(compiledOfficer.getClass().getName());
                 this.deleteAndUpdateObserver();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 e.printStackTrace();

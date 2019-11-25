@@ -149,8 +149,8 @@ public class Landscape extends Observable {
         return this.getPoliceOfficer();
     }
 
-    public PoliceOfficer getPoliceOfficer() {
-        return policeOfficer;
+    public <T extends PoliceOfficer> T getPoliceOfficer() {
+        return (T) policeOfficer;
     }
 
     private void setPoliceOfficer(PoliceOfficer policeOfficer) {
