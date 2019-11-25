@@ -10,10 +10,12 @@ import ctfmodell.util.Coordinates;
 import ctfmodell.util.DialogProvider;
 import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
+import ctfmodell.view.OfficerContextMenu;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -23,11 +25,16 @@ import javafx.util.Pair;
 import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Optional;
+
+import static ctfmodell.Main.*;
 
 
 public class Controller {
@@ -60,6 +67,7 @@ public class Controller {
     private LandscapePanel landscapePanel;
     private String editorClass;
     private Stage stage;
+    private OfficerContextMenu contextMenu;
 
     private Coordinates originFieldYX;
     private EventHandler<MouseEvent> pressedEventHandler = new EventHandler<MouseEvent>() {
@@ -179,6 +187,12 @@ public class Controller {
 
         }
     };
+    private EventHandler<ContextMenuEvent> contextMenuHandler = new EventHandler<ContextMenuEvent>() {
+        @Override
+        public void handle(ContextMenuEvent event) {
+            contextMenu.show(stage, event.getSceneX(), event.getSceneY());
+        }
+    };
 
     @FXML
     public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code) {
@@ -186,12 +200,14 @@ public class Controller {
         this.landscapePanel = landscapePanel;
         codeEditor.setText(code);
         this.compile(false);
+        contextMenu = new OfficerContextMenu();
     }
 
     public void initializeEventHandler() {
         landscapePanel.setOnMousePressed(pressedEventHandler);
         landscapePanel.setOnMouseDragged(dragEventHandler);
         landscapePanel.setOnMouseClicked(itemEventHandler);
+        landscapePanel.setOnContextMenuRequested(contextMenuHandler);
     }
 
     public void setEditorClass(String editorClass) {
@@ -209,6 +225,15 @@ public class Controller {
         this.saveCode();
 
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
+        Path programsFolder = Paths.get(Main.PROGAM_FOLDER);
+
+        ClassLoader cl = getClassLoader(programsFolder);
+
+        if(cl == null) {
+            System.err.println("Classloader konnte nicht geladen werden!");
+            return;
+        }
+
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         StandardJavaFileManager manager = compiler.getStandardFileManager(diagnostics, null, null);
@@ -236,7 +261,7 @@ public class Controller {
                     DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Kompiliert", "Kompiliert",
                             "Ihr Programmcode wurde erfolgreich kompiliert!");
                 }
-                PoliceOfficer compiledOfficer = (PoliceOfficer) Class.forName("ctfmodell.model.programs." + editorClass).newInstance();
+                PoliceOfficer compiledOfficer = (PoliceOfficer) cl.loadClass(editorClass).newInstance();
                 System.out.println(compiledOfficer);
                 this.landscape.updatePoliceOfficer(compiledOfficer);
                 this.deleteAndUpdateObserver();
@@ -248,17 +273,26 @@ public class Controller {
 
     }
 
+    private ClassLoader getClassLoader(Path programsFolder) {
+        ClassLoader cl = null;
+        try{
+            URL[] urls = new URL[]{programsFolder.toFile().toURI().toURL()};
+            cl = new URLClassLoader(urls);
+        } catch (MalformedURLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return cl;
+    }
+
     @FXML
     public void saveCode() {
-        String prefix = "package ctfmodell.model.programs;\n" +
-                "import ctfmodell.model.PoliceOfficer;\n" +
-                "public class " + editorClass + " extends PoliceOfficer {\n\npublic ";
-        String postfix = "\n\n}";
+        String prefix = PREFIX_1 + editorClass + PREFIX_2;
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
 
         StringBuilder builder = new StringBuilder(prefix);
         builder.append(codeEditor.getText())
-                .append(postfix);
+                .append(POSTFIX);
 
         try {
             Files.write(codeFile, builder.toString().getBytes());
@@ -497,9 +531,7 @@ public class Controller {
         } else if (fileName != null && !Main.simulations.constainsSimulation(fileName)) {
             String code = null;
             try {
-                String prefix = "package ctfmodell.model.programs;\n" +
-                        "import ctfmodell.model.PoliceOfficer;\n" +
-                        "public class " + fileName + " extends PoliceOfficer {\n\npublic ";
+                String prefix = PREFIX_1 + fileName + PREFIX_2;
                 code = new String(Files.readAllBytes(simulationToOpen.toPath()));
                 code = code.replace(prefix, "");
                 code = code.substring(0, code.length() - 1);

@@ -26,9 +26,10 @@ import java.nio.file.Paths;
 @SuppressWarnings("ConstantConditions")
 public class Main extends Application {
 
-    //public static final String PROGAM_FOLDER = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "programs";
-    public static final String PROGAM_FOLDER = "src" + File.separator + "main" + File.separator + "java"
-            + File.separator + "ctfmodell" + File.separator + "model" + File.separator + "programs";
+    public static final String PROGAM_FOLDER = "programs";
+    public static final String PREFIX_1 = "public class ";
+    public static final String PREFIX_2 = " extends ctfmodell.model.PoliceOfficer {\n\npublic ";
+    public static final String POSTFIX = "\n\n}";
     public static SimulationContainer simulations = new SimulationContainer();
 
     public static void main(String[] args) {
@@ -65,9 +66,7 @@ public class Main extends Application {
 
         if (Files.exists(directory)) {
             try {
-                String prefix = "package ctfmodell.model.programs;\n" +
-                        "import ctfmodell.model.PoliceOfficer;\n" +
-                        "public class DefaultOfficer extends PoliceOfficer {\n\npublic ";
+                String prefix = PREFIX_1 + "DefaultOfficer" + PREFIX_2;
                 String code = new String(Files.readAllBytes(directory));
                 if(code.length() < 1) return null;
                 code = code.replace(prefix, "");

@@ -1,5 +1,6 @@
 package ctfmodell.model;
 
+import ctfmodell.model.annotation.Invisible;
 import ctfmodell.model.enums.Direction;
 import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.*;
@@ -271,11 +272,12 @@ public class PoliceOfficer extends Observable {
         this.xPos = xPos;
     }
 
+    @Invisible
     public Direction getDirection() {
         return this.direction;
     }
 
-    public void setDirection(Direction direction) {
+    void setDirection(Direction direction) {
         this.direction = direction;
     }
 
@@ -283,7 +285,7 @@ public class PoliceOfficer extends Observable {
         return numberOfFlags;
     }
 
-    public void setNumberOfFlags(int numberOfFlags) {
+    void setNumberOfFlags(int numberOfFlags) {
         this.numberOfFlags = numberOfFlags;
     }
 

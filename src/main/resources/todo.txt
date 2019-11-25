@@ -1,2 +1,1 @@
-- class reload nach compilen geht nicht richtig = classloader cache?
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
