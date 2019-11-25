@@ -29,11 +29,10 @@ public class OfficerContextMenu extends ContextMenu {
             Class<?> officerClass = Class.forName("ctfmodell.model.PoliceOfficer");
             Method[] methods = officerClass.getDeclaredMethods();
 
-            System.out.println("class {");
             OfficerMethod methodToAdd;
             for (Method method : methods) {
                 List<Annotation> annotations = Arrays.asList(method.getAnnotations());
-                if(annotations.size() == 1 && annotations.get(0) instanceof Invisible) continue;
+                if (annotations.size() == 1 && annotations.get(0) instanceof Invisible) continue;
                 methodToAdd = new OfficerMethod();
                 String modifier = Modifier.toString(method.getModifiers());
                 if (!modifier.equals("public")) continue;
