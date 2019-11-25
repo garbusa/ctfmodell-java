@@ -204,9 +204,8 @@ public class Controller {
     }
 
     private void initializeContextMenu(String officerType) {
-        contextMenu = new OfficerContextMenu(officerType);
+        contextMenu = new OfficerContextMenu(officerType, this.landscape);
         landscapePanel.setOnContextMenuRequested(contextMenuHandler);
-        this.contextMenu.setLandscape(landscape);
     }
 
     public void initializeEventHandler() {
@@ -226,7 +225,7 @@ public class Controller {
     /**
      * Code aus CompileWithDiagnostics.java
      */
-    public void compile(boolean withAlert) {
+    private void compile(boolean withAlert) {
         this.saveCode();
 
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");

@@ -1,4 +1,2 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- Fehler bei neuen Methoden fixen
 - Spielbedingung bei Reflection einbauen
-- OfficerContextMenu als Observer

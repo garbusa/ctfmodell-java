@@ -15,38 +15,27 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("ConstantConditions")
-public class OfficerContextMenu extends ContextMenu implements Observer {
+public class OfficerContextMenu extends ContextMenu {
 
     private List<OfficerMethod> basicMethods;
     private List<OfficerMethod> newMethods;
     private Landscape landscape;
 
-    public OfficerContextMenu(String officerType) {
+    public OfficerContextMenu(String officerType, Landscape landscape) {
         super();
+        this.landscape = landscape;
         this.basicMethods = new ArrayList<>();
         this.newMethods = new ArrayList<>();
         this.getBasicMethods(officerType);
         if (!officerType.equals("ctfmodell.model.PoliceOfficer")) {
             this.getNewMethods(officerType);
         }
-    }
-
-    public void setLandscape(Landscape landscape) {
-        this.landscape = landscape;
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        this.landscape = (Landscape) o;
     }
 
     private void getBasicMethods(String officerType) {
@@ -62,14 +51,9 @@ public class OfficerContextMenu extends ContextMenu implements Observer {
     }
 
     private void getNewMethods(String officerType) {
-        try {
-            PoliceOfficer officer = this.getActualOfficer(officerType);
+        PoliceOfficer officer = this.landscape.getPoliceOfficer();
             Method[] methods = officer.getClass().getDeclaredMethods();
             reflectAndAddMethods(methods, OfficerMethod.Type.NEW, officerType);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            System.err.println(e.getMessage());
-        }
-
     }
 
     private void reflectAndAddMethods(Method[] methods, OfficerMethod.Type type, String officerType) {
@@ -109,18 +93,11 @@ public class OfficerContextMenu extends ContextMenu implements Observer {
     private void addMethodsWithEvent(OfficerMethod.Type type, String officerType) {
         MenuItem menuItem;
         List<OfficerMethod> list = (type == OfficerMethod.Type.BASIC) ? this.basicMethods : this.newMethods;
-        PoliceOfficer officer = null;
-
-        try {
-            officer = this.getActualOfficer(officerType);
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            System.err.println(e.getMessage());
-        }
+        PoliceOfficer officer = this.landscape.getPoliceOfficer();
 
         Method methodToExecute = null;
         for (OfficerMethod m : list) {
             menuItem = new MenuItem(m.toString());
-            this.getItems().add(menuItem);
 
             try {
                 if (type == OfficerMethod.Type.BASIC && !m.hasParam() && !officerType.equals("ctfmodell.model.PoliceOfficer")) {
@@ -129,61 +106,40 @@ public class OfficerContextMenu extends ContextMenu implements Observer {
                     methodToExecute = officer.getClass().getDeclaredMethod(m.getMethodName());
                 } else if (type == OfficerMethod.Type.NEW && !m.hasParam()) {
                     methodToExecute = officer.getClass().getDeclaredMethod(m.getMethodName());
+                } else if (m.hasParam()) {
+                    menuItem.setDisable(true);
+                    this.getItems().add(menuItem);
+                    continue;
                 } else {
                     continue;
                 }
-
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             }
 
-            if (m.hasParam()) {
-                menuItem.setDisable(true);
-            } else {
-                Method finalMethodToExecute = methodToExecute;
-                menuItem.setOnAction((event) -> {
+
+            Method finalMethodToExecute = methodToExecute;
+            menuItem.setOnAction((event) -> {
+                try {
+                    finalMethodToExecute.invoke(this.landscape.getPoliceOfficer());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    System.err.println(e.getCause().getMessage());
+                    Media sound = null;
                     try {
-                        finalMethodToExecute.invoke(this.landscape.getPoliceOfficer());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        System.err.println(e.getCause().getMessage());
-                        Media sound = null;
-                        try {
-                            sound = new Media(
-                                    new File(Main.class.getClassLoader().getResource("beep.wav").toURI()).toURI().toString()
-                            );
-                        } catch (URISyntaxException ex) {
-                            ex.printStackTrace();
-                        }
-                        MediaPlayer mediaPlayer = new MediaPlayer(sound);
-                        mediaPlayer.play();
+                        sound = new Media(
+                                new File(Main.class.getClassLoader().getResource("beep.wav").toURI()).toURI().toString()
+                        );
+                    } catch (URISyntaxException ex) {
+                        ex.printStackTrace();
                     }
-                });
-            }
+                    MediaPlayer mediaPlayer = new MediaPlayer(sound);
+                    mediaPlayer.play();
+                }
+            });
+            this.getItems().add(menuItem);
         }
     }
 
-    private PoliceOfficer getActualOfficer(String officerType) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        Path programsFolder = Paths.get(Main.PROGAM_FOLDER);
-        ClassLoader cl = getClassLoader(programsFolder);
-
-        if (cl == null) {
-            System.err.println("Classloader konnte nicht geladen werden!");
-            return null;
-        }
-        return (PoliceOfficer) cl.loadClass(officerType).newInstance();
-    }
-
-    private ClassLoader getClassLoader(Path programsFolder) {
-        ClassLoader cl = null;
-        try {
-            URL[] urls = new URL[]{programsFolder.toFile().toURI().toURL()};
-            cl = new URLClassLoader(urls);
-        } catch (MalformedURLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return cl;
-    }
 
 
 }

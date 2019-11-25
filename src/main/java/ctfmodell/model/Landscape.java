@@ -129,7 +129,7 @@ public class Landscape extends Observable {
         this.notifyObservers();
     }
 
-    public PoliceOfficer unsetPoliceOfficer() {
+    private PoliceOfficer unsetPoliceOfficer() {
         int y = this.policeOfficer.getyPos();
         int x = this.policeOfficer.getxPos();
 
@@ -149,8 +149,8 @@ public class Landscape extends Observable {
         return this.getPoliceOfficer();
     }
 
-    public <T extends PoliceOfficer> T getPoliceOfficer() {
-        return (T) policeOfficer;
+    public PoliceOfficer getPoliceOfficer() {
+        return policeOfficer;
     }
 
     private void setPoliceOfficer(PoliceOfficer policeOfficer) {
