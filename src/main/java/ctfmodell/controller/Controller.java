@@ -9,6 +9,7 @@ import ctfmodell.model.exception.*;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.DialogProvider;
 import ctfmodell.util.Helper;
+import ctfmodell.util.SimulationRunner;
 import ctfmodell.view.LandscapePanel;
 import ctfmodell.view.OfficerContextMenu;
 import javafx.application.Platform;
@@ -57,6 +58,9 @@ public class Controller {
     @FXML
     TextArea codeEditor;
 
+    @FXML
+    Slider slider;
+
     private Landscape landscape;
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
@@ -68,6 +72,7 @@ public class Controller {
     private String editorClass;
     private Stage stage;
     private OfficerContextMenu contextMenu;
+    private SimulationRunner runner;
 
     private Coordinates originFieldYX;
     private EventHandler<MouseEvent> pressedEventHandler = new EventHandler<MouseEvent>() {
@@ -198,6 +203,10 @@ public class Controller {
     public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code) {
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
+        runner = new SimulationRunner(0, this.landscape);
+        slider.valueProperty().addListener(
+                (observable, oldValue, newValue) -> runner.setSpeed(newValue.doubleValue())
+        );
         codeEditor.setText(code);
         this.compile(false);
         this.initializeContextMenu(landscape.getPoliceOfficer().getClass().getName());
@@ -226,6 +235,8 @@ public class Controller {
      * Code aus CompileWithDiagnostics.java
      */
     private void compile(boolean withAlert) {
+        if (isSimulationRunning()) return;
+
         this.saveCode();
 
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
@@ -292,20 +303,13 @@ public class Controller {
         return cl;
     }
 
-    @FXML
-    public void saveCode() {
-        String prefix = PREFIX_1 + editorClass + PREFIX_2;
-        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
-
-        StringBuilder builder = new StringBuilder(prefix);
-        builder.append(codeEditor.getText())
-                .append(POSTFIX);
-
-        try {
-            Files.write(codeFile, builder.toString().getBytes());
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
+    private boolean isSimulationRunning() {
+        if (runner.running) {
+            System.err.println("Simulation läuft gerade!");
+            return true;
         }
+
+        return false;
     }
 
     private void deleteAndUpdateObserver() {
@@ -321,7 +325,47 @@ public class Controller {
     }
 
     @FXML
+    public void saveCode() {
+        if (isSimulationRunning()) return;
+
+        String prefix = PREFIX_1 + editorClass + PREFIX_2;
+        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
+
+        StringBuilder builder = new StringBuilder(prefix);
+        builder.append(codeEditor.getText())
+                .append(POSTFIX);
+
+        try {
+            Files.write(codeFile, builder.toString().getBytes());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    @FXML
+    public void play() {
+        if (!runner.running && !runner.paused) {
+            new Thread(runner).start();
+        } else {
+            runner.resume();
+        }
+
+    }
+
+    @FXML
+    public void pause() {
+        runner.pause();
+    }
+
+    @FXML
+    public void stop() {
+        runner.stop();
+    }
+
+    @FXML
     private void hasFlags() {
+        if (isSimulationRunning()) return;
+
         if (this.landscape == null) return;
         if (this.landscape.getPoliceOfficer() == null) return;
         int count = this.landscape.getPoliceOfficer().getNumberOfFlags();
@@ -330,11 +374,14 @@ public class Controller {
 
     @FXML
     private void turnLeft() {
+        if (isSimulationRunning()) return;
         this.landscape.getPoliceOfficer().turnLeft();
     }
 
     @FXML
     private void forward() {
+        if (isSimulationRunning()) return;
+
         try {
             this.landscape.getPoliceOfficer().forward();
         } catch (MoveException ex) {
@@ -344,6 +391,8 @@ public class Controller {
 
     @FXML
     private void pick() {
+        if (isSimulationRunning()) return;
+
         try {
             this.landscape.getPoliceOfficer().pick();
         } catch (FlagException ex) {
@@ -353,6 +402,8 @@ public class Controller {
 
     @FXML
     private void drop() {
+        if (isSimulationRunning()) return;
+
         try {
             this.landscape.getPoliceOfficer().drop();
             if (this.landscape.getPoliceOfficer().hasWon()) {
@@ -361,79 +412,6 @@ public class Controller {
         } catch (FlagException | BaseException ex) {
             System.err.println(ex.getMessage());
         }
-    }
-
-    @FXML
-    private void attack() {
-        try {
-            this.landscape.getPoliceOfficer().attack();
-        } catch (PoliceException ex) {
-            System.err.println(ex.getMessage());
-        }
-    }
-
-    @FXML
-    private void territoriumGroup() {
-        disableStates(territoriumGroup);
-        RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
-
-        if (item == null) return;
-        String str = item.getId();
-
-        if (str.contains("resizeMenu")) {
-            sizeButton.setSelected(true);
-            this.resize();
-        } else if (str.contains("avatarMenu")) {
-            avatarButton.setSelected(true);
-            this.moveAvatarEnabled = true;
-            this.itemToDrag = Field.POLICE_OFFICER;
-        } else if (str.contains("baseMenu")) {
-            baseButton.setSelected(true);
-            this.moveBaseEnabled = true;
-            this.itemToDrag = Field.BASE;
-        } else if (str.contains("flagMenu")) {
-            flagButton.setSelected(true);
-            this.itemToAdd = Field.FLAG;
-        } else if (str.contains("terroristUnarmedMenu")) {
-            terrorUnarmedButton.setSelected(true);
-            this.itemToAdd = Field.UNARMED_TERRORIST;
-        } else if (str.contains("terroristArmedMenu")) {
-            terrorArmedButton.setSelected(true);
-            this.itemToAdd = Field.ARMED_TERRORIST;
-        } else if (str.contains("fieldMenu")) {
-            deleteButton.setSelected(true);
-            this.deleteEnabled = true;
-        }
-    }
-
-    private void disableStates(ToggleGroup addingGroup) {
-        this.moveAvatarEnabled = false;
-        this.moveBaseEnabled = false;
-        this.deleteEnabled = false;
-        this.dragged = false;
-        this.itemToAdd = Field.OUT_OF_FIELD;
-        this.itemToDrag = Field.OUT_OF_FIELD;
-        System.err.println(addingGroup.getSelectedToggle());
-    }
-
-    private void resize() {
-        resizeMenu.setSelected(true);
-
-        Dialog<Pair<String, String>> dialog = DialogProvider.getSizeDialog();
-        Optional<Pair<String, String>> result = dialog.showAndWait();
-
-        result.ifPresent(hoeheBreite -> {
-            try {
-                int height = Integer.parseInt(hoeheBreite.getKey().trim());
-                int width = Integer.parseInt(hoeheBreite.getValue().trim());
-                this.landscape.resize(width, height);
-            } catch (NumberFormatException ex) {
-                System.err.println("Es wurden nicht valide Zahlen eingegeben!");
-            } catch (LandscapeException ex) {
-                System.err.println("Es ist ein Fehler beim resizen aufgetreten.");
-            }
-        });
-
     }
 
     @FXML
@@ -450,36 +428,13 @@ public class Controller {
     }
 
     @FXML
-    private void addingGroup() {
-        disableStates(addingGroup);
-        ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
+    private void attack() {
+        if (isSimulationRunning()) return;
 
-        if (button == null) return;
-        String str = button.getId();
-
-        if (str.contains("sizeButton")) {
-            resizeMenu.setSelected(true);
-            this.resize();
-        } else if (str.contains("avatarButton")) {
-            avatarMenu.setSelected(true);
-            this.moveAvatarEnabled = true;
-            this.itemToDrag = Field.POLICE_OFFICER;
-        } else if (str.contains("baseButton")) {
-            baseButton.setSelected(true);
-            this.moveBaseEnabled = true;
-            this.itemToDrag = Field.BASE;
-        } else if (str.contains("flagButton")) {
-            flagMenu.setSelected(true);
-            this.itemToAdd = Field.FLAG;
-        } else if (str.contains("terrorUnarmedButton")) {
-            terroristUnarmedMenu.setSelected(true);
-            this.itemToAdd = Field.UNARMED_TERRORIST;
-        } else if (str.contains("terrorArmedButton")) {
-            terroristArmedMenu.setSelected(true);
-            this.itemToAdd = Field.ARMED_TERRORIST;
-        } else if (str.contains("deleteButton")) {
-            fieldMenu.setSelected(true);
-            this.deleteEnabled = true;
+        try {
+            this.landscape.getPoliceOfficer().attack();
+        } catch (PoliceException ex) {
+            System.err.println(ex.getMessage());
         }
     }
 
@@ -554,4 +509,109 @@ public class Controller {
 
     }
 
+    @FXML
+    private void territoriumGroup() {
+        if (isSimulationRunning()) return;
+
+        disableStates(territoriumGroup);
+        RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
+
+        if (item == null) return;
+        String str = item.getId();
+
+        if (str.contains("resizeMenu")) {
+            sizeButton.setSelected(true);
+            this.resize();
+        } else if (str.contains("avatarMenu")) {
+            avatarButton.setSelected(true);
+            this.moveAvatarEnabled = true;
+            this.itemToDrag = Field.POLICE_OFFICER;
+        } else if (str.contains("baseMenu")) {
+            baseButton.setSelected(true);
+            this.moveBaseEnabled = true;
+            this.itemToDrag = Field.BASE;
+        } else if (str.contains("flagMenu")) {
+            flagButton.setSelected(true);
+            this.itemToAdd = Field.FLAG;
+        } else if (str.contains("terroristUnarmedMenu")) {
+            terrorUnarmedButton.setSelected(true);
+            this.itemToAdd = Field.UNARMED_TERRORIST;
+        } else if (str.contains("terroristArmedMenu")) {
+            terrorArmedButton.setSelected(true);
+            this.itemToAdd = Field.ARMED_TERRORIST;
+        } else if (str.contains("fieldMenu")) {
+            deleteButton.setSelected(true);
+            this.deleteEnabled = true;
+        }
+    }
+
+    private void disableStates(ToggleGroup addingGroup) {
+        if (isSimulationRunning()) return;
+
+        this.moveAvatarEnabled = false;
+        this.moveBaseEnabled = false;
+        this.deleteEnabled = false;
+        this.dragged = false;
+        this.itemToAdd = Field.OUT_OF_FIELD;
+        this.itemToDrag = Field.OUT_OF_FIELD;
+        System.err.println(addingGroup.getSelectedToggle());
+    }
+
+    private void resize() {
+        if (isSimulationRunning()) return;
+
+        resizeMenu.setSelected(true);
+
+        Dialog<Pair<String, String>> dialog = DialogProvider.getSizeDialog();
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        result.ifPresent(hoeheBreite -> {
+            try {
+                int height = Integer.parseInt(hoeheBreite.getKey().trim());
+                int width = Integer.parseInt(hoeheBreite.getValue().trim());
+                this.landscape.resize(width, height);
+            } catch (NumberFormatException ex) {
+                System.err.println("Es wurden nicht valide Zahlen eingegeben!");
+            } catch (LandscapeException ex) {
+                System.err.println("Es ist ein Fehler beim resizen aufgetreten.");
+            }
+        });
+
+    }
+
+    @FXML
+    private void addingGroup() {
+        if (isSimulationRunning()) return;
+
+        disableStates(addingGroup);
+        ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
+
+        if (button == null) return;
+        String str = button.getId();
+
+        if (str.contains("sizeButton")) {
+            resizeMenu.setSelected(true);
+            this.resize();
+        } else if (str.contains("avatarButton")) {
+            avatarMenu.setSelected(true);
+            this.moveAvatarEnabled = true;
+            this.itemToDrag = Field.POLICE_OFFICER;
+        } else if (str.contains("baseButton")) {
+            baseButton.setSelected(true);
+            this.moveBaseEnabled = true;
+            this.itemToDrag = Field.BASE;
+        } else if (str.contains("flagButton")) {
+            flagMenu.setSelected(true);
+            this.itemToAdd = Field.FLAG;
+        } else if (str.contains("terrorUnarmedButton")) {
+            terroristUnarmedMenu.setSelected(true);
+            this.itemToAdd = Field.UNARMED_TERRORIST;
+        } else if (str.contains("terrorArmedButton")) {
+            terroristArmedMenu.setSelected(true);
+            this.itemToAdd = Field.ARMED_TERRORIST;
+        } else if (str.contains("deleteButton")) {
+            fieldMenu.setSelected(true);
+            this.deleteEnabled = true;
+        }
+    }
 }

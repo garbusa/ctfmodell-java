@@ -17,6 +17,10 @@ public class PoliceOfficer extends Observable {
     private Landscape landscape;
     private boolean hasWon;
 
+    public void main() {
+
+    }
+
     public PoliceOfficer() {
         this(0, 0, Direction.EAST);
     }

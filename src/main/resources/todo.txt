@@ -1,2 +1,4 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- Spielbedingung bei Reflection einbauen
+                                                      - Spielbedingung bei Reflection einbauen
+                                                      - Spielbedingung in Simulation einbauen
+                                                      - Irgendwie setField = EMPTY aus "Animation" entfernen

@@ -5,6 +5,7 @@ import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.enums.Direction;
 import ctfmodell.model.enums.Field;
 import ctfmodell.util.GraphicSize;
+import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -122,17 +123,16 @@ public class LandscapePanel extends Region implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof PoliceOfficer) {
-            //this.landscape.updatePoliceOfficer((PoliceOfficer) arg);
-        } else {
+        if (!(arg instanceof PoliceOfficer))
             this.landscape = (Landscape) o;
-        }
+            Platform.runLater(() -> {
+                this.iconCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+                this.fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+                this.draw();
+                this.getChildren().clear();
+                this.getChildren().add(fieldCanvas);
+                this.getChildren().add(iconCanvas);
+            });
 
-        this.iconCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
-        this.fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
-        this.draw();
-        this.getChildren().clear();
-        this.getChildren().add(fieldCanvas);
-        this.getChildren().add(iconCanvas);
     }
 }

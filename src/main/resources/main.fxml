@@ -201,20 +201,20 @@
                       </tooltip>
                   </Button>
                   <Separator layoutX="790.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Button fx:id="playButton" layoutX="548.0" layoutY="20.0" mnemonicParsing="false">
+                  <Button fx:id="playButton" layoutX="548.0" layoutY="20.0" mnemonicParsing="false" onAction="#play">
                      <tooltip>
                         <Tooltip text="Simulation starten" />
                      </tooltip></Button>
-                  <Button fx:id="pauseButton" layoutX="632.0" layoutY="20.0" mnemonicParsing="false">
+                  <Button fx:id="pauseButton" layoutX="632.0" layoutY="20.0" mnemonicParsing="false" onAction="#pause">
                      <tooltip>
                         <Tooltip text="Simulation pausieren" />
                      </tooltip></Button>
-                  <Button fx:id="stopButton" layoutX="716.0" layoutY="20.0" mnemonicParsing="false">
+                  <Button fx:id="stopButton" layoutX="716.0" layoutY="20.0" mnemonicParsing="false" onAction="#stop">
                      <tooltip>
                         <Tooltip text="Simulation stoppen" />
                      </tooltip></Button>
                   <Separator layoutX="800.0" layoutY="20.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Slider>
+                  <Slider fx:id="slider" max="1000.0" showTickLabels="true">
                      <tooltip>
                         <Tooltip text="Geschwindigkeit der Simulation anpassen" />
                      </tooltip></Slider>

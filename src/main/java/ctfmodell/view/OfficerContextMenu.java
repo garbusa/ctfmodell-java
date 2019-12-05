@@ -1,21 +1,17 @@
 package ctfmodell.view;
 
-import ctfmodell.Main;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.annotation.Invisible;
+import ctfmodell.util.BeepHelper;
 import ctfmodell.util.OfficerMethod;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -124,16 +120,7 @@ public class OfficerContextMenu extends ContextMenu {
                     finalMethodToExecute.invoke(this.landscape.getPoliceOfficer());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     System.err.println(e.getCause().getMessage());
-                    Media sound = null;
-                    try {
-                        sound = new Media(
-                                new File(Main.class.getClassLoader().getResource("beep.wav").toURI()).toURI().toString()
-                        );
-                    } catch (URISyntaxException ex) {
-                        ex.printStackTrace();
-                    }
-                    MediaPlayer mediaPlayer = new MediaPlayer(sound);
-                    mediaPlayer.play();
+                    BeepHelper.beep();
                 }
             });
             this.getItems().add(menuItem);

@@ -81,38 +81,33 @@ public class Landscape extends Observable {
         int y = flag.getyPos();
         switch (this.landscape[y][x]) {
             case EMPTY:
-                this.landscape[y][x] = Field.FLAG;
+                this.setField(y, x, Field.FLAG);
                 this.flags.add(flag);
                 break;
             case POLICE_OFFICER:
-                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
+                this.setField(y, x, Field.OFFICER_AND_FLAG);
                 this.flags.add(flag);
                 break;
             default:
                 throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann keine Flagge platziert werden!", y, x));
         }
-        this.setChanged();
-        this.notifyObservers();
     }
 
     public void addUnarmedTerrorist(int y, int x) {
         if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.ARMED_TERRORIST) {
-            this.landscape[y][x] = Field.UNARMED_TERRORIST;
+            this.setField(y, x, Field.UNARMED_TERRORIST);
+
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
-        this.setChanged();
-        this.notifyObservers();
     }
 
     public void addArmedTerrorist(int y, int x) {
         if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.UNARMED_TERRORIST) {
-            this.landscape[y][x] = Field.ARMED_TERRORIST;
+            this.setField(y, x, Field.ARMED_TERRORIST);
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
-        this.setChanged();
-        this.notifyObservers();
     }
 
     public void updatePoliceOfficer(PoliceOfficer policeOfficer) {
@@ -125,57 +120,43 @@ public class Landscape extends Observable {
         }
         this.setPoliceOfficer(policeOfficer);
         this.policeOfficer.setLandscape(this);
-        this.setChanged();
-        this.notifyObservers();
     }
 
-    private PoliceOfficer unsetPoliceOfficer() {
-        int y = this.policeOfficer.getyPos();
-        int x = this.policeOfficer.getxPos();
-
+    public void clearOriginPolice(Integer y, Integer x) {
         Field field = this.landscape[y][x];
-
         switch (field) {
             case OFFICER_AND_BASE:
+//                this.setField(y, x, Field.BASE);
                 this.landscape[y][x] = Field.BASE;
+                break;
             case OFFICER_AND_FLAG:
+//                this.setField(y, x, Field.FLAG);
                 this.landscape[y][x] = Field.FLAG;
+                break;
             case POLICE_OFFICER:
+//                this.setField(y, x, Field.EMPTY); Für Simulation nicht geeignet
                 this.landscape[y][x] = Field.EMPTY;
         }
-        this.setChanged();
-        this.notifyObservers();
-
-        return this.getPoliceOfficer();
     }
 
     public PoliceOfficer getPoliceOfficer() {
         return policeOfficer;
     }
 
-    private void setPoliceOfficer(PoliceOfficer policeOfficer) {
-        this.policeOfficer = policeOfficer;
-        int x = policeOfficer.getxPos();
-        int y = policeOfficer.getyPos();
-        switch (this.landscape[y][x]) {
+    public void setDestinationPolice(Integer y, Integer x) {
+        Field field = this.landscape[y][x];
+        this.getPoliceOfficer().setyPos(y);
+        this.getPoliceOfficer().setxPos(x);
+        switch (field) {
             case EMPTY:
-            case POLICE_OFFICER:
-                this.landscape[y][x] = Field.POLICE_OFFICER;
+                this.setField(y, x, Field.POLICE_OFFICER);
                 break;
             case FLAG:
-            case OFFICER_AND_FLAG:
-                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
+                this.setField(y, x, Field.OFFICER_AND_FLAG);
                 break;
             case BASE:
-            case OFFICER_AND_BASE:
-                this.landscape[y][x] = Field.OFFICER_AND_BASE;
-                break;
-            default:
-                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
-
+                this.setField(y, x, Field.OFFICER_AND_BASE);
         }
-        this.setChanged();
-        this.notifyObservers();
     }
 
     public void resize(int width, int height) {
@@ -276,52 +257,18 @@ public class Landscape extends Observable {
         return null;
     }
 
-    public void clearOriginPolice(Integer y, Integer x) {
-        Field field = this.landscape[y][x];
-        switch (field) {
-            case OFFICER_AND_BASE:
-                this.landscape[y][x] = Field.BASE;
-                break;
-            case OFFICER_AND_FLAG:
-                this.landscape[y][x] = Field.FLAG;
-                break;
-            case POLICE_OFFICER:
-                this.landscape[y][x] = Field.EMPTY;
-        }
-        this.setChanged();
-        this.notifyObservers();
-    }
-
-    public void setDestinationPolice(Integer y, Integer x) {
-        Field field = this.landscape[y][x];
-        this.getPoliceOfficer().setyPos(y);
-        this.getPoliceOfficer().setxPos(x);
-        switch (field) {
-            case EMPTY:
-                this.landscape[y][x] = Field.POLICE_OFFICER;
-                break;
-            case FLAG:
-                this.landscape[y][x] = Field.OFFICER_AND_FLAG;
-                break;
-            case BASE:
-                this.landscape[y][x] = Field.OFFICER_AND_BASE;
-        }
-        this.setChanged();
-        this.notifyObservers();
-    }
-
     public void clearOriginBase(Integer y, Integer x) {
         Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
+//                this.setField(y, x, Field.POLICE_OFFICER);
                 this.landscape[y][x] = Field.POLICE_OFFICER;
                 break;
             case BASE:
+//                this.setField(y, x, Field.EMPTY);
                 this.landscape[y][x] = Field.EMPTY;
                 break;
         }
-        this.setChanged();
-        this.notifyObservers();
     }
 
     public void setDestinationBase(Integer y, Integer x) {
@@ -330,14 +277,54 @@ public class Landscape extends Observable {
         this.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
-                this.landscape[y][x] = Field.BASE;
+                this.setField(y, x, Field.BASE);
                 break;
             case POLICE_OFFICER:
-                this.landscape[y][x] = Field.OFFICER_AND_BASE;
+                this.setField(y, x, Field.OFFICER_AND_BASE);
                 break;
         }
-        this.setChanged();
-        this.notifyObservers();
+    }
+
+    private PoliceOfficer unsetPoliceOfficer() {
+        int y = this.policeOfficer.getyPos();
+        int x = this.policeOfficer.getxPos();
+
+        Field field = this.landscape[y][x];
+
+        switch (field) {
+            case OFFICER_AND_BASE:
+                this.setField(y, x, Field.BASE);
+            case OFFICER_AND_FLAG:
+                this.setField(y, x, Field.FLAG);
+            case POLICE_OFFICER:
+//                this.setField(y, x, Field.EMPTY);
+                this.landscape[y][x] = Field.EMPTY;
+        }
+
+        return this.getPoliceOfficer();
+    }
+
+    private void setPoliceOfficer(PoliceOfficer policeOfficer) {
+        this.policeOfficer = policeOfficer;
+        int x = policeOfficer.getxPos();
+        int y = policeOfficer.getyPos();
+        switch (this.landscape[y][x]) {
+            case EMPTY:
+            case POLICE_OFFICER:
+                this.setField(y, x, Field.POLICE_OFFICER);
+                break;
+            case FLAG:
+            case OFFICER_AND_FLAG:
+                this.setField(y, x, Field.OFFICER_AND_FLAG);
+                break;
+            case BASE:
+            case OFFICER_AND_BASE:
+                this.setField(y, x, Field.OFFICER_AND_BASE);
+                break;
+            default:
+                throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
+
+        }
     }
 
     public void setField(int y, int x, Field field) {
