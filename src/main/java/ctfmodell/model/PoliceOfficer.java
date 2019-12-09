@@ -133,7 +133,10 @@ public class PoliceOfficer extends Observable {
     }
 
     private void setActualField(Field field) {
-        this.landscape.setField(this.yPos, this.xPos, field);
+        if(field != Field.EMPTY)
+            this.landscape.setField(this.yPos, this.xPos, field);
+        else
+            this.landscape.getLandscape()[this.yPos][this.xPos] = Field.EMPTY;
     }
 
     public void attack() {
@@ -168,7 +171,12 @@ public class PoliceOfficer extends Observable {
 
     private void checkEndAndClearForward(int y, int x) {
         if (this.isNotEndOfField(y, x)) {
-            this.landscape.setField(y, x, Field.EMPTY);
+            //this.landscape.setField(y, x, Field.EMPTY);
+            if(this.landscape.getLandscape()[y][x] == Field.UNARMED_TERRORIST) {
+                this.landscape.setField(y, x, Field.EMPTY);
+            } else {
+                this.landscape.getLandscape()[y][x] = Field.EMPTY;
+            }
         } else {
             System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x));

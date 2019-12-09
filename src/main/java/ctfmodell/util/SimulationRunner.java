@@ -34,11 +34,13 @@ public class SimulationRunner implements Runnable, Observer {
         try {
             landscape.getPoliceOfficer().main();
             this.running = false;
+            this.paused = false;
         } catch (Exception e) {
             System.err.println(e.getMessage());
             BeepHelper.beep();
         }
         this.running = false;
+        this.paused = false;
     }
 
 
@@ -71,6 +73,9 @@ public class SimulationRunner implements Runnable, Observer {
 
     public void stop() {
         running = false;
+        synchronized (pauseLock) {
+            this.pauseLock.notify();
+        }
     }
 
     public void pause() {

@@ -1,4 +1,5 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                                                      - Spielbedingung bei Reflection einbauen
-                                                      - Spielbedingung in Simulation einbauen
-                                                      - Irgendwie setField = EMPTY aus "Animation" entfernen
+- [y][x] = EMPTY in setField auslagern
+- synchronized in den Models
+- Spielbedingung bei Reflection einbauen
+- Spielbedingung in Simulation einbauen

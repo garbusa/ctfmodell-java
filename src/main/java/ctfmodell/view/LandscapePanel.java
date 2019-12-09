@@ -123,16 +123,18 @@ public class LandscapePanel extends Region implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (!(arg instanceof PoliceOfficer))
+        if (!(arg instanceof PoliceOfficer)) {
             this.landscape = (Landscape) o;
-            Platform.runLater(() -> {
-                this.iconCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
-                this.fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
-                this.draw();
-                this.getChildren().clear();
-                this.getChildren().add(fieldCanvas);
-                this.getChildren().add(iconCanvas);
-            });
+        }
+
+        Platform.runLater(() -> {
+            this.iconCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+            this.fieldCanvas = new Canvas(getCanvasWidth(), getCanvasHeight());
+            this.draw();
+            this.getChildren().clear();
+            this.getChildren().add(fieldCanvas);
+            this.getChildren().add(iconCanvas);
+        });
 
     }
 }

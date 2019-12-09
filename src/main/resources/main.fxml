@@ -214,7 +214,7 @@
                         <Tooltip text="Simulation stoppen" />
                      </tooltip></Button>
                   <Separator layoutX="800.0" layoutY="20.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Slider fx:id="slider" max="1000.0" showTickLabels="true">
+                  <Slider fx:id="slider" max="2000.0" showTickLabels="true">
                      <tooltip>
                         <Tooltip text="Geschwindigkeit der Simulation anpassen" />
                      </tooltip></Slider>

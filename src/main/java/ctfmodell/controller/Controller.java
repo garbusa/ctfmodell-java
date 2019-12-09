@@ -232,10 +232,10 @@ public class Controller {
     }
 
     /**
-     * Code aus CompileWithDiagnostics.java
+     * Inspiriert aus CompileWithDiagnostics.java
      */
     private void compile(boolean withAlert) {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         this.saveCode();
 
@@ -326,7 +326,7 @@ public class Controller {
 
     @FXML
     public void saveCode() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         String prefix = PREFIX_1 + editorClass + PREFIX_2;
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
@@ -364,7 +364,7 @@ public class Controller {
 
     @FXML
     private void hasFlags() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         if (this.landscape == null) return;
         if (this.landscape.getPoliceOfficer() == null) return;
@@ -374,13 +374,13 @@ public class Controller {
 
     @FXML
     private void turnLeft() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
         this.landscape.getPoliceOfficer().turnLeft();
     }
 
     @FXML
     private void forward() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         try {
             this.landscape.getPoliceOfficer().forward();
@@ -391,7 +391,7 @@ public class Controller {
 
     @FXML
     private void pick() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         try {
             this.landscape.getPoliceOfficer().pick();
@@ -402,7 +402,7 @@ public class Controller {
 
     @FXML
     private void drop() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         try {
             this.landscape.getPoliceOfficer().drop();
@@ -429,7 +429,7 @@ public class Controller {
 
     @FXML
     private void attack() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         try {
             this.landscape.getPoliceOfficer().attack();
@@ -511,7 +511,7 @@ public class Controller {
 
     @FXML
     private void territoriumGroup() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         disableStates(territoriumGroup);
         RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
@@ -546,7 +546,7 @@ public class Controller {
     }
 
     private void disableStates(ToggleGroup addingGroup) {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         this.moveAvatarEnabled = false;
         this.moveBaseEnabled = false;
@@ -558,7 +558,7 @@ public class Controller {
     }
 
     private void resize() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         resizeMenu.setSelected(true);
 
@@ -581,7 +581,7 @@ public class Controller {
 
     @FXML
     private void addingGroup() {
-        if (isSimulationRunning()) return;
+        //if (isSimulationRunning()) return;
 
         disableStates(addingGroup);
         ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
