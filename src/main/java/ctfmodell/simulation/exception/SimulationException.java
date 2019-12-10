@@ -1,4 +1,4 @@
-package ctfmodell.util.exception;
+package ctfmodell.simulation.exception;
 
 public class SimulationException extends RuntimeException {
 

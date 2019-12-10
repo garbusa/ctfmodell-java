@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 public class Main extends Application {
 
     public static final String PROGAM_FOLDER = "programs";
+    public static final String LANDSCAPE_FOLDER = "landscapes";
     public static final String PREFIX_1 = "public class ";
     public static final String PREFIX_2 = " extends ctfmodell.model.PoliceOfficer {\n\npublic ";
     public static final String POSTFIX = "\n\n}";
@@ -39,6 +40,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         createProgramFolder();
+        createSerializationFolder();
         String defaultCode = loadDefaultOfficerCode();
         createAndStartSimulation(primaryStage, "DefaultOfficer", defaultCode);
     }
@@ -60,6 +62,22 @@ public class Main extends Application {
         }
 
     }
+
+    private static void createSerializationFolder() {
+        Path directory = Paths.get(LANDSCAPE_FOLDER);
+
+        if (!Files.exists(directory)) {
+            try {
+                Files.createDirectory(directory);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+        } else {
+            System.err.println("LANDSCAPE_FOLDER-Verzeichnis existiert schon!");
+        }
+
+    }
+
 
     private static String loadDefaultOfficerCode() {
         Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");

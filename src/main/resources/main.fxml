@@ -43,21 +43,21 @@
                           <items>
                             <MenuItem mnemonicParsing="false" text="XML" />
                               <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren" onAction="#saveLandscape"/>
                           </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Laden">
                            <items>
                               <MenuItem mnemonicParsing="false" text="XML" />
                               <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren" onAction="#loadLandscape"/>
                            </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Als Bild speichern">
                            <items>
                               <MenuItem mnemonicParsing="false" text="XML" />
                               <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren" />
+                              <MenuItem mnemonicParsing="false" text="Serialisieren"/>
                            </items>
                         </Menu>
                     <MenuItem mnemonicParsing="false" text="Drucken" />
@@ -103,15 +103,15 @@
                 </Menu>
                   <Menu mnemonicParsing="false" text="Simulation">
                      <items>
-                        <MenuItem fx:id="playItem" mnemonicParsing="false" text="Start/Fortsetzen">
+                        <MenuItem fx:id="playItem" mnemonicParsing="false" text="Start/Fortsetzen" onAction="#play">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="F11" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
-                        <MenuItem fx:id="pauseItem" mnemonicParsing="false" text="Pause">
+                        <MenuItem fx:id="pauseItem" mnemonicParsing="false" text="Pause" onAction="#pause">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="F12" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
-                        <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" />
+                        <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" onAction="#stop"/>
                      </items>
                   </Menu>
               </menus>

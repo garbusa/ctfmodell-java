@@ -3,8 +3,8 @@ package ctfmodell.view;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.annotation.Invisible;
-import ctfmodell.util.BeepHelper;
-import ctfmodell.util.OfficerMethod;
+import ctfmodell.provider.SoundProvider;
+import ctfmodell.provider.MethodProvider;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
@@ -19,8 +19,8 @@ import java.util.List;
 @SuppressWarnings("ConstantConditions")
 public class OfficerContextMenu extends ContextMenu {
 
-    private List<OfficerMethod> basicMethods;
-    private List<OfficerMethod> newMethods;
+    private List<MethodProvider> basicMethods;
+    private List<MethodProvider> newMethods;
     private Landscape landscape;
 
     public OfficerContextMenu(String officerType, Landscape landscape) {
@@ -39,7 +39,7 @@ public class OfficerContextMenu extends ContextMenu {
             Class<?> officerClass = Class.forName("ctfmodell.model.PoliceOfficer");
             Method[] methods = officerClass.getDeclaredMethods();
 
-            reflectAndAddMethods(methods, OfficerMethod.Type.BASIC, officerType);
+            reflectAndAddMethods(methods, MethodProvider.Type.BASIC, officerType);
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -49,17 +49,17 @@ public class OfficerContextMenu extends ContextMenu {
     private void getNewMethods(String officerType) {
         PoliceOfficer officer = this.landscape.getPoliceOfficer();
             Method[] methods = officer.getClass().getDeclaredMethods();
-            reflectAndAddMethods(methods, OfficerMethod.Type.NEW, officerType);
+            reflectAndAddMethods(methods, MethodProvider.Type.NEW, officerType);
     }
 
-    private void reflectAndAddMethods(Method[] methods, OfficerMethod.Type type, String officerType) {
-        OfficerMethod methodToAdd;
+    private void reflectAndAddMethods(Method[] methods, MethodProvider.Type type, String officerType) {
+        MethodProvider methodToAdd;
         for (Method method : methods) {
             List<Annotation> annotations = Arrays.asList(method.getAnnotations());
             String modifier = Modifier.toString(method.getModifiers());
             if (annotations.size() == 1 && annotations.get(0) instanceof Invisible
                     || !modifier.equals("public")) continue;
-            methodToAdd = new OfficerMethod();
+            methodToAdd = new MethodProvider();
             methodToAdd.setMethodType(method.getReturnType().toString());
             methodToAdd.setMethodName(method.getName());
             Class[] paramTypes = method.getParameterTypes();
@@ -70,7 +70,7 @@ public class OfficerContextMenu extends ContextMenu {
                 methodToAdd.getParamTypes().add(paramType);
             }
 
-            if (type == OfficerMethod.Type.BASIC) {
+            if (type == MethodProvider.Type.BASIC) {
                 basicMethods.add(methodToAdd);
             } else {
                 newMethods.add(methodToAdd);
@@ -78,29 +78,29 @@ public class OfficerContextMenu extends ContextMenu {
 
         }
 
-        if (type == OfficerMethod.Type.BASIC) {
-            addMethodsWithEvent(OfficerMethod.Type.BASIC, officerType);
+        if (type == MethodProvider.Type.BASIC) {
+            addMethodsWithEvent(MethodProvider.Type.BASIC, officerType);
         } else {
-            addMethodsWithEvent(OfficerMethod.Type.NEW, officerType);
+            addMethodsWithEvent(MethodProvider.Type.NEW, officerType);
         }
 
     }
 
-    private void addMethodsWithEvent(OfficerMethod.Type type, String officerType) {
+    private void addMethodsWithEvent(MethodProvider.Type type, String officerType) {
         MenuItem menuItem;
-        List<OfficerMethod> list = (type == OfficerMethod.Type.BASIC) ? this.basicMethods : this.newMethods;
+        List<MethodProvider> list = (type == MethodProvider.Type.BASIC) ? this.basicMethods : this.newMethods;
         PoliceOfficer officer = this.landscape.getPoliceOfficer();
 
         Method methodToExecute = null;
-        for (OfficerMethod m : list) {
+        for (MethodProvider m : list) {
             menuItem = new MenuItem(m.toString());
 
             try {
-                if (type == OfficerMethod.Type.BASIC && !m.hasParam() && !officerType.equals("ctfmodell.model.PoliceOfficer")) {
+                if (type == MethodProvider.Type.BASIC && !m.hasParam() && !officerType.equals("ctfmodell.model.PoliceOfficer")) {
                     methodToExecute = officer.getClass().getSuperclass().getDeclaredMethod(m.getMethodName());
-                } else if (type == OfficerMethod.Type.BASIC && !m.hasParam() && officerType.equals("ctfmodell.model.PoliceOfficer")) {
+                } else if (type == MethodProvider.Type.BASIC && !m.hasParam() && officerType.equals("ctfmodell.model.PoliceOfficer")) {
                     methodToExecute = officer.getClass().getDeclaredMethod(m.getMethodName());
-                } else if (type == OfficerMethod.Type.NEW && !m.hasParam()) {
+                } else if (type == MethodProvider.Type.NEW && !m.hasParam()) {
                     methodToExecute = officer.getClass().getDeclaredMethod(m.getMethodName());
                 } else if (m.hasParam()) {
                     menuItem.setDisable(true);
@@ -120,7 +120,7 @@ public class OfficerContextMenu extends ContextMenu {
                     finalMethodToExecute.invoke(this.landscape.getPoliceOfficer());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     System.err.println(e.getCause().getMessage());
-                    BeepHelper.beep();
+                    SoundProvider.beep();
                 }
             });
             this.getItems().add(menuItem);

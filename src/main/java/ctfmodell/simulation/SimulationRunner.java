@@ -1,4 +1,4 @@
-package ctfmodell.util;
+package ctfmodell.simulation;
 
 /*
   Ich war zum Thread-Unterricht leider nicht da, musste deshalb recherchieren
@@ -7,7 +7,8 @@ package ctfmodell.util;
 
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
-import ctfmodell.util.exception.SimulationException;
+import ctfmodell.provider.SoundProvider;
+import ctfmodell.simulation.exception.SimulationException;
 import javafx.application.Platform;
 
 import java.util.Observable;
@@ -20,6 +21,10 @@ public class SimulationRunner implements Runnable, Observer {
     public volatile boolean paused = false;
     private double speed;
     private Landscape landscape;
+
+    public void setLandscape(Landscape landscape) {
+        this.landscape = landscape;
+    }
 
     public SimulationRunner(double speed, Landscape landscape) {
         this.speed = speed;
@@ -37,7 +42,7 @@ public class SimulationRunner implements Runnable, Observer {
             this.paused = false;
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            BeepHelper.beep();
+            SoundProvider.beep();
         }
         this.running = false;
         this.paused = false;

@@ -1,9 +1,9 @@
-package ctfmodell.util;
+package ctfmodell.provider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OfficerMethod {
+public class MethodProvider {
 
     public enum Type {
         BASIC,
@@ -13,7 +13,7 @@ public class OfficerMethod {
     private String methodType;
     private String methodName;
     private List<String> paramTypes;
-    public OfficerMethod() {
+    public MethodProvider() {
         paramTypes = new ArrayList<>();
     }
 

@@ -1,4 +1,4 @@
-package ctfmodell.util;
+package ctfmodell.provider;
 
 import ctfmodell.Main;
 import javafx.scene.media.Media;
@@ -7,7 +7,7 @@ import javafx.scene.media.MediaPlayer;
 import java.io.File;
 import java.net.URISyntaxException;
 
-public class BeepHelper {
+public class SoundProvider {
 
     public static void beep() {
         Media sound = null;

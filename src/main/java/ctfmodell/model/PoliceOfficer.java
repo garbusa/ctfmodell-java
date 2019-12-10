@@ -268,19 +268,23 @@ public class PoliceOfficer extends Observable {
         }
     }
 
-    int getxPos() {
+    @Invisible
+    public int getxPos() {
         return xPos;
     }
 
-    int getyPos() {
+    @Invisible
+    public int getyPos() {
         return yPos;
     }
 
-    void setyPos(int yPos) {
+    @Invisible
+    public void setyPos(int yPos) {
         this.yPos = yPos;
     }
 
-    void setxPos(int xPos) {
+    @Invisible
+    public void setxPos(int xPos) {
         this.xPos = xPos;
     }
 
@@ -289,7 +293,7 @@ public class PoliceOfficer extends Observable {
         return this.direction;
     }
 
-    void setDirection(Direction direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 
@@ -297,11 +301,11 @@ public class PoliceOfficer extends Observable {
         return numberOfFlags;
     }
 
-    void setNumberOfFlags(int numberOfFlags) {
+    public void setNumberOfFlags(int numberOfFlags) {
         this.numberOfFlags = numberOfFlags;
     }
 
-    void setLandscape(Landscape landscape) {
+    public void setLandscape(Landscape landscape) {
         this.landscape = landscape;
     }
 }

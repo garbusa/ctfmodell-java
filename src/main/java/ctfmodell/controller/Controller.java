@@ -6,13 +6,15 @@ import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.*;
+import ctfmodell.provider.DialogProvider;
+import ctfmodell.serialization.LandscapeSerialization;
+import ctfmodell.simulation.SimulationRunner;
 import ctfmodell.util.Coordinates;
-import ctfmodell.util.DialogProvider;
 import ctfmodell.util.Helper;
-import ctfmodell.util.SimulationRunner;
 import ctfmodell.view.LandscapePanel;
 import ctfmodell.view.OfficerContextMenu;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -61,7 +63,7 @@ public class Controller {
     @FXML
     Slider slider;
 
-    private Landscape landscape;
+    public Landscape landscape;
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
     private Field itemToAdd = Field.OUT_OF_FIELD;
@@ -235,8 +237,6 @@ public class Controller {
      * Inspiriert aus CompileWithDiagnostics.java
      */
     private void compile(boolean withAlert) {
-        //if (isSimulationRunning()) return;
-
         this.saveCode();
 
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
@@ -303,20 +303,17 @@ public class Controller {
         return cl;
     }
 
-    private boolean isSimulationRunning() {
-        if (runner.running) {
-            System.err.println("Simulation läuft gerade!");
-            return true;
-        }
-
-        return false;
-    }
-
     private void deleteAndUpdateObserver() {
         if (this.landscape.getPoliceOfficer() != null) {
             this.landscape.getPoliceOfficer().deleteObservers();
             this.landscape.getPoliceOfficer().addObserver(landscapePanel);
+            this.landscape.getPoliceOfficer().addObserver(this.runner);
         }
+
+        this.landscape.deleteObservers();
+        this.landscape.addObserver(landscapePanel);
+        this.landscape.addObserver(this.runner);
+        this.runner.setLandscape(this.landscape);
     }
 
     @FXML
@@ -326,8 +323,6 @@ public class Controller {
 
     @FXML
     public void saveCode() {
-        //if (isSimulationRunning()) return;
-
         String prefix = PREFIX_1 + editorClass + PREFIX_2;
         Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
 
@@ -364,8 +359,6 @@ public class Controller {
 
     @FXML
     private void hasFlags() {
-        //if (isSimulationRunning()) return;
-
         if (this.landscape == null) return;
         if (this.landscape.getPoliceOfficer() == null) return;
         int count = this.landscape.getPoliceOfficer().getNumberOfFlags();
@@ -374,14 +367,11 @@ public class Controller {
 
     @FXML
     private void turnLeft() {
-        //if (isSimulationRunning()) return;
         this.landscape.getPoliceOfficer().turnLeft();
     }
 
     @FXML
     private void forward() {
-        //if (isSimulationRunning()) return;
-
         try {
             this.landscape.getPoliceOfficer().forward();
         } catch (MoveException ex) {
@@ -391,8 +381,6 @@ public class Controller {
 
     @FXML
     private void pick() {
-        //if (isSimulationRunning()) return;
-
         try {
             this.landscape.getPoliceOfficer().pick();
         } catch (FlagException ex) {
@@ -402,8 +390,6 @@ public class Controller {
 
     @FXML
     private void drop() {
-        //if (isSimulationRunning()) return;
-
         try {
             this.landscape.getPoliceOfficer().drop();
             if (this.landscape.getPoliceOfficer().hasWon()) {
@@ -429,8 +415,6 @@ public class Controller {
 
     @FXML
     private void attack() {
-        //if (isSimulationRunning()) return;
-
         try {
             this.landscape.getPoliceOfficer().attack();
         } catch (PoliceException ex) {
@@ -511,8 +495,6 @@ public class Controller {
 
     @FXML
     private void territoriumGroup() {
-        //if (isSimulationRunning()) return;
-
         disableStates(territoriumGroup);
         RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
 
@@ -558,8 +540,6 @@ public class Controller {
     }
 
     private void resize() {
-        //if (isSimulationRunning()) return;
-
         resizeMenu.setSelected(true);
 
         Dialog<Pair<String, String>> dialog = DialogProvider.getSizeDialog();
@@ -581,8 +561,6 @@ public class Controller {
 
     @FXML
     private void addingGroup() {
-        //if (isSimulationRunning()) return;
-
         disableStates(addingGroup);
         ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
 
@@ -613,5 +591,44 @@ public class Controller {
             fieldMenu.setSelected(true);
             this.deleteEnabled = true;
         }
+    }
+
+    @FXML
+    public void loadLandscape(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(LANDSCAPE_FOLDER).toFile());
+        File landscapeFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
+
+        if (landscapeFile == null) {
+            System.err.println("Keine Datei ausgewählt!");
+            return;
+        }
+
+        String file = landscapeFile.getName();
+        String fileName = (file.contains(".landscape")) ? file.split("\\.")[0] : null;
+
+        if (fileName != null) {
+            LandscapeSerialization.deserialize(this, landscapeFile, landscapePanel);
+        } else {
+            System.err.println("Die ausgewählte Datei ist keine gültige Landscape-Datei!");
+        }
+
+
+    }
+
+    @FXML
+    public void saveLandscape(ActionEvent event) {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            Path directory = Paths.get(LANDSCAPE_FOLDER, name + ".landscape");
+            if (!Files.exists(directory)) {
+                LandscapeSerialization.serialize(this.landscape, directory);
+            } else {
+                System.err.println(name + ".landscape existiert schon. Wähle einen anderen Namen aus!");
+            }
+        });
+
     }
 }

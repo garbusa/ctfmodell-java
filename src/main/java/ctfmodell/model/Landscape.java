@@ -1,25 +1,67 @@
 package ctfmodell.model;
 
+import ctfmodell.model.enums.Direction;
 import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.LandscapeException;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.GraphicSize;
 import ctfmodell.util.Rectangle;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
-public class Landscape extends Observable {
+public class Landscape extends Observable implements Serializable {
 
-    private PoliceOfficer policeOfficer;
+    private transient PoliceOfficer policeOfficer;
     private int height;
     private int width;
     private int baseX;
     private int baseY;
     private Field[][] landscape;
-    private List<Flag> flags;
-    private Rectangle[][] landscapeCoordinates;
+    private transient List<Flag> flags;
+    private transient Rectangle[][] landscapeCoordinates;
+
+    /**
+     * Für Serialisierung
+     */
+    private int officerXPos;
+    private int officerYPos;
+    private Direction direction;
+    private int numberOfFlags;
+
+    public int getOfficerXPos() {
+        return officerXPos;
+    }
+
+    public void setOfficerXPos(int officerXPos) {
+        this.officerXPos = officerXPos;
+    }
+
+    public int getOfficerYPos() {
+        return officerYPos;
+    }
+
+    public void setOfficerYPos(int officerYPos) {
+        this.officerYPos = officerYPos;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    public int getNumberOfFlags() {
+        return numberOfFlags;
+    }
+
+    public void setNumberOfFlags(int numberOfFlags) {
+        this.numberOfFlags = numberOfFlags;
+    }
 
     public Landscape() {
         this.height = 10;
@@ -205,7 +247,7 @@ public class Landscape extends Observable {
         this.landscape = resizedLandscape;
         this.regeneratePixelLandscape();
         this.setChanged();
-        this.notifyObservers();
+        this.notifyObservers(this);
     }
 
     private boolean hasPoliceOfficerOnLandscape(Field[][] landscape) {
@@ -330,7 +372,7 @@ public class Landscape extends Observable {
     public void setField(int y, int x, Field field) {
         this.landscape[y][x] = field;
         this.setChanged();
-        this.notifyObservers();
+        this.notifyObservers(this);
     }
 
     public Field getField(int y, int x) {
@@ -353,4 +395,27 @@ public class Landscape extends Observable {
     void setFlags(List<Flag> flags) {
         this.flags = flags;
     }
+
+    public void reloadAfterDeserialization(PoliceOfficer policeOfficer) {
+        this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
+        this.flags = new ArrayList<>();
+
+        this.setPoliceOfficer(policeOfficer);
+        this.policeOfficer.setLandscape(this);
+        this.regeneratePixelLandscape();
+
+        this.flags.clear();
+        for (int y = 0; y < this.landscape.length; y++) {
+            for(int x = 0; x < this.landscape[0].length; x++) {
+                if(this.getField(y, x) == Field.FLAG || this.getField(y, x) == Field.OFFICER_AND_FLAG) {
+                    Flag flag = new Flag(x, y);
+                    this.flags.add(flag);
+                }
+            }
+        }
+
+        this.setChanged();
+        this.notifyObservers(this);
+    }
+
 }
