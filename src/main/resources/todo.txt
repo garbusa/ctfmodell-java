@@ -1,5 +1,3 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- [y][x] = EMPTY in setField auslagern
 - synchronized in den Models
-- Spielbedingung bei Reflection einbauen
-- Spielbedingung in Simulation einbauen
+- flagge entfernen exception

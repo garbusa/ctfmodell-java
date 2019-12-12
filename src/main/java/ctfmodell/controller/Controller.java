@@ -68,7 +68,6 @@ public class Controller {
     private boolean moveBaseEnabled = false;
     private Field itemToAdd = Field.OUT_OF_FIELD;
     private Field itemToDrag = Field.OUT_OF_FIELD;
-    private boolean deleteEnabled = false;
     private boolean dragged;
     private LandscapePanel landscapePanel;
     private String editorClass;
@@ -141,12 +140,12 @@ public class Controller {
         public void handle(MouseEvent mouseEvent) {
             int originX = (int) Math.floor(mouseEvent.getX() - 1);
             int originY = (int) Math.floor(mouseEvent.getY() - 1);
-            if (!deleteEnabled && itemToAdd == Field.OUT_OF_FIELD) return;
+            if (!landscape.isDeleteEnabled() && itemToAdd == Field.OUT_OF_FIELD) return;
             originFieldYX = landscape.getFieldByCoordinates(originY, originX);
             System.out.println("(Item Add) Clicked Coordinates: " + originY + "-" + originX);
             if (originFieldYX == null) return;
 
-            if (deleteEnabled) {
+            if (landscape.isDeleteEnabled()) {
                 Field field = landscape.getField(originFieldYX.getY(), originFieldYX.getX());
                 switch (field) {
                     case BASE:
@@ -157,12 +156,15 @@ public class Controller {
                         System.err.println("Der Akteur kann nicht gelöscht werden.");
                         break;
                     case FLAG:
+                        landscape.deleteFlag(originFieldYX.getY(), originFieldYX.getX());
+                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY);
+                        break;
                     case UNARMED_TERRORIST:
                     case ARMED_TERRORIST:
                         landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY);
                         break;
                     case OFFICER_AND_FLAG:
-                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.FLAG);
+                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.POLICE_OFFICER);
                         break;
                 }
             } else if (itemToAdd != Field.OUT_OF_FIELD) {
@@ -392,9 +394,6 @@ public class Controller {
     private void drop() {
         try {
             this.landscape.getPoliceOfficer().drop();
-            if (this.landscape.getPoliceOfficer().hasWon()) {
-                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Mission", "Mission", "Mission erfüllt!");
-            }
         } catch (FlagException | BaseException ex) {
             System.err.println(ex.getMessage());
         }
@@ -465,7 +464,7 @@ public class Controller {
         File simulationToOpen = fileChooser.showOpenDialog(pane.getScene().getWindow());
 
         if (simulationToOpen == null) {
-            System.err.println("Keine Datei ausgewählt!");
+            System.err.println("Du musst eine Officer-Klasse (.java) auswählen!");
             return;
         }
 
@@ -523,7 +522,7 @@ public class Controller {
             this.itemToAdd = Field.ARMED_TERRORIST;
         } else if (str.contains("fieldMenu")) {
             deleteButton.setSelected(true);
-            this.deleteEnabled = true;
+            this.landscape.setDeleteEnabled(true);
         }
     }
 
@@ -532,7 +531,7 @@ public class Controller {
 
         this.moveAvatarEnabled = false;
         this.moveBaseEnabled = false;
-        this.deleteEnabled = false;
+        this.landscape.setDeleteEnabled(false);
         this.dragged = false;
         this.itemToAdd = Field.OUT_OF_FIELD;
         this.itemToDrag = Field.OUT_OF_FIELD;
@@ -589,7 +588,7 @@ public class Controller {
             this.itemToAdd = Field.ARMED_TERRORIST;
         } else if (str.contains("deleteButton")) {
             fieldMenu.setSelected(true);
-            this.deleteEnabled = true;
+            this.landscape.setDeleteEnabled(true);
         }
     }
 

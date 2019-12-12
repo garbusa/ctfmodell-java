@@ -6,8 +6,10 @@ import ctfmodell.model.exception.LandscapeException;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.GraphicSize;
 import ctfmodell.util.Rectangle;
+import javafx.application.Platform;
 
 import java.io.Serializable;
+import java.lang.management.PlatformLoggingMXBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -23,6 +25,14 @@ public class Landscape extends Observable implements Serializable {
     private transient List<Flag> flags;
     private transient Rectangle[][] landscapeCoordinates;
 
+    public void deleteFlag(int y, int x) {
+            for (Flag flag : flags) {
+                if(flag.getyPos() == y && flag.getxPos() == x) {
+                    this.flags.remove(flag);
+                }
+            }
+    }
+
     /**
      * Für Serialisierung
      */
@@ -30,6 +40,16 @@ public class Landscape extends Observable implements Serializable {
     private int officerYPos;
     private Direction direction;
     private int numberOfFlags;
+
+    private boolean deleteEnabled = false;
+
+    public boolean isDeleteEnabled() {
+        return deleteEnabled;
+    }
+
+    public void setDeleteEnabled(boolean deleteEnabled) {
+        this.deleteEnabled = deleteEnabled;
+    }
 
     public int getOfficerXPos() {
         return officerXPos;
@@ -168,16 +188,13 @@ public class Landscape extends Observable implements Serializable {
         Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
-//                this.setField(y, x, Field.BASE);
-                this.landscape[y][x] = Field.BASE;
+                this.setField(y, x, Field.BASE);
                 break;
             case OFFICER_AND_FLAG:
-//                this.setField(y, x, Field.FLAG);
-                this.landscape[y][x] = Field.FLAG;
+                this.setField(y, x, Field.FLAG);
                 break;
             case POLICE_OFFICER:
-//                this.setField(y, x, Field.EMPTY); Für Simulation nicht geeignet
-                this.landscape[y][x] = Field.EMPTY;
+                this.setField(y, x, Field.EMPTY);
         }
     }
 
@@ -202,50 +219,52 @@ public class Landscape extends Observable implements Serializable {
     }
 
     public void resize(int width, int height) {
-        if (this.landscape == null)
-            throw new LandscapeException("Du kannst nicht die Größe einer nicht existierenden Landschaft verändern!");
-        if (width < 2 || height < 2)
-            throw new LandscapeException("Eine neue Landschaft muss mindestens 2x2 groß sein!");
+        synchronized (this) {
+            if (this.landscape == null)
+                throw new LandscapeException("Du kannst nicht die Größe einer nicht existierenden Landschaft verändern!");
+            if (width < 2 || height < 2)
+                throw new LandscapeException("Eine neue Landschaft muss mindestens 2x2 groß sein!");
 
-        this.width = width;
-        this.height = height;
-        Field[][] resizedLandscape = new Field[height][width];
-        landscapeCoordinates = new Rectangle[height][width];
+            this.width = width;
+            this.height = height;
+            Field[][] resizedLandscape = new Field[height][width];
+            landscapeCoordinates = new Rectangle[height][width];
 
-        //Kopiere alle möglichen Felder von der alten zur neuen
-        for (int y = 0; y < resizedLandscape.length; y++) {
-            if (y >= this.landscape.length) break;
-            for (int x = 0; x < resizedLandscape[y].length; x++) {
-                if (x >= this.landscape[y].length) break;
-                resizedLandscape[y][x] = this.landscape[y][x];
-            }
-        }
-
-        for (int y = 0; y < resizedLandscape.length; y++) {
-            for (int x = 0; x < resizedLandscape[y].length; x++) {
-                if (resizedLandscape[y][x] == null) {
-                    resizedLandscape[y][x] = Field.EMPTY;
+            //Kopiere alle möglichen Felder von der alten zur neuen
+            for (int y = 0; y < resizedLandscape.length; y++) {
+                if (y >= this.landscape.length) break;
+                for (int x = 0; x < resizedLandscape[y].length; x++) {
+                    if (x >= this.landscape[y].length) break;
+                    resizedLandscape[y][x] = this.landscape[y][x];
                 }
             }
-        }
 
-        //Falls das vorherige Feld einen Akteur und oder eine Base hatte aber nicht zum neuen übernommen wurde,
-        //Füge Officer hinzu
-        if (hasPoliceOfficerOnLandscape(this.landscape) && !hasPoliceOfficerOnLandscape(resizedLandscape)) {
-            Field fieldToCheck = getFieldEnum(0, 0);
-            if (fieldToCheck == Field.BASE) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
-            else if (fieldToCheck == Field.FLAG) resizedLandscape[0][0] = Field.OFFICER_AND_FLAG;
-            else resizedLandscape[0][0] = Field.POLICE_OFFICER;
-        }
+            for (int y = 0; y < resizedLandscape.length; y++) {
+                for (int x = 0; x < resizedLandscape[y].length; x++) {
+                    if (resizedLandscape[y][x] == null) {
+                        resizedLandscape[y][x] = Field.EMPTY;
+                    }
+                }
+            }
 
-        if (hasBaseOnLandscape(this.landscape) && !hasBaseOnLandscape(resizedLandscape)) {
-            Field fieldToCheck = getFieldEnum(resizedLandscape.length, resizedLandscape[0].length);
-            if (fieldToCheck == Field.POLICE_OFFICER) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
-            else resizedLandscape[height - 1][width - 1] = Field.BASE;
-        }
+            //Falls das vorherige Feld einen Akteur und oder eine Base hatte aber nicht zum neuen übernommen wurde,
+            //Füge Officer hinzu
+            if (hasPoliceOfficerOnLandscape(this.landscape) && !hasPoliceOfficerOnLandscape(resizedLandscape)) {
+                Field fieldToCheck = getFieldEnum(0, 0);
+                if (fieldToCheck == Field.BASE) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
+                else if (fieldToCheck == Field.FLAG) resizedLandscape[0][0] = Field.OFFICER_AND_FLAG;
+                else resizedLandscape[0][0] = Field.POLICE_OFFICER;
+            }
 
-        this.landscape = resizedLandscape;
-        this.regeneratePixelLandscape();
+            if (hasBaseOnLandscape(this.landscape) && !hasBaseOnLandscape(resizedLandscape)) {
+                Field fieldToCheck = getFieldEnum(resizedLandscape.length, resizedLandscape[0].length);
+                if (fieldToCheck == Field.POLICE_OFFICER) resizedLandscape[0][0] = Field.OFFICER_AND_BASE;
+                else resizedLandscape[height - 1][width - 1] = Field.BASE;
+            }
+
+            this.landscape = resizedLandscape;
+            this.regeneratePixelLandscape();
+        }
         this.setChanged();
         this.notifyObservers(this);
     }
@@ -303,20 +322,16 @@ public class Landscape extends Observable implements Serializable {
         Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
-//                this.setField(y, x, Field.POLICE_OFFICER);
-                this.landscape[y][x] = Field.POLICE_OFFICER;
+                this.setField(y, x, Field.POLICE_OFFICER);
                 break;
             case BASE:
-//                this.setField(y, x, Field.EMPTY);
-                this.landscape[y][x] = Field.EMPTY;
+                this.setField(y, x, Field.EMPTY);
                 break;
         }
     }
 
     public void setDestinationBase(Integer y, Integer x) {
         Field field = this.landscape[y][x];
-        this.getPoliceOfficer().setyPos(y);
-        this.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
                 this.setField(y, x, Field.BASE);
@@ -339,8 +354,7 @@ public class Landscape extends Observable implements Serializable {
             case OFFICER_AND_FLAG:
                 this.setField(y, x, Field.FLAG);
             case POLICE_OFFICER:
-//                this.setField(y, x, Field.EMPTY);
-                this.landscape[y][x] = Field.EMPTY;
+                this.setField(y, x, Field.EMPTY);
         }
 
         return this.getPoliceOfficer();
@@ -370,9 +384,16 @@ public class Landscape extends Observable implements Serializable {
     }
 
     public void setField(int y, int x, Field field) {
-        this.landscape[y][x] = field;
-        this.setChanged();
-        this.notifyObservers(this);
+        boolean update = (field != Field.EMPTY);
+
+        synchronized (this) {
+            this.landscape[y][x] = field;
+        }
+
+        if (update || isDeleteEnabled()) {
+            this.setChanged();
+            this.notifyObservers(this);
+        }
     }
 
     public Field getField(int y, int x) {
@@ -397,23 +418,24 @@ public class Landscape extends Observable implements Serializable {
     }
 
     public void reloadAfterDeserialization(PoliceOfficer policeOfficer) {
-        this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
-        this.flags = new ArrayList<>();
+        synchronized (this) {
+            this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
+            this.flags = new ArrayList<>();
 
-        this.setPoliceOfficer(policeOfficer);
-        this.policeOfficer.setLandscape(this);
-        this.regeneratePixelLandscape();
+            this.setPoliceOfficer(policeOfficer);
+            this.policeOfficer.setLandscape(this);
+            this.regeneratePixelLandscape();
 
-        this.flags.clear();
-        for (int y = 0; y < this.landscape.length; y++) {
-            for(int x = 0; x < this.landscape[0].length; x++) {
-                if(this.getField(y, x) == Field.FLAG || this.getField(y, x) == Field.OFFICER_AND_FLAG) {
-                    Flag flag = new Flag(x, y);
-                    this.flags.add(flag);
+            this.flags.clear();
+            for (int y = 0; y < this.landscape.length; y++) {
+                for (int x = 0; x < this.landscape[0].length; x++) {
+                    if (this.getField(y, x) == Field.FLAG || this.getField(y, x) == Field.OFFICER_AND_FLAG) {
+                        Flag flag = new Flag(x, y);
+                        this.flags.add(flag);
+                    }
                 }
             }
         }
-
         this.setChanged();
         this.notifyObservers(this);
     }

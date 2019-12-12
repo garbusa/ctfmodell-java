@@ -4,6 +4,9 @@ import ctfmodell.model.annotation.Invisible;
 import ctfmodell.model.enums.Direction;
 import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.*;
+import ctfmodell.provider.DialogProvider;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 import java.util.List;
 import java.util.Observable;
@@ -136,7 +139,7 @@ public class PoliceOfficer extends Observable {
         if(field != Field.EMPTY)
             this.landscape.setField(this.yPos, this.xPos, field);
         else
-            this.landscape.getLandscape()[this.yPos][this.xPos] = Field.EMPTY;
+            this.landscape.setField(this.yPos, this.xPos, Field.EMPTY);
     }
 
     public void attack() {
@@ -175,7 +178,7 @@ public class PoliceOfficer extends Observable {
             if(this.landscape.getLandscape()[y][x] == Field.UNARMED_TERRORIST) {
                 this.landscape.setField(y, x, Field.EMPTY);
             } else {
-                this.landscape.getLandscape()[y][x] = Field.EMPTY;
+                this.landscape.setField(y, x, Field.EMPTY);
             }
         } else {
             System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
@@ -194,6 +197,9 @@ public class PoliceOfficer extends Observable {
         } else {
             this.numberOfFlags = 0;
             this.hasWon = true;
+            Platform.runLater(() -> {
+                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Mission", "Mission", "Du hast deine Mission erfüllt!");
+            });
         }
     }
 
@@ -227,21 +233,23 @@ public class PoliceOfficer extends Observable {
     }
 
     public void turnLeft() {
-        switch (this.direction) {
-            case NORTH:
-                this.direction = Direction.WEST;
-                break;
-            case WEST:
-                this.direction = Direction.SOUTH;
-                break;
-            case SOUTH:
-                this.direction = Direction.EAST;
-                break;
-            case EAST:
-                this.direction = Direction.NORTH;
-                break;
-            default:
-                break;
+        synchronized (this) {
+            switch (this.direction) {
+                case NORTH:
+                    this.direction = Direction.WEST;
+                    break;
+                case WEST:
+                    this.direction = Direction.SOUTH;
+                    break;
+                case SOUTH:
+                    this.direction = Direction.EAST;
+                    break;
+                case EAST:
+                    this.direction = Direction.NORTH;
+                    break;
+                default:
+                    break;
+            }
         }
         this.setChanged();
         this.notifyObservers(this);

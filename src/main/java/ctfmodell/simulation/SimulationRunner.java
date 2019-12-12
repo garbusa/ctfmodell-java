@@ -38,6 +38,9 @@ public class SimulationRunner implements Runnable, Observer {
         this.running = true;
         try {
             landscape.getPoliceOfficer().main();
+            if (landscape.getPoliceOfficer().hasWon()) {
+
+            }
             this.running = false;
             this.paused = false;
         } catch (Exception e) {
