@@ -1,3 +1,2 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 - synchronized in den Models
-- flagge entfernen exception

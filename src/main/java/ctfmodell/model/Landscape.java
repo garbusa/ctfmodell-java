@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import java.io.Serializable;
 import java.lang.management.PlatformLoggingMXBean;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 
@@ -26,11 +27,7 @@ public class Landscape extends Observable implements Serializable {
     private transient Rectangle[][] landscapeCoordinates;
 
     public void deleteFlag(int y, int x) {
-            for (Flag flag : flags) {
-                if(flag.getyPos() == y && flag.getxPos() == x) {
-                    this.flags.remove(flag);
-                }
-            }
+        flags.removeIf(flag -> flag.getyPos() == y && flag.getxPos() == x);
     }
 
     /**
