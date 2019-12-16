@@ -28,6 +28,7 @@ public class Main extends Application {
 
     public static final String PROGAM_FOLDER = "programs";
     public static final String LANDSCAPE_FOLDER = "landscapes";
+    public static final String XML_FOLDER = "xml";
     public static final String PREFIX_1 = "public class ";
     public static final String PREFIX_2 = " extends ctfmodell.model.PoliceOfficer {\n\npublic ";
     public static final String POSTFIX = "\n\n}";
@@ -41,6 +42,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         createProgramFolder();
         createSerializationFolder();
+        createXMLFolder();
         String defaultCode = loadDefaultOfficerCode();
         createAndStartSimulation(primaryStage, "DefaultOfficer", defaultCode);
     }
@@ -77,6 +79,22 @@ public class Main extends Application {
         }
 
     }
+
+    private static void createXMLFolder() {
+        Path directory = Paths.get(XML_FOLDER);
+
+        if (!Files.exists(directory)) {
+            try {
+                Files.createDirectory(directory);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+        } else {
+            System.err.println("XML-Verzeichnis existiert schon!");
+        }
+
+    }
+
 
 
     private static String loadDefaultOfficerCode() {

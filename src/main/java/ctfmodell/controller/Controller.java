@@ -8,6 +8,7 @@ import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.*;
 import ctfmodell.provider.DialogProvider;
 import ctfmodell.serialization.LandscapeSerialization;
+import ctfmodell.serialization.XMLSerialization;
 import ctfmodell.simulation.SimulationRunner;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.Helper;
@@ -629,5 +630,11 @@ public class Controller {
             }
         });
 
+    }
+
+    @FXML
+    public void saveXML(ActionEvent actionEvent) {
+        XMLSerialization serializator = new XMLSerialization();
+        serializator.save(null, "test");
     }
 }

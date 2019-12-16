@@ -41,7 +41,7 @@
                   <items>
                         <Menu mnemonicParsing="false" text="Speichern">
                           <items>
-                            <MenuItem mnemonicParsing="false" text="XML" />
+                            <MenuItem mnemonicParsing="false" text="XML" onAction="#saveXML"/>
                               <MenuItem mnemonicParsing="false" text="JAXB" />
                               <MenuItem mnemonicParsing="false" text="Serialisieren" onAction="#saveLandscape"/>
                           </items>
