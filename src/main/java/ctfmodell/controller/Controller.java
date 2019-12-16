@@ -43,28 +43,21 @@ import static ctfmodell.Main.*;
 
 public class Controller {
 
+    public Landscape landscape;
     @FXML
     BorderPane pane;
-
     @FXML
     MenuItem newItem;
-
     @FXML
     RadioMenuItem resizeMenu, avatarMenu, baseMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
-
     @FXML
     ToggleButton sizeButton, avatarButton, baseButton, flagButton, terrorUnarmedButton, terrorArmedButton, deleteButton;
-
     @FXML
     ToggleGroup territoriumGroup, addingGroup;
-
     @FXML
     TextArea codeEditor;
-
     @FXML
     Slider slider;
-
-    public Landscape landscape;
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
     private Field itemToAdd = Field.OUT_OF_FIELD;
@@ -158,14 +151,14 @@ public class Controller {
                         break;
                     case FLAG:
                         landscape.deleteFlag(originFieldYX.getY(), originFieldYX.getX());
-                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY);
+                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY, false);
                         break;
                     case UNARMED_TERRORIST:
                     case ARMED_TERRORIST:
-                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY);
+                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.EMPTY, false);
                         break;
                     case OFFICER_AND_FLAG:
-                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.POLICE_OFFICER);
+                        landscape.setField(originFieldYX.getY(), originFieldYX.getX(), Field.POLICE_OFFICER, false);
                         break;
                 }
             } else if (itemToAdd != Field.OUT_OF_FIELD) {
@@ -217,25 +210,6 @@ public class Controller {
         this.initializeContextMenu(landscape.getPoliceOfficer().getClass().getName());
     }
 
-    private void initializeContextMenu(String officerType) {
-        contextMenu = new OfficerContextMenu(officerType, this.landscape);
-        landscapePanel.setOnContextMenuRequested(contextMenuHandler);
-    }
-
-    public void initializeEventHandler() {
-        landscapePanel.setOnMousePressed(pressedEventHandler);
-        landscapePanel.setOnMouseDragged(dragEventHandler);
-        landscapePanel.setOnMouseClicked(itemEventHandler);
-    }
-
-    public void setEditorClass(String editorClass) {
-        this.editorClass = editorClass;
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
     /**
      * Inspiriert aus CompileWithDiagnostics.java
      */
@@ -247,7 +221,7 @@ public class Controller {
 
         ClassLoader cl = getClassLoader(programsFolder);
 
-        if(cl == null) {
+        if (cl == null) {
             System.err.println("Classloader konnte nicht geladen werden!");
             return;
         }
@@ -294,9 +268,30 @@ public class Controller {
 
     }
 
+    private void initializeContextMenu(String officerType) {
+        contextMenu = new OfficerContextMenu(officerType, this.landscape);
+        landscapePanel.setOnContextMenuRequested(contextMenuHandler);
+    }
+
+    @FXML
+    public void saveCode() {
+        String prefix = PREFIX_1 + editorClass + PREFIX_2;
+        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
+
+        StringBuilder builder = new StringBuilder(prefix);
+        builder.append(codeEditor.getText())
+                .append(POSTFIX);
+
+        try {
+            Files.write(codeFile, builder.toString().getBytes());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
     private ClassLoader getClassLoader(Path programsFolder) {
         ClassLoader cl = null;
-        try{
+        try {
             URL[] urls = new URL[]{programsFolder.toFile().toURI().toURL()};
             cl = new URLClassLoader(urls);
         } catch (MalformedURLException e) {
@@ -319,25 +314,23 @@ public class Controller {
         this.runner.setLandscape(this.landscape);
     }
 
-    @FXML
-    public void compile() {
-        this.compile(true);
+    public void initializeEventHandler() {
+        landscapePanel.setOnMousePressed(pressedEventHandler);
+        landscapePanel.setOnMouseDragged(dragEventHandler);
+        landscapePanel.setOnMouseClicked(itemEventHandler);
+    }
+
+    public void setEditorClass(String editorClass) {
+        this.editorClass = editorClass;
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
     @FXML
-    public void saveCode() {
-        String prefix = PREFIX_1 + editorClass + PREFIX_2;
-        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
-
-        StringBuilder builder = new StringBuilder(prefix);
-        builder.append(codeEditor.getText())
-                .append(POSTFIX);
-
-        try {
-            Files.write(codeFile, builder.toString().getBytes());
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
+    public void compile() {
+        this.compile(true);
     }
 
     @FXML
@@ -358,6 +351,90 @@ public class Controller {
     @FXML
     public void stop() {
         runner.stop();
+    }
+
+    @FXML
+    public void loadLandscape(ActionEvent event) {
+        LandscapeSerialization serialization = new LandscapeSerialization();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(LANDSCAPE_FOLDER).toFile());
+        File landscapeFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
+
+        if (landscapeFile == null) {
+            System.err.println("Keine Datei ausgewählt!");
+            return;
+        }
+
+        String file = landscapeFile.getName();
+        String fileName = (file.contains(".landscape")) ? file.split("\\.")[0] : null;
+
+        if (fileName != null) {
+            serialization.deserialize(this, landscapeFile, landscapePanel);
+        } else {
+            System.err.println("Die ausgewählte Datei ist keine gültige Landscape-Datei!");
+        }
+
+
+    }
+
+    @FXML
+    public void saveLandscape(ActionEvent event) {
+        LandscapeSerialization serialization = new LandscapeSerialization();
+
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            Path directory = Paths.get(LANDSCAPE_FOLDER, name + ".landscape");
+            if (!Files.exists(directory)) {
+                serialization.serialize(this.landscape, directory);
+            } else {
+                System.err.println(name + ".landscape existiert schon. Wähle einen anderen Namen aus!");
+            }
+        });
+
+    }
+
+    @FXML
+    public void saveXML(ActionEvent actionEvent) {
+        XMLSerialization serializator = new XMLSerialization();
+
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern (XML)", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            Path directory = Paths.get(XML_FOLDER, name + ".txml");
+            if (!Files.exists(directory)) {
+                serializator.save(this.landscape, name);
+            } else {
+                System.err.println(name + ".txml existiert schon. Wähle einen anderen Namen aus!");
+            }
+        });
+    }
+
+    @FXML
+    public void loadXML(ActionEvent event) {
+        XMLSerialization serializator = new XMLSerialization();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(XML_FOLDER).toFile());
+        File xmlFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
+
+        if (xmlFile == null) {
+            System.err.println("Keine TXML-Datei ausgewählt!");
+            return;
+        }
+
+        String file = xmlFile.getName();
+        String fileName = (file.contains(".txml")) ? file.split("\\.")[0] : null;
+
+        if (fileName != null) {
+            serializator.load(this, xmlFile, landscapePanel);
+        } else {
+            System.err.println("Die ausgewählte Datei ist keine gültige TXML-Datei!");
+        }
+
     }
 
     @FXML
@@ -591,50 +668,5 @@ public class Controller {
             fieldMenu.setSelected(true);
             this.landscape.setDeleteEnabled(true);
         }
-    }
-
-    @FXML
-    public void loadLandscape(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(LANDSCAPE_FOLDER).toFile());
-        File landscapeFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
-
-        if (landscapeFile == null) {
-            System.err.println("Keine Datei ausgewählt!");
-            return;
-        }
-
-        String file = landscapeFile.getName();
-        String fileName = (file.contains(".landscape")) ? file.split("\\.")[0] : null;
-
-        if (fileName != null) {
-            LandscapeSerialization.deserialize(this, landscapeFile, landscapePanel);
-        } else {
-            System.err.println("Die ausgewählte Datei ist keine gültige Landscape-Datei!");
-        }
-
-
-    }
-
-    @FXML
-    public void saveLandscape(ActionEvent event) {
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
-        Optional<String> result = dialog.showAndWait();
-
-        result.ifPresent(name -> {
-            Path directory = Paths.get(LANDSCAPE_FOLDER, name + ".landscape");
-            if (!Files.exists(directory)) {
-                LandscapeSerialization.serialize(this.landscape, directory);
-            } else {
-                System.err.println(name + ".landscape existiert schon. Wähle einen anderen Namen aus!");
-            }
-        });
-
-    }
-
-    @FXML
-    public void saveXML(ActionEvent actionEvent) {
-        XMLSerialization serializator = new XMLSerialization();
-        serializator.save(null, "test");
     }
 }

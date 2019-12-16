@@ -3,246 +3,323 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane fx:id="pane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ctfmodell.controller.Controller" maxHeight="-Infinity"
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="pane" fx:controller="ctfmodell.controller.Controller"
+            maxHeight="-Infinity"
             maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0"
             stylesheets="css/icons.css" xmlns="http://javafx.com/javafx/8.0.172-ea">
-   <top>
-      <VBox prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-         <children>
-            <MenuBar>
-              <menus>
-                <Menu mnemonicParsing="false" text="Editor">
-                  <items>
-                        <MenuItem fx:id="newItem" mnemonicParsing="false" text="Neu" onAction="#createNewSimulation">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem fx:id="openItem" mnemonicParsing="false" text="Öffnen" onAction="#openSimulation">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem fx:id="compileItem" mnemonicParsing="false" text="Kompilieren" onAction="#compile">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem fx:id="printItem" mnemonicParsing="false" text="Drucken">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Beenden" onAction="#closeSimulation">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Territorium">
-                  <items>
-                        <Menu mnemonicParsing="false" text="Speichern">
-                          <items>
-                            <MenuItem mnemonicParsing="false" text="XML" onAction="#saveXML"/>
-                              <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren" onAction="#saveLandscape"/>
-                          </items>
+    <top>
+        <VBox prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <children>
+                <MenuBar>
+                    <menus>
+                        <Menu mnemonicParsing="false" text="Editor">
+                            <items>
+                                <MenuItem fx:id="newItem" mnemonicParsing="false" text="Neu"
+                                          onAction="#createNewSimulation">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem fx:id="openItem" mnemonicParsing="false" text="Öffnen"
+                                          onAction="#openSimulation">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem fx:id="compileItem" mnemonicParsing="false" text="Kompilieren"
+                                          onAction="#compile">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem fx:id="printItem" mnemonicParsing="false" text="Drucken">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" text="Beenden" onAction="#closeSimulation">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                            </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Laden">
-                           <items>
-                              <MenuItem mnemonicParsing="false" text="XML" />
-                              <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren" onAction="#loadLandscape"/>
-                           </items>
+                        <Menu mnemonicParsing="false" text="Territorium">
+                            <items>
+                                <Menu mnemonicParsing="false" text="Speichern">
+                                    <items>
+                                        <MenuItem mnemonicParsing="false" text="XML" onAction="#saveXML"/>
+                                        <MenuItem mnemonicParsing="false" text="JAXB"/>
+                                        <MenuItem mnemonicParsing="false" text="Serialisieren"
+                                                  onAction="#saveLandscape"/>
+                                    </items>
+                                </Menu>
+                                <Menu mnemonicParsing="false" text="Laden">
+                                    <items>
+                                        <MenuItem mnemonicParsing="false" text="XML" onAction="#loadXML"/>
+                                        <MenuItem mnemonicParsing="false" text="JAXB"/>
+                                        <MenuItem mnemonicParsing="false" text="Serialisieren"
+                                                  onAction="#loadLandscape"/>
+                                    </items>
+                                </Menu>
+                                <Menu mnemonicParsing="false" text="Als Bild speichern">
+                                    <items>
+                                        <MenuItem mnemonicParsing="false" text="XML"/>
+                                        <MenuItem mnemonicParsing="false" text="JAXB"/>
+                                        <MenuItem mnemonicParsing="false" text="Serialisieren"/>
+                                    </items>
+                                </Menu>
+                                <MenuItem mnemonicParsing="false" text="Drucken"/>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" text="Größe ändern..."
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup">
+                                    <toggleGroup>
+                                        <ToggleGroup fx:id="territoriumGroup"/>
+                                    </toggleGroup>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" text="Avatar verschieben"
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                                <RadioMenuItem fx:id="baseMenu" mnemonicParsing="false" text="Base verschieben"
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                                <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" text="Flagge platzieren"
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                                <RadioMenuItem fx:id="terroristUnarmedMenu" mnemonicParsing="false"
+                                               text="Unbewaffneten Terroristen platzieren"
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                                <RadioMenuItem fx:id="terroristArmedMenu" mnemonicParsing="false"
+                                               text="Bewaffneten Terroristen platzieren" toggleGroup="$territoriumGroup"
+                                               onAction="#territoriumGroup"/>
+                                <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" text="Kachel löschen"
+                                               toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
+                            </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Als Bild speichern">
-                           <items>
-                              <MenuItem mnemonicParsing="false" text="XML" />
-                              <MenuItem mnemonicParsing="false" text="JAXB" />
-                              <MenuItem mnemonicParsing="false" text="Serialisieren"/>
-                           </items>
+                        <Menu mnemonicParsing="false" text="Avatar">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Flaggen in der Hand..." onAction="#hasFlags"/>
+                                <MenuItem mnemonicParsing="false" text="linksUm" onAction="#turnLeft">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" text="vor" onAction="#forward">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="DOWN"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" text="nimm" onAction="#pick">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="DOWN"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" text="gib" onAction="#drop">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" text="attackieren" onAction="#attack">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="DOWN"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                            </items>
                         </Menu>
-                    <MenuItem mnemonicParsing="false" text="Drucken" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" text="Größe ändern..." toggleGroup="$territoriumGroup" onAction="#territoriumGroup">
+                        <Menu mnemonicParsing="false" text="Simulation">
+                            <items>
+                                <MenuItem fx:id="playItem" mnemonicParsing="false" text="Start/Fortsetzen"
+                                          onAction="#play">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="F11" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem fx:id="pauseItem" mnemonicParsing="false" text="Pause" onAction="#pause">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="F12" control="DOWN" meta="UP" shift="UP"
+                                                            shortcut="UP"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" onAction="#stop"/>
+                            </items>
+                        </Menu>
+                    </menus>
+                    <tooltip>
+                        <Tooltip text="Menü zur Steuerung der Simulation"/>
+                    </tooltip>
+                </MenuBar>
+                <ToolBar prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                        <Button fx:id="newButton" mnemonicParsing="false" onAction="#createNewSimulation">
+                            <tooltip>
+                                <Tooltip text="Neue Simulation erstellen"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="openButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#openSimulation">
+                            <tooltip>
+                                <Tooltip text="Simulation öffnen"/>
+                            </tooltip>
+                        </Button>
+                        <Separator orientation="VERTICAL" prefHeight="10.0"/>
+                        <Button fx:id="saveButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#saveCode">
+                            <tooltip>
+                                <Tooltip text="Simulation speichern"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="compileButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#compile">
+                            <tooltip>
+                                <Tooltip text="Kompilieren"/>
+                            </tooltip>
+                        </Button>
+                        <Separator layoutX="178.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0"/>
+                        <ToggleButton fx:id="sizeButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
                             <toggleGroup>
-                                <ToggleGroup fx:id="territoriumGroup" />
+                                <ToggleGroup fx:id="addingGroup"/>
                             </toggleGroup>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" text="Avatar verschieben" toggleGroup="$territoriumGroup" onAction="#territoriumGroup" />
-                      <RadioMenuItem fx:id="baseMenu" mnemonicParsing="false" text="Base verschieben"
-                                     toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
-                        <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" text="Flagge platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
-                        <RadioMenuItem fx:id="terroristUnarmedMenu" mnemonicParsing="false" text="Unbewaffneten Terroristen platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
-                      <RadioMenuItem fx:id="terroristArmedMenu" mnemonicParsing="false" text="Bewaffneten Terroristen platzieren" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
-                      <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" text="Kachel löschen" toggleGroup="$territoriumGroup" onAction="#territoriumGroup"/>
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Avatar">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="Flaggen in der Hand..." onAction="#hasFlags"/>
-                        <MenuItem mnemonicParsing="false" text="linksUm" onAction="#turnLeft">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="vor" onAction="#forward">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="nimm" onAction="#pick">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem mnemonicParsing="false" text="gib" onAction="#drop">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
-                           </accelerator></MenuItem>
-                      <MenuItem mnemonicParsing="false" text="attackieren" onAction="#attack">
-                          <accelerator>
-                              <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
-                          </accelerator></MenuItem>
-                  </items>
-                </Menu>
-                  <Menu mnemonicParsing="false" text="Simulation">
-                     <items>
-                        <MenuItem fx:id="playItem" mnemonicParsing="false" text="Start/Fortsetzen" onAction="#play">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="F11" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem fx:id="pauseItem" mnemonicParsing="false" text="Pause" onAction="#pause">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="F12" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator></MenuItem>
-                        <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" onAction="#stop"/>
-                     </items>
-                  </Menu>
-              </menus>
-               <tooltip>
-                  <Tooltip text="Menü zur Steuerung der Simulation" />
-               </tooltip>
-            </MenuBar>
-            <ToolBar prefHeight="40.0" prefWidth="200.0">
-              <items>
-                  <Button fx:id="newButton" mnemonicParsing="false" onAction="#createNewSimulation">
-                     <tooltip>
-                        <Tooltip text="Neue Simulation erstellen" />
-                     </tooltip></Button>
-                  <Button fx:id="openButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#openSimulation">
-                     <tooltip>
-                        <Tooltip text="Simulation öffnen" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" prefHeight="10.0" />
-                  <Button fx:id="saveButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#saveCode">
-                     <tooltip>
-                        <Tooltip text="Simulation speichern" />
-                     </tooltip></Button>
-                  <Button fx:id="compileButton" layoutX="94.0" layoutY="10.0" mnemonicParsing="false" onAction="#compile">
-                     <tooltip>
-                        <Tooltip text="Kompilieren" />
-                     </tooltip></Button>
-                  <Separator layoutX="178.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <ToggleButton fx:id="sizeButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="addingGroup" />
-                     </toggleGroup>
-                     <tooltip>
-                        <Tooltip text="Größe der Simulation ändern" />
-                     </tooltip>
-                  </ToggleButton>
-                  <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <tooltip>
-                        <Tooltip text="Avatar verschieben" />
-                     </tooltip></ToggleButton>
-                  <ToggleButton fx:id="baseButton" mnemonicParsing="false" toggleGroup="$addingGroup"
-                                onAction="#addingGroup">
-                      <tooltip>
-                          <Tooltip text="Base verschieben"/>
-                      </tooltip>
-                  </ToggleButton>
-                  <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <tooltip>
-                        <Tooltip text="Flagge hinzufügen" />
-                     </tooltip></ToggleButton>
-                  <ToggleButton fx:id="terrorUnarmedButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <tooltip>
-                        <Tooltip text="Terrorist hinzufügen" />
-                     </tooltip></ToggleButton>
-                  <ToggleButton fx:id="terrorArmedButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <tooltip>
-                        <Tooltip text="Terrorist mit Waffe hinzufügen" />
-                     </tooltip></ToggleButton>
-                  <ToggleButton fx:id="deleteButton" mnemonicParsing="false" toggleGroup="$addingGroup" onAction="#addingGroup">
-                     <tooltip>
-                        <Tooltip text="Ausgewähltes Objekt löschen" />
-                     </tooltip></ToggleButton>
-                  <Separator layoutX="358.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Button fx:id="isFlagButton" layoutX="370.0" layoutY="10.0" mnemonicParsing="false" onAction="#hasFlags">
-                     <tooltip>
-                        <Tooltip text="Prüfen, ob Polizist Flaggen hat" />
-                     </tooltip></Button>
-                  <Button fx:id="rotateButton" layoutX="454.0" layoutY="10.0" mnemonicParsing="false" onAction="#turnLeft">
-                     <tooltip>
-                        <Tooltip text="Polizist um 90° drehen" />
-                     </tooltip></Button>
-                  <Button fx:id="forwardButton" layoutX="538.0" layoutY="10.0" mnemonicParsing="false" onAction="#forward">
-                     <tooltip>
-                        <Tooltip text="Polizist um ein Feld vorbewegen" />
-                     </tooltip></Button>
-                  <Button fx:id="pickButton" layoutX="622.0" layoutY="10.0" mnemonicParsing="false" onAction="#pick">
-                     <tooltip>
-                        <Tooltip text="Flagge aufheben" />
-                     </tooltip></Button>
-                  <Button fx:id="dropButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false" onAction="#drop">
-                     <tooltip>
-                        <Tooltip text="Flagge ablegen" />
-                     </tooltip></Button>
-                  <Button fx:id="attackButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false"
-                          onAction="#attack">
-                      <tooltip>
-                          <Tooltip text="Terrorist attackieren"/>
-                      </tooltip>
-                  </Button>
-                  <Separator layoutX="790.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Button fx:id="playButton" layoutX="548.0" layoutY="20.0" mnemonicParsing="false" onAction="#play">
-                     <tooltip>
-                        <Tooltip text="Simulation starten" />
-                     </tooltip></Button>
-                  <Button fx:id="pauseButton" layoutX="632.0" layoutY="20.0" mnemonicParsing="false" onAction="#pause">
-                     <tooltip>
-                        <Tooltip text="Simulation pausieren" />
-                     </tooltip></Button>
-                  <Button fx:id="stopButton" layoutX="716.0" layoutY="20.0" mnemonicParsing="false" onAction="#stop">
-                     <tooltip>
-                        <Tooltip text="Simulation stoppen" />
-                     </tooltip></Button>
-                  <Separator layoutX="800.0" layoutY="20.0" orientation="VERTICAL" prefHeight="10.0" />
-                  <Slider fx:id="slider" max="2000.0" showTickLabels="true">
-                     <tooltip>
-                        <Tooltip text="Geschwindigkeit der Simulation anpassen" />
-                     </tooltip></Slider>
-              </items>
-            </ToolBar>
-         </children>
-      </VBox>
-   </top>
-   <center>
-      <SplitPane dividerPositions="0.5986622073578596" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-               <children>
-                  <TextArea fx:id="codeEditor" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <tooltip>
-                        <Tooltip text="Hier kommt dein Programmiercode rein!" />
-                     </tooltip></TextArea>
-               </children>
-            </AnchorPane>
-            <VBox alignment="CENTER">
-                <HBox alignment="CENTER">
-                    <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"/>
-                </HBox>
-            </VBox>
-        </items>
-      </SplitPane>
-   </center>
-   <bottom>
-      <Label text="Herzlich Willkommen" BorderPane.alignment="BOTTOM_LEFT" />
-   </bottom>
+                            <tooltip>
+                                <Tooltip text="Größe der Simulation ändern"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="avatarButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Avatar verschieben"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="baseButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Base verschieben"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="flagButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Flagge hinzufügen"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="terrorUnarmedButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Terrorist hinzufügen"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="terrorArmedButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Terrorist mit Waffe hinzufügen"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="deleteButton" mnemonicParsing="false" toggleGroup="$addingGroup"
+                                      onAction="#addingGroup">
+                            <tooltip>
+                                <Tooltip text="Ausgewähltes Objekt löschen"/>
+                            </tooltip>
+                        </ToggleButton>
+                        <Separator layoutX="358.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0"/>
+                        <Button fx:id="isFlagButton" layoutX="370.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#hasFlags">
+                            <tooltip>
+                                <Tooltip text="Prüfen, ob Polizist Flaggen hat"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="rotateButton" layoutX="454.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#turnLeft">
+                            <tooltip>
+                                <Tooltip text="Polizist um 90° drehen"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="forwardButton" layoutX="538.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#forward">
+                            <tooltip>
+                                <Tooltip text="Polizist um ein Feld vorbewegen"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="pickButton" layoutX="622.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#pick">
+                            <tooltip>
+                                <Tooltip text="Flagge aufheben"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="dropButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#drop">
+                            <tooltip>
+                                <Tooltip text="Flagge ablegen"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="attackButton" layoutX="706.0" layoutY="10.0" mnemonicParsing="false"
+                                onAction="#attack">
+                            <tooltip>
+                                <Tooltip text="Terrorist attackieren"/>
+                            </tooltip>
+                        </Button>
+                        <Separator layoutX="790.0" layoutY="10.0" orientation="VERTICAL" prefHeight="10.0"/>
+                        <Button fx:id="playButton" layoutX="548.0" layoutY="20.0" mnemonicParsing="false"
+                                onAction="#play">
+                            <tooltip>
+                                <Tooltip text="Simulation starten"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="pauseButton" layoutX="632.0" layoutY="20.0" mnemonicParsing="false"
+                                onAction="#pause">
+                            <tooltip>
+                                <Tooltip text="Simulation pausieren"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="stopButton" layoutX="716.0" layoutY="20.0" mnemonicParsing="false"
+                                onAction="#stop">
+                            <tooltip>
+                                <Tooltip text="Simulation stoppen"/>
+                            </tooltip>
+                        </Button>
+                        <Separator layoutX="800.0" layoutY="20.0" orientation="VERTICAL" prefHeight="10.0"/>
+                        <Slider fx:id="slider" max="2000.0" showTickLabels="true">
+                            <tooltip>
+                                <Tooltip text="Geschwindigkeit der Simulation anpassen"/>
+                            </tooltip>
+                        </Slider>
+                    </items>
+                </ToolBar>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.5986622073578596" prefHeight="160.0" prefWidth="200.0"
+                   BorderPane.alignment="CENTER">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                    <children>
+                        <TextArea fx:id="codeEditor" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <tooltip>
+                                <Tooltip text="Hier kommt dein Programmiercode rein!"/>
+                            </tooltip>
+                        </TextArea>
+                    </children>
+                </AnchorPane>
+                <VBox alignment="CENTER">
+                    <HBox alignment="CENTER">
+                        <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"/>
+                    </HBox>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+    <bottom>
+        <Label text="Herzlich Willkommen" BorderPane.alignment="BOTTOM_LEFT"/>
+    </bottom>
 </BorderPane>

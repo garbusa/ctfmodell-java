@@ -20,10 +20,6 @@ public class PoliceOfficer extends Observable {
     private Landscape landscape;
     private boolean hasWon;
 
-    public void main() {
-
-    }
-
     public PoliceOfficer() {
         this(0, 0, Direction.EAST);
     }
@@ -34,6 +30,10 @@ public class PoliceOfficer extends Observable {
         this.numberOfFlags = 0;
         this.direction = direction;
         this.hasWon = false;
+    }
+
+    public void main() {
+
     }
 
     public void forward() {
@@ -136,50 +136,45 @@ public class PoliceOfficer extends Observable {
     }
 
     private void setActualField(Field field) {
-        if(field != Field.EMPTY)
-            this.landscape.setField(this.yPos, this.xPos, field);
+        if (field != Field.EMPTY)
+            this.landscape.setField(this.yPos, this.xPos, field, false);
         else
-            this.landscape.setField(this.yPos, this.xPos, Field.EMPTY);
+            this.landscape.setField(this.yPos, this.xPos, Field.EMPTY, false);
     }
 
     public void attack() {
         Field forwardField = this.getForwardField();
         if (forwardField == Field.UNARMED_TERRORIST) {
-            this.clearForwardField();
+            this.clearForwardField(true);
         } else {
             throw new PoliceException("Du kannst nur unbewaffnete Terroristen attackieren!");
         }
     }
 
-    private void clearForwardField() {
+    private void clearForwardField(boolean isAttack) {
         int y = this.yPos;
         int x = this.xPos;
         switch (this.direction) {
             case NORTH:
-                this.checkEndAndClearForward(y - 1, x);
+                this.checkEndAndClearForward(y - 1, x, isAttack);
                 break;
             case SOUTH:
-                this.checkEndAndClearForward(y + 1, x);
+                this.checkEndAndClearForward(y + 1, x, isAttack);
                 break;
             case WEST:
-                this.checkEndAndClearForward(y, x - 1);
+                this.checkEndAndClearForward(y, x - 1, isAttack);
                 break;
             case EAST:
-                this.checkEndAndClearForward(y, x + 1);
+                this.checkEndAndClearForward(y, x + 1, isAttack);
                 break;
             default:
                 break;
         }
     }
 
-    private void checkEndAndClearForward(int y, int x) {
+    private void checkEndAndClearForward(int y, int x, boolean isAttack) {
         if (this.isNotEndOfField(y, x)) {
-            //this.landscape.setField(y, x, Field.EMPTY);
-            if(this.landscape.getLandscape()[y][x] == Field.UNARMED_TERRORIST) {
-                this.landscape.setField(y, x, Field.EMPTY);
-            } else {
-                this.landscape.setField(y, x, Field.EMPTY);
-            }
+            this.landscape.setField(y, x, Field.EMPTY, isAttack);
         } else {
             System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x));

@@ -6,12 +6,9 @@ import ctfmodell.model.exception.LandscapeException;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.GraphicSize;
 import ctfmodell.util.Rectangle;
-import javafx.application.Platform;
 
 import java.io.Serializable;
-import java.lang.management.PlatformLoggingMXBean;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 
@@ -25,11 +22,6 @@ public class Landscape extends Observable implements Serializable {
     private Field[][] landscape;
     private transient List<Flag> flags;
     private transient Rectangle[][] landscapeCoordinates;
-
-    public void deleteFlag(int y, int x) {
-        flags.removeIf(flag -> flag.getyPos() == y && flag.getxPos() == x);
-    }
-
     /**
      * Für Serialisierung
      */
@@ -37,15 +29,36 @@ public class Landscape extends Observable implements Serializable {
     private int officerYPos;
     private Direction direction;
     private int numberOfFlags;
-
     private boolean deleteEnabled = false;
 
-    public boolean isDeleteEnabled() {
-        return deleteEnabled;
+    public Landscape() {
+        this.height = 10;
+        this.width = 10;
+        this.baseX = 9;
+        this.baseY = 9;
+
+        this.landscape = this.generateFields();
+        this.flags = new ArrayList<>();
+        this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
+        this.regeneratePixelLandscape();
+
+        //Nur Provisorisch, da beim kompilieren sofort ersetzt
+        PoliceOfficer policeOfficer = new PoliceOfficer();
+        policeOfficer.setLandscape(this);
+        this.setPoliceOfficer(policeOfficer);
+
+        Flag flagOne = new Flag(2, 2);
+        Flag flagTwo = new Flag(3, 3);
+
+        this.addFlag(flagOne);
+        this.addFlag(flagTwo);
+        this.addUnarmedTerrorist(0, 1);
+        this.addArmedTerrorist(1, 1);
+        this.addArmedTerrorist(1, 0);
     }
 
-    public void setDeleteEnabled(boolean deleteEnabled) {
-        this.deleteEnabled = deleteEnabled;
+    public void deleteFlag(int y, int x) {
+        flags.removeIf(flag -> flag.getyPos() == y && flag.getxPos() == x);
     }
 
     public int getOfficerXPos() {
@@ -80,71 +93,16 @@ public class Landscape extends Observable implements Serializable {
         this.numberOfFlags = numberOfFlags;
     }
 
-    public Landscape() {
-        this.height = 10;
-        this.width = 10;
-        this.baseX = 9;
-        this.baseY = 9;
-
-        this.landscape = this.generateFields();
-        this.flags = new ArrayList<>();
-        this.landscapeCoordinates = new Rectangle[landscape.length][landscape[0].length];
-        this.regeneratePixelLandscape();
-
-        //Nur Provisorisch, da beim kompilieren sofort ersetzt
-        PoliceOfficer policeOfficer = new PoliceOfficer();
-        policeOfficer.setLandscape(this);
-        this.setPoliceOfficer(policeOfficer);
-
-        Flag flagOne = new Flag(2, 2);
-        Flag flagTwo = new Flag(3, 3);
-
-        this.addFlag(flagOne);
-        this.addFlag(flagTwo);
-        this.addUnarmedTerrorist(0, 1);
-        this.addArmedTerrorist(1, 1);
-        this.addArmedTerrorist(1, 0);
-    }
-
-    private Field[][] generateFields() {
-        Field[][] fields = new Field[this.height][this.width];
-        for (int y = 0; y < fields.length; y++) {
-            for (int x = 0; x < fields[y].length; x++) {
-                if (x == this.baseX && y == this.baseY) {
-                    fields[y][x] = Field.BASE;
-                } else {
-                    fields[y][x] = Field.EMPTY;
-                }
-            }
-        }
-
-        return fields;
-    }
-
-    private void regeneratePixelLandscape() {
-        int posX = 0;
-        int posY = 0;
-        for (int y = 0; y < this.landscape.length; y++) {
-            for (int x = 0; x < this.landscape[y].length; x++) {
-                landscapeCoordinates[y][x] = new Rectangle(posY, posY + GraphicSize.RECT_SIZE, posX, posX + GraphicSize.RECT_SIZE);
-                posX += GraphicSize.RECT_SIZE + GraphicSize.GAP_SIZE;
-            }
-            posX = 0;
-            posY += GraphicSize.RECT_SIZE + GraphicSize.GAP_SIZE;
-
-        }
-    }
-
     public void addFlag(Flag flag) {
         int x = flag.getxPos();
         int y = flag.getyPos();
         switch (this.landscape[y][x]) {
             case EMPTY:
-                this.setField(y, x, Field.FLAG);
+                this.setField(y, x, Field.FLAG, false);
                 this.flags.add(flag);
                 break;
             case POLICE_OFFICER:
-                this.setField(y, x, Field.OFFICER_AND_FLAG);
+                this.setField(y, x, Field.OFFICER_AND_FLAG, false);
                 this.flags.add(flag);
                 break;
             default:
@@ -154,16 +112,8 @@ public class Landscape extends Observable implements Serializable {
 
     public void addUnarmedTerrorist(int y, int x) {
         if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.ARMED_TERRORIST) {
-            this.setField(y, x, Field.UNARMED_TERRORIST);
+            this.setField(y, x, Field.UNARMED_TERRORIST, false);
 
-        } else {
-            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
-        }
-    }
-
-    public void addArmedTerrorist(int y, int x) {
-        if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.UNARMED_TERRORIST) {
-            this.setField(y, x, Field.ARMED_TERRORIST);
         } else {
             throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
         }
@@ -181,38 +131,47 @@ public class Landscape extends Observable implements Serializable {
         this.policeOfficer.setLandscape(this);
     }
 
+    public void addArmedTerrorist(int y, int x) {
+        if (this.landscape[y][x] == Field.EMPTY || this.landscape[y][x] == Field.UNARMED_TERRORIST) {
+            this.setField(y, x, Field.ARMED_TERRORIST, false);
+        } else {
+            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Terrorist platziert werden!", y, x));
+        }
+    }
+
     public void clearOriginPolice(Integer y, Integer x) {
         Field field = this.landscape[y][x];
         switch (field) {
             case OFFICER_AND_BASE:
-                this.setField(y, x, Field.BASE);
+                this.setField(y, x, Field.BASE, false);
                 break;
             case OFFICER_AND_FLAG:
-                this.setField(y, x, Field.FLAG);
+                this.setField(y, x, Field.FLAG, false);
                 break;
             case POLICE_OFFICER:
-                this.setField(y, x, Field.EMPTY);
+                this.setField(y, x, Field.EMPTY, false);
         }
     }
 
-    public PoliceOfficer getPoliceOfficer() {
-        return policeOfficer;
+    public void setField(int y, int x, Field field, boolean isAttack) {
+        boolean update = (field != Field.EMPTY || isAttack);
+
+        synchronized (this) {
+            this.landscape[y][x] = field;
+        }
+
+        if (update || isDeleteEnabled()) {
+            this.setChanged();
+            this.notifyObservers(this);
+        }
     }
 
-    public void setDestinationPolice(Integer y, Integer x) {
-        Field field = this.landscape[y][x];
-        this.getPoliceOfficer().setyPos(y);
-        this.getPoliceOfficer().setxPos(x);
-        switch (field) {
-            case EMPTY:
-                this.setField(y, x, Field.POLICE_OFFICER);
-                break;
-            case FLAG:
-                this.setField(y, x, Field.OFFICER_AND_FLAG);
-                break;
-            case BASE:
-                this.setField(y, x, Field.OFFICER_AND_BASE);
-        }
+    public boolean isDeleteEnabled() {
+        return deleteEnabled;
+    }
+
+    public void setDeleteEnabled(boolean deleteEnabled) {
+        this.deleteEnabled = deleteEnabled;
     }
 
     public void resize(int width, int height) {
@@ -295,6 +254,20 @@ public class Landscape extends Observable implements Serializable {
         return false;
     }
 
+    private void regeneratePixelLandscape() {
+        int posX = 0;
+        int posY = 0;
+        for (int y = 0; y < this.landscape.length; y++) {
+            for (int x = 0; x < this.landscape[y].length; x++) {
+                landscapeCoordinates[y][x] = new Rectangle(posY, posY + GraphicSize.RECT_SIZE, posX, posX + GraphicSize.RECT_SIZE);
+                posX += GraphicSize.RECT_SIZE + GraphicSize.GAP_SIZE;
+            }
+            posX = 0;
+            posY += GraphicSize.RECT_SIZE + GraphicSize.GAP_SIZE;
+
+        }
+    }
+
     public int getHeight() {
         return height;
     }
@@ -315,46 +288,24 @@ public class Landscape extends Observable implements Serializable {
         return null;
     }
 
-    public void clearOriginBase(Integer y, Integer x) {
+    public void setDestinationPolice(Integer y, Integer x) {
         Field field = this.landscape[y][x];
-        switch (field) {
-            case OFFICER_AND_BASE:
-                this.setField(y, x, Field.POLICE_OFFICER);
-                break;
-            case BASE:
-                this.setField(y, x, Field.EMPTY);
-                break;
-        }
-    }
-
-    public void setDestinationBase(Integer y, Integer x) {
-        Field field = this.landscape[y][x];
+        this.getPoliceOfficer().setyPos(y);
+        this.getPoliceOfficer().setxPos(x);
         switch (field) {
             case EMPTY:
-                this.setField(y, x, Field.BASE);
+                this.setField(y, x, Field.POLICE_OFFICER, false);
                 break;
-            case POLICE_OFFICER:
-                this.setField(y, x, Field.OFFICER_AND_BASE);
+            case FLAG:
+                this.setField(y, x, Field.OFFICER_AND_FLAG, false);
                 break;
+            case BASE:
+                this.setField(y, x, Field.OFFICER_AND_BASE, false);
         }
     }
 
-    private PoliceOfficer unsetPoliceOfficer() {
-        int y = this.policeOfficer.getyPos();
-        int x = this.policeOfficer.getxPos();
-
-        Field field = this.landscape[y][x];
-
-        switch (field) {
-            case OFFICER_AND_BASE:
-                this.setField(y, x, Field.BASE);
-            case OFFICER_AND_FLAG:
-                this.setField(y, x, Field.FLAG);
-            case POLICE_OFFICER:
-                this.setField(y, x, Field.EMPTY);
-        }
-
-        return this.getPoliceOfficer();
+    public PoliceOfficer getPoliceOfficer() {
+        return policeOfficer;
     }
 
     private void setPoliceOfficer(PoliceOfficer policeOfficer) {
@@ -364,15 +315,15 @@ public class Landscape extends Observable implements Serializable {
         switch (this.landscape[y][x]) {
             case EMPTY:
             case POLICE_OFFICER:
-                this.setField(y, x, Field.POLICE_OFFICER);
+                this.setField(y, x, Field.POLICE_OFFICER, false);
                 break;
             case FLAG:
             case OFFICER_AND_FLAG:
-                this.setField(y, x, Field.OFFICER_AND_FLAG);
+                this.setField(y, x, Field.OFFICER_AND_FLAG, false);
                 break;
             case BASE:
             case OFFICER_AND_BASE:
-                this.setField(y, x, Field.OFFICER_AND_BASE);
+                this.setField(y, x, Field.OFFICER_AND_BASE, false);
                 break;
             default:
                 throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) kann kein Officer platziert werden!", y, x));
@@ -380,38 +331,32 @@ public class Landscape extends Observable implements Serializable {
         }
     }
 
-    public void setField(int y, int x, Field field) {
-        boolean update = (field != Field.EMPTY);
-
-        synchronized (this) {
-            this.landscape[y][x] = field;
-        }
-
-        if (update || isDeleteEnabled()) {
-            this.setChanged();
-            this.notifyObservers(this);
+    public void clearOriginBase(Integer y, Integer x) {
+        Field field = this.landscape[y][x];
+        switch (field) {
+            case OFFICER_AND_BASE:
+                this.setField(y, x, Field.POLICE_OFFICER, false);
+                break;
+            case BASE:
+                this.setField(y, x, Field.EMPTY, false);
+                break;
         }
     }
 
-    public Field getField(int y, int x) {
-        return this.landscape[y][x];
+    public void setDestinationBase(Integer y, Integer x) {
+        Field field = this.landscape[y][x];
+        switch (field) {
+            case EMPTY:
+                this.setField(y, x, Field.BASE, false);
+                break;
+            case POLICE_OFFICER:
+                this.setField(y, x, Field.OFFICER_AND_BASE, false);
+                break;
+        }
     }
 
     public Field[][] getLandscape() {
         return landscape;
-    }
-
-    boolean isNotEndOfField(int y, int x) {
-        return (y > -1 && y < this.landscape.length)
-                && (x > -1 && x < this.landscape[y].length);
-    }
-
-    List<Flag> getFlags() {
-        return flags;
-    }
-
-    void setFlags(List<Flag> flags) {
-        this.flags = flags;
     }
 
     public void reloadAfterDeserialization(PoliceOfficer policeOfficer) {
@@ -435,6 +380,56 @@ public class Landscape extends Observable implements Serializable {
         }
         this.setChanged();
         this.notifyObservers(this);
+    }
+
+    public Field getField(int y, int x) {
+        return this.landscape[y][x];
+    }
+
+    boolean isNotEndOfField(int y, int x) {
+        return (y > -1 && y < this.landscape.length)
+                && (x > -1 && x < this.landscape[y].length);
+    }
+
+    List<Flag> getFlags() {
+        return flags;
+    }
+
+    void setFlags(List<Flag> flags) {
+        this.flags = flags;
+    }
+
+    private Field[][] generateFields() {
+        Field[][] fields = new Field[this.height][this.width];
+        for (int y = 0; y < fields.length; y++) {
+            for (int x = 0; x < fields[y].length; x++) {
+                if (x == this.baseX && y == this.baseY) {
+                    fields[y][x] = Field.BASE;
+                } else {
+                    fields[y][x] = Field.EMPTY;
+                }
+            }
+        }
+
+        return fields;
+    }
+
+    private PoliceOfficer unsetPoliceOfficer() {
+        int y = this.policeOfficer.getyPos();
+        int x = this.policeOfficer.getxPos();
+
+        Field field = this.landscape[y][x];
+
+        switch (field) {
+            case OFFICER_AND_BASE:
+                this.setField(y, x, Field.BASE, false);
+            case OFFICER_AND_FLAG:
+                this.setField(y, x, Field.FLAG, false);
+            case POLICE_OFFICER:
+                this.setField(y, x, Field.EMPTY, false);
+        }
+
+        return this.getPoliceOfficer();
     }
 
 }

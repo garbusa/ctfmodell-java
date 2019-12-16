@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 public class LandscapeSerialization {
 
-    public static void serialize(Landscape landscape, Path directory) {
+    public void serialize(Landscape landscape, Path directory) {
 
         try {
             FileOutputStream fileOut =
@@ -34,7 +34,7 @@ public class LandscapeSerialization {
 
     }
 
-    public static void deserialize(Controller controller, File landscapeFile, LandscapePanel landscapePanel) {
+    public void deserialize(Controller controller, File landscapeFile, LandscapePanel landscapePanel) {
         Landscape loadedLandscape = null;
         try {
             FileInputStream fileIn = new FileInputStream(landscapeFile);
@@ -42,7 +42,6 @@ public class LandscapeSerialization {
             loadedLandscape = (Landscape) in.readObject();
             in.close();
             fileIn.close();
-
 
 
         } catch (IOException i) {
