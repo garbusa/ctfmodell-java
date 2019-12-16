@@ -1,0 +1,13 @@
+<!DOCTYPE landscape [
+    <!ELEMENT landscape-items (#PCDATA) (field+,officer)>
+    <!ELEMENT field (#PCDATA)>
+    <!ELEMENT officer (#PCDATA)>
+
+    <!ATTLIST field type CDATA #REQUIRED>
+    <!ATTLIST field y CDATA #REQUIRED>
+    <!ATTLIST field x CDATA #REQUIRED>
+    <!ATTLIST officer direction CDATA #REQUIRED>
+    <!ATTLIST officer numberOfFlags CDATA #REQUIRED>
+    <!ATTLIST officer y CDATA #REQUIRED>
+    <!ATTLIST officer x CDATA #REQUIRED>
+]>

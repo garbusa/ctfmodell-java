@@ -32,22 +32,7 @@ public class XMLSerialization {
             XMLStreamWriter writer = factory.createXMLStreamWriter(new FileOutputStream(xmlFile), "UTF-8");
             writer.writeStartDocument("utf-8", "1.0");
             writer.writeCharacters("\n");
-//            writer.writeDTD("<!DOCTYPE landscape " +
-//                        "[\n" +
-//                            "<!ELEMENT landscape-items (#PCDATA) (field+,officer)>\n" +
-//                            "<!ELEMENT field (#PCDATA)>\n" +
-//                            "<!ELEMENT officer (#PCDATA)>\n" +
-//                            "\n" +
-//                    "<!ATTLIST field type CDATA #REQUIRED>\n" +
-//                            "<!ATTLIST field y CDATA #REQUIRED>\n" +
-//                            "<!ATTLIST field x CDATA #REQUIRED>\n" +
-//                            "\n" +
-//                            "<!ATTLIST officer direction CDATA #REQUIRED>\n" +
-//                            "<!ATTLIST officer numberOfFlags CDATA #REQUIRED>\n" +
-//                    "<!ATTLIST officer y CDATA #REQUIRED>\n" +
-//                    "<!ATTLIST officer x CDATA #REQUIRED>\n" +
-//                            "]"+
-//                    ">");
+            writer.writeDTD("<!DOCTYPE landscape SYSTEM \"landscape.dtd\">");
             writer.writeCharacters("\n");
 
             //Schreibe alle Landschaft Tags
