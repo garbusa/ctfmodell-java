@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8">
-      <module name="ctfmodell" target="8" />
+      <module name="ctfmodell" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

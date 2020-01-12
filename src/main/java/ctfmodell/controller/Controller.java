@@ -1,6 +1,7 @@
 package ctfmodell.controller;
 
 import ctfmodell.Main;
+import ctfmodell.database.DatabaseManager;
 import ctfmodell.model.Flag;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
@@ -668,5 +669,15 @@ public class Controller {
             fieldMenu.setSelected(true);
             this.landscape.setDeleteEnabled(true);
         }
+    }
+
+    @FXML
+    public void saveJDBC(ActionEvent actionEvent) {
+        DatabaseManager.test();
+    }
+
+    @FXML
+    public void loadJDBC(ActionEvent actionEvent) {
+
     }
 }

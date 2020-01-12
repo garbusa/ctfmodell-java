@@ -153,6 +153,15 @@
                                 <MenuItem fx:id="stopItem" mnemonicParsing="false" text="Stopp" onAction="#stop"/>
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" text="Beispiele">
+                            <items>
+                                <MenuItem fx:id="saveJDBC" mnemonicParsing="false" text="Speichern..."
+                                          onAction="#saveJDBC">
+                                </MenuItem>
+                                <MenuItem fx:id="loadJDBC" mnemonicParsing="false" text="Laden..." onAction="#loadJDBC">
+                                </MenuItem>
+                            </items>
+                        </Menu>
                     </menus>
                     <tooltip>
                         <Tooltip text="Menü zur Steuerung der Simulation"/>
