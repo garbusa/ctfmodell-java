@@ -2,6 +2,7 @@ package ctfmodell;
 
 import ctfmodell.container.SimulationContainer;
 import ctfmodell.controller.Controller;
+import ctfmodell.database.DatabaseManager;
 import ctfmodell.model.Landscape;
 import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
@@ -17,7 +18,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,11 +40,32 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        DatabaseManager.createDatabase();
         createProgramFolder();
         createSerializationFolder();
         createXMLFolder();
         String defaultCode = loadDefaultOfficerCode();
         createAndStartSimulation(primaryStage, "DefaultOfficer", defaultCode);
+    }
+
+    private static String loadDefaultOfficerCode() {
+        Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");
+
+        if (Files.exists(directory)) {
+            try {
+                String prefix = PREFIX_1 + "DefaultOfficer" + PREFIX_2;
+                String code = new String(Files.readAllBytes(directory));
+                if (code.length() < 1) return null;
+                code = code.replace(prefix, "");
+                code = code.substring(0, code.length() - 1);
+                return code;
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     private static void createProgramFolder() {
@@ -95,28 +116,6 @@ public class Main extends Application {
 
     }
 
-
-
-    private static String loadDefaultOfficerCode() {
-        Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");
-
-        if (Files.exists(directory)) {
-            try {
-                String prefix = PREFIX_1 + "DefaultOfficer" + PREFIX_2;
-                String code = new String(Files.readAllBytes(directory));
-                if(code.length() < 1) return null;
-                code = code.replace(prefix, "");
-                code = code.substring(0, code.length() - 1);
-                return code;
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
     public static void createAndStartSimulation(Stage primaryStage, String editorClass, String code) throws IOException {
         if (!Helper.isValidClassName(editorClass)) {
             System.err.println(editorClass + "ist kein valider Klassenname!");
@@ -141,6 +140,7 @@ public class Main extends Application {
         controller.setEditorClass(editorClass);
         controller.initialize(landscape, landscapePanel, code);
         controller.initializeEventHandler();
+        controller.setOfficerLabel(editorClass);
 
         //Add LandscapePanel to GUI
         SplitPane splitPane = (SplitPane) ((BorderPane) root).getCenter();
@@ -152,7 +152,7 @@ public class Main extends Application {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setContent(landscapePanel);
 
-        primaryStage.setTitle(editorClass);
+        primaryStage.setTitle("Capture The Flag Simulation");
         primaryStage.getIcons().add(new Image(Main.class.getClassLoader().getResourceAsStream("image/menu/police_with_flag.png")));
         primaryStage.setScene(new Scene(root));
         simulations.addSimulation(editorClass);
@@ -166,6 +166,11 @@ public class Main extends Application {
         controller.saveCode();
 
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() {
+        DatabaseManager.shutdownDatabase();
     }
 
     private static void createDefaultOfficer() {

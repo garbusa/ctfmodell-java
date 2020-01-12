@@ -1,11 +1,14 @@
 package ctfmodell.provider;
 
+import ctfmodell.model.Example;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
+
+import java.util.List;
 
 @SuppressWarnings("Duplicates")
 public class DialogProvider {
@@ -83,6 +86,16 @@ public class DialogProvider {
             }
             return null;
         });
+
+        return dialog;
+    }
+
+    public static ChoiceDialog<Example> getExampleChoiceBox(List<Example> examples) {
+        ChoiceDialog<Example> dialog = new ChoiceDialog<>(examples.get(0), examples);
+
+        dialog.setTitle("Verfügbaren Beispiele");
+        dialog.setHeaderText("Wähle ein Beispiel aus:");
+        dialog.setContentText("Beispiel:");
 
         return dialog;
     }

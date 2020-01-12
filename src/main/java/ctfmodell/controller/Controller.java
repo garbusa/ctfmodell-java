@@ -2,6 +2,7 @@ package ctfmodell.controller;
 
 import ctfmodell.Main;
 import ctfmodell.database.DatabaseManager;
+import ctfmodell.model.Example;
 import ctfmodell.model.Flag;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
@@ -28,6 +29,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import javax.tools.*;
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -36,7 +38,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static ctfmodell.Main.*;
@@ -59,6 +63,8 @@ public class Controller {
     TextArea codeEditor;
     @FXML
     Slider slider;
+    @FXML
+    Label officerLabel;
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
     private Field itemToAdd = Field.OUT_OF_FIELD;
@@ -399,7 +405,6 @@ public class Controller {
 
     @FXML
     public void saveXML(ActionEvent actionEvent) {
-        XMLSerialization serializator = new XMLSerialization();
 
         Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern (XML)", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
         Optional<String> result = dialog.showAndWait();
@@ -407,7 +412,7 @@ public class Controller {
         result.ifPresent(name -> {
             Path directory = Paths.get(XML_FOLDER, name + ".txml");
             if (!Files.exists(directory)) {
-                serializator.save(this.landscape, name);
+                XMLSerialization.save(this.landscape, name);
             } else {
                 System.err.println(name + ".txml existiert schon. Wähle einen anderen Namen aus!");
             }
@@ -416,7 +421,6 @@ public class Controller {
 
     @FXML
     public void loadXML(ActionEvent event) {
-        XMLSerialization serializator = new XMLSerialization();
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(Paths.get(XML_FOLDER).toFile());
@@ -431,7 +435,7 @@ public class Controller {
         String fileName = (file.contains(".txml")) ? file.split("\\.")[0] : null;
 
         if (fileName != null) {
-            serializator.load(this, xmlFile, landscapePanel);
+            XMLSerialization.load(this, xmlFile);
         } else {
             System.err.println("Die ausgewählte Datei ist keine gültige TXML-Datei!");
         }
@@ -673,11 +677,61 @@ public class Controller {
 
     @FXML
     public void saveJDBC(ActionEvent actionEvent) {
-        DatabaseManager.test();
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code abspeichern", "Gebe ein oder mehrere Tags ein", "Speichern", "Tags");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            List<String> tags = Arrays.asList(name.split(" "));
+            try {
+                boolean success = DatabaseManager.saveExample(landscape, this.codeEditor.getText(), tags, editorClass);
+
+                if (success) {
+                    DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Beispiel speichern",
+                            "Dein Beispiel wurde erfolgreich gespeichert.");
+                } else {
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehlgeschlagen", "Beispiel speichern",
+                            "Dein Beispiel konnte nicht gespeichert werden.");
+                }
+
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @FXML
     public void loadJDBC(ActionEvent actionEvent) {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code laden", "Gebe einen Tag ein", "Laden", "Tag");
+        Optional<String> result = dialog.showAndWait();
 
+        result.ifPresent(name -> {
+            List<String> tags = Arrays.asList(name.split(" "));
+
+            if (tags.size() > 1) {
+                DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Du kannst nur einen Tag eingeben");
+            } else {
+                List<Example> examples = DatabaseManager.getExamplesOfTag(tags.get(0));
+                ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
+                Optional<Example> choiceResult = choiceDialog.showAndWait();
+
+                choiceResult.ifPresent(example -> {
+                    try {
+                        DatabaseManager.loadExample(example, this);
+                    } catch (XMLStreamException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+        });
+
+    }
+
+    public TextArea getCodeEditor() {
+        return this.codeEditor;
+    }
+
+    public void setOfficerLabel(String officerLabel) {
+        this.officerLabel.setText("Du bist gerade als: " + officerLabel + " unterwegs.");
     }
 }
