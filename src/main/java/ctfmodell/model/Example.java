@@ -1,11 +1,17 @@
 package ctfmodell.model;
 
-public class Example {
+import java.io.Serializable;
+
+public class Example implements Serializable {
 
     private int id;
     private String officerName;
     private String code;
     private String xml;
+
+    Example() {
+
+    }
 
     public Example(int id, String code, String xml, String officerName) {
         this.id = id;

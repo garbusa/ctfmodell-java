@@ -161,7 +161,7 @@
                                 </MenuItem>
                             </items>
                         </Menu>
-                        <fx:include source="tutor.fxml" />
+                        <fx:include fx:id="tutorMenu" source="tutor.fxml"/>
                     </menus>
                     <tooltip>
                         <Tooltip text="Menü zur Steuerung der Simulation"/>

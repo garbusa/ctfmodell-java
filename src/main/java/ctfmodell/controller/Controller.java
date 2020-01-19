@@ -12,6 +12,7 @@ import ctfmodell.provider.DialogProvider;
 import ctfmodell.serialization.LandscapeSerialization;
 import ctfmodell.serialization.XMLSerialization;
 import ctfmodell.simulation.SimulationRunner;
+import ctfmodell.tutor.TutorController;
 import ctfmodell.util.Coordinates;
 import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
@@ -65,6 +66,11 @@ public class Controller {
     Slider slider;
     @FXML
     Label officerLabel;
+    @FXML
+    Menu tutorMenu;
+    @FXML
+    TutorController tutorMenuController;
+
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
     private Field itemToAdd = Field.OUT_OF_FIELD;
@@ -205,7 +211,7 @@ public class Controller {
     };
 
     @FXML
-    public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code) {
+    public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code, String role) {
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
         runner = new SimulationRunner(0, this.landscape);
@@ -215,6 +221,8 @@ public class Controller {
         codeEditor.setText(code);
         this.compile(false);
         this.initializeContextMenu(landscape.getPoliceOfficer().getClass().getName());
+        tutorMenuController.setParentController(this);
+        tutorMenuController.setRole(role);
     }
 
     /**

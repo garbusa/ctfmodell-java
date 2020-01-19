@@ -1,2 +1,5 @@
 - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 - synchronized in den Models
+- ganzen controlls disablen (Simulation, Tutor)
+- ui hübscher machen
+- refractoren
