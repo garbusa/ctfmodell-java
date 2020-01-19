@@ -711,16 +711,20 @@ public class Controller {
                 DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Du kannst nur einen Tag eingeben");
             } else {
                 List<Example> examples = DatabaseManager.getExamplesOfTag(tags.get(0));
-                ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
-                Optional<Example> choiceResult = choiceDialog.showAndWait();
+                if(examples.isEmpty()) {
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Es konnten keine Beispiele zu diesem Tag gefunden werden.");
+                } else {
+                    ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
+                    Optional<Example> choiceResult = choiceDialog.showAndWait();
 
-                choiceResult.ifPresent(example -> {
-                    try {
-                        DatabaseManager.loadExample(example, this);
-                    } catch (XMLStreamException e) {
-                        e.printStackTrace();
-                    }
-                });
+                    choiceResult.ifPresent(example -> {
+                        try {
+                            DatabaseManager.loadExample(example, this);
+                        } catch (XMLStreamException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
             }
 
         });

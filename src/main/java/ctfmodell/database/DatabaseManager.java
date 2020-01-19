@@ -147,19 +147,23 @@ public class DatabaseManager {
             connection.commit();
             return true;
         } catch (Throwable th) {
-            th.printStackTrace();
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            runRollback(th);
         } finally {
             runFinally(stmt);
         }
 
         return false;
+    }
+
+    private static void runRollback(Throwable th) {
+        th.printStackTrace();
+        try {
+            if (connection != null) {
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void runFinally(PreparedStatement stmt) {
@@ -230,14 +234,7 @@ public class DatabaseManager {
             connection.commit();
             return examples;
         } catch (Throwable th) {
-            th.printStackTrace();
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            runRollback(th);
         } finally {
             runFinally(stmt);
         }

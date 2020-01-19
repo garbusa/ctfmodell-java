@@ -18,10 +18,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 @SuppressWarnings("ConstantConditions")
 public class Main extends Application {
@@ -126,8 +129,11 @@ public class Main extends Application {
             code = "void main() {\n\n}";
         }
 
+        FileInputStream fis = new FileInputStream("simulator.properties");
+        ResourceBundle resourceBundle = new PropertyResourceBundle(fis);
 
         FXMLLoader loader = new FXMLLoader(Main.class.getClassLoader().getResource("main.fxml"));
+        loader.setResources(resourceBundle);
         Parent root = loader.load();
 
         //Add Observers

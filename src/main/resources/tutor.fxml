@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<Menu xmlns:fx="http://javafx.com/fxml/1" mnemonicParsing="false" text="Tutor" fx:controller="ctfmodell.tutor.TutorController">
+    <items>
+        <MenuItem fx:id="sendOrLoadRequest" mnemonicParsing="false">
+        </MenuItem>
+        <MenuItem fx:id="sendOrLoadAnswer" mnemonicParsing="false" text="Laden...">
+        </MenuItem>
+    </items>
+</Menu>
