@@ -15,6 +15,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.UUID;
 
 
@@ -33,19 +35,23 @@ public class TutorController {
     private String role = null;
 
     private boolean connectionFailed = false;
+    private ResourceBundle resourceBundle;
 
     @FXML
     public void initialize() {
         if (this.role != null) {
-            setRoleMenu();
+            setRoleMenu("de");
         }
+
     }
 
-    private void setRoleMenu() {
+    private void setRoleMenu(String language) {
+        resourceBundle = ResourceBundle.getBundle("bundles.language", new Locale(language));
+
         switch (this.role) {
             case "tutor":
-                sendOrLoadRequest.setText("Anfrage laden");
-                sendOrLoadAnswer.setText("Anfrage beantworten");
+                sendOrLoadRequest.setText(resourceBundle.getString("menuItemStudentAnfrageLaden"));
+                sendOrLoadAnswer.setText(resourceBundle.getString("menuItemStudentAntwortSenden"));
                 sendOrLoadRequest.setOnAction((event) -> this.loadRequest());
                 sendOrLoadAnswer.setOnAction((event) -> this.sendAnswer());
 
@@ -53,8 +59,8 @@ public class TutorController {
                 sendOrLoadAnswer.setDisable(true);
                 break;
             case "student":
-                sendOrLoadRequest.setText("Tutoranfrage senden");
-                sendOrLoadAnswer.setText("Tutoranfrage laden");
+                sendOrLoadRequest.setText(resourceBundle.getString("menuItemTutorAnfrageSenden"));
+                sendOrLoadAnswer.setText(resourceBundle.getString("menuItemTutorAntwortLaden"));
                 sendOrLoadRequest.setOnAction((event) -> this.sendRequest());
                 sendOrLoadAnswer.setOnAction((event) -> this.loadAnswer());
 
@@ -64,6 +70,7 @@ public class TutorController {
             default:
                 throw new IllegalStateException("unexpected role");
         }
+
     }
 
     private void loadRequest() {
@@ -194,9 +201,9 @@ public class TutorController {
         this.mainController = controller;
     }
 
-    public void setRole(String role) {
+    public void setRole(String role, String language) {
         this.role = role;
-        setRoleMenu();
+        setRoleMenu(language);
     }
 
     private void switchControlsEnable() {

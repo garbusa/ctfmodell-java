@@ -23,4 +23,8 @@ public class SimulationContainer {
         return this.openSimulations.isEmpty();
     }
 
+    public int getContainerSize() {
+        return openSimulations.size();
+    }
+
 }

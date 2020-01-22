@@ -11,38 +11,35 @@
             <children>
                 <MenuBar>
                     <menus>
-                        <Menu mnemonicParsing="false" text="Editor">
+                        <Menu fx:id="editorMenu" mnemonicParsing="false">
                             <items>
-                                <MenuItem fx:id="newItem" mnemonicParsing="false" onAction="#createNewSimulation"
-                                          text="Neu">
+                                <MenuItem fx:id="newItem" mnemonicParsing="false" onAction="#createNewSimulation">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem fx:id="openItem" mnemonicParsing="false" onAction="#openSimulation"
-                                          text="Öffnen">
+                                <MenuItem fx:id="openItem" mnemonicParsing="false" onAction="#openSimulation">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
                                 <SeparatorMenuItem mnemonicParsing="false"/>
-                                <MenuItem fx:id="compileItem" mnemonicParsing="false" onAction="#compile"
-                                          text="Kompilieren">
+                                <MenuItem fx:id="compileItem" mnemonicParsing="false" onAction="#compile">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem fx:id="printItem" mnemonicParsing="false" text="Drucken">
+                                <MenuItem fx:id="printItem" mnemonicParsing="false">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
                                 <SeparatorMenuItem mnemonicParsing="false"/>
-                                <MenuItem mnemonicParsing="false" onAction="#closeSimulation" text="Beenden">
+                                <MenuItem fx:id="beendenItem" mnemonicParsing="false" onAction="#closeSimulation">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP"
                                                             shortcut="UP"/>
@@ -50,83 +47,83 @@
                                 </MenuItem>
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Territorium">
+                        <Menu fx:id="territoriumMenu" mnemonicParsing="false">
                             <items>
-                                <Menu mnemonicParsing="false" text="Speichern">
+                                <Menu fx:id="saveItemMenu" mnemonicParsing="false">
                                     <items>
                                         <MenuItem mnemonicParsing="false" onAction="#saveXML" text="XML"/>
                                         <MenuItem mnemonicParsing="false" text="JAXB"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#saveLandscape"
-                                                  text="Serialisieren"/>
+                                        <MenuItem fx:id="serializeItem" mnemonicParsing="false"
+                                                  onAction="#saveLandscape"/>
                                     </items>
                                 </Menu>
-                                <Menu mnemonicParsing="false" text="Laden">
+                                <Menu fx:id="loadItemMenu" mnemonicParsing="false" text="Laden">
                                     <items>
                                         <MenuItem mnemonicParsing="false" onAction="#loadXML" text="XML"/>
                                         <MenuItem mnemonicParsing="false" text="JAXB"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#loadLandscape"
-                                                  text="Serialisieren"/>
+                                        <MenuItem fx:id="serializeItem2" mnemonicParsing="false"
+                                                  onAction="#loadLandscape"/>
                                     </items>
                                 </Menu>
-                                <Menu mnemonicParsing="false" text="Als Bild speichern">
+                                <Menu fx:id="saveImageAsItemMenu" mnemonicParsing="false">
                                     <items>
                                         <MenuItem mnemonicParsing="false" text="XML"/>
                                         <MenuItem mnemonicParsing="false" text="JAXB"/>
-                                        <MenuItem mnemonicParsing="false" text="Serialisieren"/>
+                                        <MenuItem fx:id="serializeItem3" mnemonicParsing="false"/>
                                     </items>
                                 </Menu>
-                                <MenuItem mnemonicParsing="false" text="Drucken"/>
+                                <MenuItem fx:id="printItem2" mnemonicParsing="false"/>
                                 <SeparatorMenuItem mnemonicParsing="false"/>
                                 <RadioMenuItem fx:id="resizeMenu" mnemonicParsing="false" onAction="#territoriumGroup"
-                                               text="Größe ändern..." toggleGroup="$territoriumGroup">
+                                               toggleGroup="$territoriumGroup">
                                     <toggleGroup>
                                         <ToggleGroup fx:id="territoriumGroup"/>
                                     </toggleGroup>
                                 </RadioMenuItem>
                                 <RadioMenuItem fx:id="avatarMenu" mnemonicParsing="false" onAction="#territoriumGroup"
-                                               text="Avatar verschieben" toggleGroup="$territoriumGroup"/>
+                                               toggleGroup="$territoriumGroup"/>
                                 <RadioMenuItem fx:id="baseMenu" mnemonicParsing="false" onAction="#territoriumGroup"
-                                               text="Base verschieben" toggleGroup="$territoriumGroup"/>
+                                               toggleGroup="$territoriumGroup"/>
                                 <RadioMenuItem fx:id="flagMenu" mnemonicParsing="false" onAction="#territoriumGroup"
-                                               text="Flagge platzieren" toggleGroup="$territoriumGroup"/>
+                                               toggleGroup="$territoriumGroup"/>
                                 <RadioMenuItem fx:id="terroristUnarmedMenu" mnemonicParsing="false"
-                                               onAction="#territoriumGroup" text="Unbewaffneten Terroristen platzieren"
+                                               onAction="#territoriumGroup"
                                                toggleGroup="$territoriumGroup"/>
                                 <RadioMenuItem fx:id="terroristArmedMenu" mnemonicParsing="false"
-                                               onAction="#territoriumGroup" text="Bewaffneten Terroristen platzieren"
+                                               onAction="#territoriumGroup"
                                                toggleGroup="$territoriumGroup"/>
                                 <RadioMenuItem fx:id="fieldMenu" mnemonicParsing="false" onAction="#territoriumGroup"
-                                               text="Kachel löschen" toggleGroup="$territoriumGroup"/>
+                                               toggleGroup="$territoriumGroup"/>
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Avatar">
+                        <Menu fx:id="avatarMainMenu" mnemonicParsing="false">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#hasFlags" text="Flaggen in der Hand..."/>
-                                <MenuItem mnemonicParsing="false" onAction="#turnLeft" text="linksUm">
+                                <MenuItem fx:id="flagsInHandItem" mnemonicParsing="false" onAction="#hasFlags"/>
+                                <MenuItem fx:id="leftTurnItem" mnemonicParsing="false" onAction="#turnLeft">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem mnemonicParsing="false" onAction="#forward" text="vor">
+                                <MenuItem fx:id="forwardItem" mnemonicParsing="false" onAction="#forward">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="DOWN"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem mnemonicParsing="false" onAction="#pick" text="nimm">
+                                <MenuItem fx:id="pickItem" mnemonicParsing="false" onAction="#pick">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="DOWN"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem mnemonicParsing="false" onAction="#drop" text="gib">
+                                <MenuItem fx:id="dropItem" mnemonicParsing="false" onAction="#drop">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="DOWN"
                                                             shortcut="UP"/>
                                     </accelerator>
                                 </MenuItem>
-                                <MenuItem mnemonicParsing="false" onAction="#attack" text="attackieren">
+                                <MenuItem fx:id="attackItem" mnemonicParsing="false" onAction="#attack">
                                     <accelerator>
                                         <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="DOWN"
                                                             shortcut="UP"/>
@@ -134,7 +131,7 @@
                                 </MenuItem>
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Simulation">
+                        <Menu fx:id="simulationMenu" mnemonicParsing="false">
                             <items>
                                 <MenuItem fx:id="playItem" mnemonicParsing="false" onAction="#play"
                                           text="Start/Fortsetzen">
@@ -152,7 +149,7 @@
                                 <MenuItem fx:id="stopItem" mnemonicParsing="false" onAction="#stop" text="Stopp"/>
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Beispiele">
+                        <Menu fx:id="beispieleMenu" mnemonicParsing="false">
                             <items>
                                 <MenuItem fx:id="saveJDBC" mnemonicParsing="false" onAction="#saveJDBC"
                                           text="Speichern...">
@@ -162,6 +159,16 @@
                             </items>
                         </Menu>
                         <fx:include fx:id="tutorMenu" source="tutor.fxml"/>
+                        <Menu fx:id="spracheMenu" mnemonicParsing="false">
+                            <items>
+                                <MenuItem fx:id="languageDE" mnemonicParsing="false" onAction="#switchToGerman"
+                                          text="Deutsch">
+                                </MenuItem>
+                                <MenuItem fx:id="languageEN" mnemonicParsing="false" onAction="#switchToEnglish"
+                                          text="Englisch">
+                                </MenuItem>
+                            </items>
+                        </Menu>
                     </menus>
                     <tooltip>
                         <Tooltip text="Menü zur Steuerung der Simulation"/>

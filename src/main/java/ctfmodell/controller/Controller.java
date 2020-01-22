@@ -9,6 +9,7 @@ import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.enums.Field;
 import ctfmodell.model.exception.*;
 import ctfmodell.provider.DialogProvider;
+import ctfmodell.provider.PropertyProvider;
 import ctfmodell.serialization.LandscapeSerialization;
 import ctfmodell.serialization.XMLSerialization;
 import ctfmodell.simulation.SimulationRunner;
@@ -18,6 +19,9 @@ import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
 import ctfmodell.view.OfficerContextMenu;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,23 +43,18 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static ctfmodell.Main.*;
 
 
+@SuppressWarnings("unchecked")
 public class Controller {
 
     public Landscape landscape;
     @FXML
     BorderPane pane;
-    @FXML
-    MenuItem newItem;
-    @FXML
-    RadioMenuItem resizeMenu, avatarMenu, baseMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
+
     @FXML
     ToggleButton sizeButton, avatarButton, baseButton, flagButton, terrorUnarmedButton, terrorArmedButton, deleteButton;
     @FXML
@@ -66,8 +65,38 @@ public class Controller {
     Slider slider;
     @FXML
     Label officerLabel;
+
     @FXML
-    Menu tutorMenu;
+    Menu tutorMenu, editorMenu, territoriumMenu, avatarMainMenu, simulationMenu, beispieleMenu, spracheMenu;
+
+    //editorMenu
+    @FXML
+    MenuItem newItem, openItem, compileItem, printItem, beendenItem;
+
+    //editorMenu
+    @FXML
+    Menu saveItemMenu, loadItemMenu, saveImageAsItemMenu;
+    @FXML
+    MenuItem serializeItem, serializeItem2, serializeItem3, printItem2;
+    @FXML
+    RadioMenuItem resizeMenu, avatarMenu, baseMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
+
+    //menuAvatar
+    @FXML
+    MenuItem flagsInHandItem, leftTurnItem, forwardItem, pickItem, dropItem, attackItem;
+
+    //simulationMenu
+    @FXML
+    MenuItem playItem, pauseItem, stopItem;
+
+    //beispieleMenu
+    @FXML
+    MenuItem saveJDBC, loadJDBC;
+
+    //sprachenMenu
+    @FXML
+    MenuItem languageDE, languageEN;
+
     @FXML
     TutorController tutorMenuController;
 
@@ -81,6 +110,10 @@ public class Controller {
     private Stage stage;
     private OfficerContextMenu contextMenu;
     private SimulationRunner runner;
+
+    private PropertyProvider propertyProvider;
+    private ResourceBundle resourceBundle;
+    private StringProperty language;
 
     private Coordinates originFieldYX;
     private EventHandler<MouseEvent> pressedEventHandler = new EventHandler<MouseEvent>() {
@@ -211,18 +244,30 @@ public class Controller {
     };
 
     @FXML
-    public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code, String role) {
+    public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code, PropertyProvider provider) {
+        this.propertyProvider = provider;
+        resourceBundle = ResourceBundle.getBundle("bundles.language", new Locale(this.propertyProvider.getLanguage()));
+
+        System.out.println("Sprache startet mit Englisch");
+
+        this.language = new SimpleStringProperty();
+        this.language.addListener((ChangeListener) (o, oldVal, newVal) -> this.translate());
+        this.language.setValue(this.propertyProvider.getLanguage());
+
+
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
         runner = new SimulationRunner(0, this.landscape);
         slider.valueProperty().addListener(
                 (observable, oldValue, newValue) -> runner.setSpeed(newValue.doubleValue())
         );
+
         codeEditor.setText(code);
         this.compile(false);
         this.initializeContextMenu(landscape.getPoliceOfficer().getClass().getName());
+
         tutorMenuController.setParentController(this);
-        tutorMenuController.setRole(role);
+        tutorMenuController.setRole(provider.getRole(), this.propertyProvider.getLanguage());
     }
 
     /**
@@ -448,6 +493,137 @@ public class Controller {
             System.err.println("Die ausgewählte Datei ist keine gültige TXML-Datei!");
         }
 
+    }
+
+    private void translate() {
+        ResourceBundle.clearCache();
+        this.resourceBundle = ResourceBundle
+                .getBundle("bundles.language", new Locale(this.propertyProvider.getLanguage()));
+
+        this.tutorMenu.setText(this.resourceBundle.getString("menuTutor"));
+        this.editorMenu.setText(this.resourceBundle.getString("menuEditor"));
+        this.territoriumMenu.setText(this.resourceBundle.getString("menuTerritorium"));
+        this.avatarMainMenu.setText(this.resourceBundle.getString("menuAvatar"));
+        this.simulationMenu.setText(this.resourceBundle.getString("menuSimulation"));
+        this.beispieleMenu.setText(this.resourceBundle.getString("menuBeispiele"));
+        this.spracheMenu.setText(this.resourceBundle.getString("menuSprache"));
+
+        this.newItem.setText(this.resourceBundle.getString("menuItemNeu"));
+        this.openItem.setText(this.resourceBundle.getString("menuItemOeffnen"));
+        this.compileItem.setText(this.resourceBundle.getString("menuItemKompilieren"));
+        this.printItem.setText(this.resourceBundle.getString("menuItemDrucken"));
+        this.beendenItem.setText(this.resourceBundle.getString("menuItemBeenden"));
+
+        this.saveItemMenu.setText(this.resourceBundle.getString("menuItemSpeicher"));
+        this.loadItemMenu.setText(this.resourceBundle.getString("menuItemLaden"));
+        this.saveImageAsItemMenu.setText(this.resourceBundle.getString("menuItemBildSpeichern"));
+        this.serializeItem.setText(this.resourceBundle.getString("menuItemSerialisieren"));
+        this.serializeItem2.setText(this.resourceBundle.getString("menuItemSerialisieren"));
+        this.serializeItem3.setText(this.resourceBundle.getString("menuItemSerialisieren"));
+        this.printItem2.setText(this.resourceBundle.getString("menuItemDrucken"));
+        this.resizeMenu.setText(this.resourceBundle.getString("menuItemGroesseAendern"));
+        this.avatarMenu.setText(this.resourceBundle.getString("menuItemAvatarVerschieben"));
+        this.baseMenu.setText(this.resourceBundle.getString("menuItemBaseVerschieben"));
+        this.flagMenu.setText(this.resourceBundle.getString("menuItemFlaggePlatzieren"));
+        this.terroristUnarmedMenu.setText(this.resourceBundle.getString("menuItemUnbewaffnetePlatzieren"));
+        this.terroristArmedMenu.setText(this.resourceBundle.getString("menuItemBewaffnetePlatieren"));
+        this.fieldMenu.setText(this.resourceBundle.getString("menuItemKachenLoeschen"));
+
+
+        this.flagsInHandItem.setText(this.resourceBundle.getString("menuItemFlaggenInHand"));
+        this.leftTurnItem.setText(this.resourceBundle.getString("menuItemLinkUm"));
+        this.forwardItem.setText(this.resourceBundle.getString("menuItemVor"));
+        this.pickItem.setText(this.resourceBundle.getString("menuItemNimm"));
+        this.dropItem.setText(this.resourceBundle.getString("menuItemGib"));
+        this.attackItem.setText(this.resourceBundle.getString("menuItemAttackieren"));
+
+        this.playItem.setText(this.resourceBundle.getString("menuItemStartFortsetzen"));
+        this.pauseItem.setText(this.resourceBundle.getString("menuItemPause"));
+        this.stopItem.setText(this.resourceBundle.getString("menuItemStopp"));
+
+        this.saveJDBC.setText(this.resourceBundle.getString("menuItemSpeicher"));
+        this.loadJDBC.setText(this.resourceBundle.getString("menuItemLaden"));
+
+        tutorMenuController.setRole(this.propertyProvider.getRole(), this.propertyProvider.getLanguage());
+
+        this.languageDE.setText(this.resourceBundle.getString("menuItemDeutsch"));
+        this.languageEN.setText(this.resourceBundle.getString("menuItemEnglisch"));
+    }
+
+    @FXML
+    public void saveJDBC(ActionEvent actionEvent) {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code abspeichern", "Gebe ein oder mehrere Tags ein", "Speichern", "Tags");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            List<String> tags = Arrays.asList(name.split(" "));
+            try {
+                boolean success = DatabaseManager.saveExample(landscape, this.codeEditor.getText(), tags, editorClass);
+
+                if (success) {
+                    DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Beispiel speichern",
+                            "Dein Beispiel wurde erfolgreich gespeichert.");
+                } else {
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehlgeschlagen", "Beispiel speichern",
+                            "Dein Beispiel konnte nicht gespeichert werden.");
+                }
+
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @FXML
+    public void loadJDBC(ActionEvent actionEvent) {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code laden", "Gebe einen Tag ein", "Laden", "Tag");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(name -> {
+            List<String> tags = Arrays.asList(name.split(" "));
+
+            if (tags.size() > 1) {
+                DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Du kannst nur einen Tag eingeben");
+            } else {
+                List<Example> examples = DatabaseManager.getExamplesOfTag(tags.get(0));
+                if (examples.isEmpty()) {
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Es konnten keine Beispiele zu diesem Tag gefunden werden.");
+                } else {
+                    ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
+                    Optional<Example> choiceResult = choiceDialog.showAndWait();
+
+                    choiceResult.ifPresent(example -> {
+                        try {
+                            DatabaseManager.loadExample(example, this);
+                        } catch (XMLStreamException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+        });
+
+    }
+
+    public TextArea getCodeEditor() {
+        return this.codeEditor;
+    }
+
+    public void setOfficerLabel(String officerLabel) {
+        this.officerLabel.setText("Du bist gerade als: " + officerLabel + " unterwegs.");
+    }
+
+    @FXML
+    public void switchToGerman(ActionEvent event) {
+        this.propertyProvider.setLanguage("de");
+        this.language.setValue("de");
+    }
+
+    @FXML
+    public void switchToEnglish(ActionEvent event) {
+        this.propertyProvider.setLanguage("en");
+        this.language.setValue("en");
     }
 
     @FXML
@@ -681,69 +857,5 @@ public class Controller {
             fieldMenu.setSelected(true);
             this.landscape.setDeleteEnabled(true);
         }
-    }
-
-    @FXML
-    public void saveJDBC(ActionEvent actionEvent) {
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code abspeichern", "Gebe ein oder mehrere Tags ein", "Speichern", "Tags");
-        Optional<String> result = dialog.showAndWait();
-
-        result.ifPresent(name -> {
-            List<String> tags = Arrays.asList(name.split(" "));
-            try {
-                boolean success = DatabaseManager.saveExample(landscape, this.codeEditor.getText(), tags, editorClass);
-
-                if (success) {
-                    DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Beispiel speichern",
-                            "Dein Beispiel wurde erfolgreich gespeichert.");
-                } else {
-                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehlgeschlagen", "Beispiel speichern",
-                            "Dein Beispiel konnte nicht gespeichert werden.");
-                }
-
-            } catch (XMLStreamException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    @FXML
-    public void loadJDBC(ActionEvent actionEvent) {
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code laden", "Gebe einen Tag ein", "Laden", "Tag");
-        Optional<String> result = dialog.showAndWait();
-
-        result.ifPresent(name -> {
-            List<String> tags = Arrays.asList(name.split(" "));
-
-            if (tags.size() > 1) {
-                DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Du kannst nur einen Tag eingeben");
-            } else {
-                List<Example> examples = DatabaseManager.getExamplesOfTag(tags.get(0));
-                if(examples.isEmpty()) {
-                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Es konnten keine Beispiele zu diesem Tag gefunden werden.");
-                } else {
-                    ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
-                    Optional<Example> choiceResult = choiceDialog.showAndWait();
-
-                    choiceResult.ifPresent(example -> {
-                        try {
-                            DatabaseManager.loadExample(example, this);
-                        } catch (XMLStreamException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-
-        });
-
-    }
-
-    public TextArea getCodeEditor() {
-        return this.codeEditor;
-    }
-
-    public void setOfficerLabel(String officerLabel) {
-        this.officerLabel.setText("Du bist gerade als: " + officerLabel + " unterwegs.");
     }
 }

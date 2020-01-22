@@ -4,6 +4,7 @@ import ctfmodell.container.SimulationContainer;
 import ctfmodell.controller.Controller;
 import ctfmodell.database.DatabaseManager;
 import ctfmodell.model.Landscape;
+import ctfmodell.provider.PropertyProvider;
 import ctfmodell.tutor.Tutor;
 import ctfmodell.tutor.TutorialSystem;
 import ctfmodell.tutor.TutorialSystemImpl;
@@ -21,7 +22,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,9 +31,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Properties;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 
 @SuppressWarnings({"ConstantConditions", "Duplicates"})
 public class Main extends Application {
@@ -45,6 +42,7 @@ public class Main extends Application {
     public static final String PREFIX_2 = " extends ctfmodell.model.PoliceOfficer {\n\npublic ";
     public static final String POSTFIX = "\n\n}";
     public static SimulationContainer simulations = new SimulationContainer();
+    private static final PropertyProvider propertyProvider = new PropertyProvider();
 
     public static void main(String[] args) {
         launch(args);
@@ -138,15 +136,10 @@ public class Main extends Application {
             code = "void main() {\n\n}";
         }
 
-        FileInputStream fis = new FileInputStream("simulator.properties");
-        Properties properties = new Properties();
-        properties.load(fis);
-        String role = properties.getProperty("role");
-        establishRMIConnection(role);
-        ResourceBundle resourceBundle = new PropertyResourceBundle(fis);
+
+        establishRMIConnection(propertyProvider.getRole());
 
         FXMLLoader loader = new FXMLLoader(Main.class.getClassLoader().getResource("main.fxml"));
-        loader.setResources(resourceBundle);
         Parent root = loader.load();
 
         //Add Observers
@@ -157,7 +150,7 @@ public class Main extends Application {
 
         Controller controller = loader.getController();
         controller.setEditorClass(editorClass);
-        controller.initialize(landscape, landscapePanel, code, role);
+        controller.initialize(landscape, landscapePanel, code, propertyProvider);
         controller.initializeEventHandler();
         controller.setOfficerLabel(editorClass);
 
@@ -189,20 +182,25 @@ public class Main extends Application {
     }
 
     public static void establishRMIConnection(String role) {
+        if (simulations.getContainerSize() > 0) {
+            return;
+        }
+
+        int port = Integer.valueOf(propertyProvider.getPort());
 
         try {
             if ("tutor".equals(role)) {
                 Tutor.tutorialSystem = new TutorialSystemImpl();
-                LocateRegistry.createRegistry(3579);
-                Tutor.registry = LocateRegistry.getRegistry(3579);
+                LocateRegistry.createRegistry(port);
+                Tutor.registry = LocateRegistry.getRegistry(port);
                 Tutor.registry.rebind("TutorialSystem", Tutor.tutorialSystem);
                 System.out.println("TutorialSystem angemeldet");
             } else {
-                Tutor.registry = LocateRegistry.getRegistry(3579);
+                Tutor.registry = LocateRegistry.getRegistry(port);
                 Tutor.tutorialSystem = (TutorialSystem) Tutor.registry.lookup("TutorialSystem");
             }
         } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
+            System.err.println("Socket-Verbindung ist fehlgeschlagen");
         }
     }
 
@@ -212,7 +210,7 @@ public class Main extends Application {
             UnicastRemoteObject.unexportObject(Tutor.tutorialSystem, true);
             DatabaseManager.shutdownDatabase();
         } catch (NoSuchObjectException e) {
-            e.printStackTrace();
+            // Tritt auf, wenn man Student ist
         }
     }
 
