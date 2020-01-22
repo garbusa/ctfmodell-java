@@ -17,7 +17,6 @@ public class Tutor {
     public static Registry registry;
 
     static void loadStudentExample(Controller controller, StudentExample example) {
-//        controller.setOfficerLabel(example.getOfficerName());
         controller.getCodeEditor().setText(example.getCode());
 
         Reader r = new StringReader(example.getXml());

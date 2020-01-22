@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -206,7 +208,12 @@ public class Main extends Application {
 
     @Override
     public void stop() {
-        DatabaseManager.shutdownDatabase();
+        try {
+            UnicastRemoteObject.unexportObject(Tutor.tutorialSystem, true);
+            DatabaseManager.shutdownDatabase();
+        } catch (NoSuchObjectException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void createDefaultOfficer() {
@@ -222,6 +229,5 @@ public class Main extends Application {
             System.err.println("DefaultOfficer.java gibt es schon existiert schon!");
         }
     }
-
 
 }

@@ -4,8 +4,10 @@ import ctfmodell.Main;
 import ctfmodell.controller.Controller;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.StudentExample;
+import ctfmodell.provider.DialogProvider;
 import ctfmodell.serialization.XMLSerialization;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -47,6 +49,8 @@ public class TutorController {
                 sendOrLoadRequest.setOnAction((event) -> this.loadRequest());
                 sendOrLoadAnswer.setOnAction((event) -> this.sendAnswer());
 
+                sendOrLoadRequest.setDisable(false);
+                sendOrLoadAnswer.setDisable(true);
                 break;
             case "student":
                 sendOrLoadRequest.setText("Tutoranfrage senden");
@@ -54,6 +58,8 @@ public class TutorController {
                 sendOrLoadRequest.setOnAction((event) -> this.sendRequest());
                 sendOrLoadAnswer.setOnAction((event) -> this.loadAnswer());
 
+                sendOrLoadRequest.setDisable(false);
+                sendOrLoadAnswer.setDisable(true);
                 break;
             default:
                 throw new IllegalStateException("unexpected role");
@@ -66,21 +72,32 @@ public class TutorController {
             example = Tutor.tutorialSystem.loadNextRequest();
 
             if (example == null) {
-                System.out.println("Es gibt momentan keine Anfragen von Studenten!");
+                DialogProvider.alert(
+                        Alert.AlertType.ERROR, "Keine Anfragen", "Keine Anfragen",
+                        "Es gibt momentan keine Anfragen von Studenten"
+                );
             } else {
                 this.studendIdToAnswer = example.getStudentId();
                 Tutor.loadStudentExample(mainController, example);
-                System.out.println("Anfrage von Student wurde geladen!");
+                mainController.compile();
+                DialogProvider.alert(
+                        Alert.AlertType.CONFIRMATION, "Anfragen", "Geladen",
+                        "Anfrage vom Studenten wurde geladen"
+                );
+                switchControlsEnable();
             }
         } catch (RemoteException e) {
-            System.out.println("Es es beim laden einer Studentenanfrage ein Fehler aufgetreten!");
-            e.printStackTrace();
+            DialogProvider.alert(
+                    Alert.AlertType.ERROR, "Fehler", "Fehler",
+                    "Beim Laden einer Studentenanfrage ist ein Fehler aufgetreten"
+            );
         }
     }
 
     private void sendAnswer() {
         if (studendIdToAnswer == null) {
-            System.out.println("Du hast noch keine Anfrage geladen!");
+            DialogProvider.alert(Alert.AlertType.INFORMATION, "Anfragen", "Wichtig",
+                    "Du musst vorher eine Anfrage eines Studenten laden!");
             return;
         }
 
@@ -88,63 +105,75 @@ public class TutorController {
             StudentExample example = deserializeExample(studendIdToAnswer);
             Tutor.saveStudentExample(example);
             studendIdToAnswer = null;
-            System.out.println("Antwort wurde vom Tutor gespeichert");
+            DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Gespeichert", "Gespeichert",
+                    "Deine Antwort wurde für den Studenten hinterlegt!");
+            switchControlsEnable();
         } catch (XMLStreamException e) {
-            System.out.println("Speichern der Antwort ist fehlgeschlagen!");
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
+                    "Speichern der Antwort ist fehlgeschlagen!");
             e.printStackTrace();
         }
     }
 
     private void sendRequest() {
         try {
-            if (connectionFailed) {
-                Main.establishRMIConnection(this.role);
-            }
-
-            if (Tutor.tutorialSystem == null) {
-                System.err.println("Es besteht keine Verbindung zu einem Tutor!");
-                return;
-            }
+            if (connectionFailed()) return;
 
             StudentExample example = deserializeExample(studentId);
             boolean sendRequestSuccess = Tutor.tutorialSystem.sendRequest(example);
 
             if (sendRequestSuccess) {
-                System.out.println("Anfrage an den Tutor wurde erfolgreich versendet");
+                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Versendet",
+                        "Anfrage an den Tutor wurde erfolgreich versendet");
+                switchControlsEnable();
             } else {
-                System.out.println("Anfrage an den Tutor konnte nicht versendet werden");
+                connectionFailed = true;
+                DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
+                        "Deine Anfrage konnte nicht versendet werden.");
             }
 
 
         } catch (RemoteException | XMLStreamException e) {
             connectionFailed = true;
-            System.err.println("Anfrage an den Tutor konnte nicht versendet werden");
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
+                    "Deine Anfrage konnte nicht versendet werden.");
             //e.printStackTrace();
         }
     }
 
-    private void loadAnswer() {
+    private boolean connectionFailed() {
         if (connectionFailed) {
             Main.establishRMIConnection(this.role);
         }
 
         if (Tutor.tutorialSystem == null) {
-            System.err.println("Es besteht keine Verbindung zu einem Tutor!");
-            return;
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Keine Verbindung", "" +
+                    "Es konnte keine Verbindung zum Tutor aufgebaut werden!");
+            return true;
         }
+        return false;
+    }
+
+    private void loadAnswer() {
+        if (connectionFailed()) return;
 
         StudentExample example;
         try {
             example = Tutor.tutorialSystem.checkResponse(studentId);
             if (example == null) {
-                System.out.println("Es gibt momentan keine Antworten vom Tutor!");
+                DialogProvider.alert(Alert.AlertType.INFORMATION, "Information", "Keine Antwort",
+                        "Es gibt momentan keine Antworten vom Tutor!");
             } else {
                 Tutor.loadStudentExample(mainController, example);
-                System.out.println("Antwort vom Studenten wurde geladen!");
+                mainController.compile();
+                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Geladen",
+                        "Antwort vom Tutor wurde geladen!");
+                switchControlsEnable();
             }
         } catch (RemoteException e) {
             connectionFailed = true;
-            System.err.println("Es es beim laden der Tutor-Antwort ein Fehler aufgetreten!");
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
+                    "Es es beim laden der Tutor-Antwort ein Fehler aufgetreten!");
             //e.printStackTrace();
         }
     }
@@ -168,6 +197,20 @@ public class TutorController {
     public void setRole(String role) {
         this.role = role;
         setRoleMenu();
+    }
+
+    private void switchControlsEnable() {
+        if (this.sendOrLoadAnswer.isDisable()) {
+            this.sendOrLoadAnswer.setDisable(false);
+        } else {
+            this.sendOrLoadAnswer.setDisable(true);
+        }
+
+        if (this.sendOrLoadRequest.isDisable()) {
+            this.sendOrLoadRequest.setDisable(false);
+        } else {
+            this.sendOrLoadRequest.setDisable(true);
+        }
     }
 
 }
