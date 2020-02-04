@@ -3,6 +3,11 @@ package ctfmodell.container;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Hier werden aktuelle Simulationen in einer Liste festgehalten
+ *
+ * @author Nick Garbusa
+ */
 public class SimulationContainer {
 
     private List<String> openSimulations = new ArrayList<>();

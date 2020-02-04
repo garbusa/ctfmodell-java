@@ -10,6 +10,11 @@ import javafx.util.Pair;
 
 import java.util.List;
 
+/**
+ * Providerklasse, die wiederverwendbare Dialogboxen für JavaFX enthält
+ *
+ * @author Nick Garbusa
+ */
 @SuppressWarnings("Duplicates")
 public class DialogProvider {
 

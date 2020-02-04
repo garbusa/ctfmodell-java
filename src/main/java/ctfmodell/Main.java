@@ -8,6 +8,7 @@ import ctfmodell.provider.PropertyProvider;
 import ctfmodell.tutor.Tutor;
 import ctfmodell.tutor.TutorialSystem;
 import ctfmodell.tutor.TutorialSystemImpl;
+import ctfmodell.util.FileUtils;
 import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
 import javafx.application.Application;
@@ -23,9 +24,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -35,14 +33,8 @@ import java.rmi.server.UnicastRemoteObject;
 @SuppressWarnings({"ConstantConditions", "Duplicates"})
 public class Main extends Application {
 
-    public static final String PROGAM_FOLDER = "programs";
-    public static final String LANDSCAPE_FOLDER = "landscapes";
-    public static final String XML_FOLDER = "xml";
-    public static final String PREFIX_1 = "public class ";
-    public static final String PREFIX_2 = " extends ctfmodell.model.PoliceOfficer {\n\npublic ";
-    public static final String POSTFIX = "\n\n}";
-    public static SimulationContainer simulations = new SimulationContainer();
     private static final PropertyProvider propertyProvider = new PropertyProvider();
+    public static SimulationContainer simulations = new SimulationContainer();
 
     public static void main(String[] args) {
         launch(args);
@@ -51,84 +43,16 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         DatabaseManager.createDatabase();
-        createProgramFolder();
-        createSerializationFolder();
-        createXMLFolder();
-        String defaultCode = loadDefaultOfficerCode();
+        FileUtils.createProgramFolder();
+        FileUtils.createSerializationFolder();
+        FileUtils.createXMLFolder();
+        String defaultCode = FileUtils.loadDefaultOfficerCode();
         createAndStartSimulation(primaryStage, "DefaultOfficer", defaultCode);
-    }
-
-    private static String loadDefaultOfficerCode() {
-        Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");
-
-        if (Files.exists(directory)) {
-            try {
-                String prefix = PREFIX_1 + "DefaultOfficer" + PREFIX_2;
-                String code = new String(Files.readAllBytes(directory));
-                if (code.length() < 1) return null;
-                code = code.replace(prefix, "");
-                code = code.substring(0, code.length() - 1);
-                return code;
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    private static void createProgramFolder() {
-        Path directory = Paths.get(PROGAM_FOLDER);
-
-        if (!Files.exists(directory)) {
-            try {
-                Files.createDirectory(directory);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-            } finally {
-                createDefaultOfficer();
-            }
-        } else {
-            System.err.println("Programm-Verzeichnis existiert schon!");
-            createDefaultOfficer();
-        }
-
-    }
-
-    private static void createSerializationFolder() {
-        Path directory = Paths.get(LANDSCAPE_FOLDER);
-
-        if (!Files.exists(directory)) {
-            try {
-                Files.createDirectory(directory);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-            }
-        } else {
-            System.err.println("LANDSCAPE_FOLDER-Verzeichnis existiert schon!");
-        }
-
-    }
-
-    private static void createXMLFolder() {
-        Path directory = Paths.get(XML_FOLDER);
-
-        if (!Files.exists(directory)) {
-            try {
-                Files.createDirectory(directory);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-            }
-        } else {
-            System.err.println("XML-Verzeichnis existiert schon!");
-        }
-
     }
 
     public static void createAndStartSimulation(Stage primaryStage, String editorClass, String code) throws IOException {
         if (!Helper.isValidClassName(editorClass)) {
-            System.err.println(editorClass + "ist kein valider Klassenname!");
+            System.err.println("[Simulation] " + editorClass + "ist kein valider Klassenname!");
             System.exit(0);
         }
 
@@ -165,7 +89,7 @@ public class Main extends Application {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setContent(landscapePanel);
 
-        primaryStage.setTitle("Capture The Flag Simulation");
+        primaryStage.setTitle("Capture The Flag Simulation [" + propertyProvider.getRole() + "]");
         primaryStage.getIcons().add(new Image(Main.class.getClassLoader().getResourceAsStream("image/menu/police_with_flag.png")));
         primaryStage.setScene(new Scene(root));
         simulations.addSimulation(editorClass);
@@ -194,13 +118,13 @@ public class Main extends Application {
                 LocateRegistry.createRegistry(port);
                 Tutor.registry = LocateRegistry.getRegistry(port);
                 Tutor.registry.rebind("TutorialSystem", Tutor.tutorialSystem);
-                System.out.println("TutorialSystem angemeldet");
+                System.out.println("[DEBUG] TutorialSystem angemeldet");
             } else {
                 Tutor.registry = LocateRegistry.getRegistry(port);
                 Tutor.tutorialSystem = (TutorialSystem) Tutor.registry.lookup("TutorialSystem");
             }
         } catch (RemoteException | NotBoundException e) {
-            System.err.println("Socket-Verbindung ist fehlgeschlagen");
+            System.out.println("[DEBUG] Socket-Verbindung ist fehlgeschlagen");
         }
     }
 
@@ -211,20 +135,6 @@ public class Main extends Application {
             DatabaseManager.shutdownDatabase();
         } catch (NoSuchObjectException e) {
             // Tritt auf, wenn man Student ist
-        }
-    }
-
-    private static void createDefaultOfficer() {
-        Path directory = Paths.get(PROGAM_FOLDER, "DefaultOfficer.java");
-
-        if (!Files.exists(directory)) {
-            try {
-                Files.createFile(directory);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-            }
-        } else {
-            System.err.println("DefaultOfficer.java gibt es schon existiert schon!");
         }
     }
 

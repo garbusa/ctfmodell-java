@@ -13,8 +13,8 @@ import ctfmodell.provider.PropertyProvider;
 import ctfmodell.serialization.LandscapeSerialization;
 import ctfmodell.serialization.XMLSerialization;
 import ctfmodell.simulation.SimulationRunner;
-import ctfmodell.tutor.TutorController;
 import ctfmodell.util.Coordinates;
+import ctfmodell.util.FileUtils;
 import ctfmodell.util.Helper;
 import ctfmodell.view.LandscapePanel;
 import ctfmodell.view.OfficerContextMenu;
@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -45,9 +44,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static ctfmodell.Main.*;
-
-
+/**
+ * Der Hauptkontroller, wo alle Interaktionen mit der Simulation stattfinden
+ *
+ * @author Nick Garbusa
+ */
 @SuppressWarnings("unchecked")
 public class Controller {
 
@@ -69,36 +70,40 @@ public class Controller {
     @FXML
     Menu tutorMenu, editorMenu, territoriumMenu, avatarMainMenu, simulationMenu, beispieleMenu, spracheMenu;
 
-    //editorMenu
+    // editorMenu
     @FXML
-    MenuItem newItem, openItem, compileItem, printItem, beendenItem;
+    MenuItem newItem, openItem, compileItem, beendenItem;
 
-    //editorMenu
+    // editorMenu
     @FXML
-    Menu saveItemMenu, loadItemMenu, saveImageAsItemMenu;
+    Menu saveItemMenu, loadItemMenu;
     @FXML
-    MenuItem serializeItem, serializeItem2, serializeItem3, printItem2;
+    MenuItem serializeItem, serializeItem2;
     @FXML
     RadioMenuItem resizeMenu, avatarMenu, baseMenu, flagMenu, terroristUnarmedMenu, terroristArmedMenu, fieldMenu;
 
-    //menuAvatar
+    // menuAvatar
     @FXML
     MenuItem flagsInHandItem, leftTurnItem, forwardItem, pickItem, dropItem, attackItem;
 
-    //simulationMenu
+    // simulationMenu
     @FXML
     MenuItem playItem, pauseItem, stopItem;
 
-    //beispieleMenu
+    // beispieleMenu
     @FXML
     MenuItem saveJDBC, loadJDBC;
 
-    //sprachenMenu
+    // sprachenMenu
     @FXML
     MenuItem languageDE, languageEN;
 
+    @SuppressWarnings("WeakerAccess")
     @FXML
     TutorController tutorMenuController;
+
+    @FXML
+    Button playButton, pauseButton, stopButton, newButton, openButton, saveButton, compileButton, isFlagButton, rotateButton, forwardButton, pickButton, dropButton, attackButton;
 
     private boolean moveAvatarEnabled = false;
     private boolean moveBaseEnabled = false;
@@ -116,6 +121,10 @@ public class Controller {
     private StringProperty language;
 
     private Coordinates originFieldYX;
+
+    /**
+     * Eventhandler der aktiv ist, wenn ein Objekt im Feld neu positionier wird (drag & drop)
+     */
     private EventHandler<MouseEvent> pressedEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent mouseEvent) {
@@ -130,7 +139,8 @@ public class Controller {
 
             if (moveAvatarEnabled) {
                 Field field = landscape.getField(originFieldYX.getY(), originFieldYX.getX());
-                dragged = field == Field.POLICE_OFFICER || field == Field.OFFICER_AND_BASE || field == Field.OFFICER_AND_FLAG;
+                dragged = field == Field.POLICE_OFFICER || field == Field.OFFICER_AND_BASE
+                        || field == Field.OFFICER_AND_FLAG;
             } else if (moveBaseEnabled) {
                 Field field = landscape.getField(originFieldYX.getY(), originFieldYX.getX());
                 dragged = field == Field.BASE || field == Field.OFFICER_AND_BASE;
@@ -147,8 +157,9 @@ public class Controller {
 
                 if (destinationFieldYX != null) {
                     Field field = landscape.getLandscape()[destinationFieldYX.getY()][destinationFieldYX.getX()];
-                    //Ist origin Pair ungleich translate Pair?
-                    if (!originFieldYX.getY().equals(destinationFieldYX.getY()) || !originFieldYX.getX().equals(destinationFieldYX.getX())) {
+                    // Ist origin Pair ungleich translate Pair?
+                    if (!originFieldYX.getY().equals(destinationFieldYX.getY())
+                            || !originFieldYX.getX().equals(destinationFieldYX.getX())) {
                         // Wenn ja, prüfe ob verschieben möglich ist
                         if (itemToDrag == Field.POLICE_OFFICER) {
                             if (field == Field.EMPTY || field == Field.BASE || field == Field.FLAG) {
@@ -156,7 +167,7 @@ public class Controller {
                                 landscape.setDestinationPolice(destinationFieldYX.getY(), destinationFieldYX.getX());
                                 originFieldYX = destinationFieldYX;
                             } else {
-                                System.err.println("Police Officer kann nicht auf dieses Feld gesetzt werden!");
+                                System.err.println("[Simulation] Police Officer kann nicht auf dieses Feld gesetzt werden!");
                             }
                         } else if (itemToDrag == Field.BASE) {
                             if (field == Field.EMPTY || field == Field.POLICE_OFFICER) {
@@ -164,7 +175,7 @@ public class Controller {
                                 landscape.setDestinationBase(destinationFieldYX.getY(), destinationFieldYX.getX());
                                 originFieldYX = destinationFieldYX;
                             } else {
-                                System.err.println("Die Base kann nicht auf dieses Feld gesetzt werden!");
+                                System.err.println("[Simulation] Die Base kann nicht auf dieses Feld gesetzt werden!");
                             }
                         }
 
@@ -175,25 +186,30 @@ public class Controller {
             }
         }
     };
+
+    /**
+     * Eventhandler um ein Item einzufügen oder zu löschen
+     */
     private EventHandler<MouseEvent> itemEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent mouseEvent) {
             int originX = (int) Math.floor(mouseEvent.getX() - 1);
             int originY = (int) Math.floor(mouseEvent.getY() - 1);
-            if (!landscape.isDeleteEnabled() && itemToAdd == Field.OUT_OF_FIELD) return;
+            if (!landscape.isDeleteEnabled() && itemToAdd == Field.OUT_OF_FIELD)
+                return;
             originFieldYX = landscape.getFieldByCoordinates(originY, originX);
-            System.out.println("(Item Add) Clicked Coordinates: " + originY + "-" + originX);
-            if (originFieldYX == null) return;
+            if (originFieldYX == null)
+                return;
 
             if (landscape.isDeleteEnabled()) {
                 Field field = landscape.getField(originFieldYX.getY(), originFieldYX.getX());
                 switch (field) {
                     case BASE:
-                        System.err.println("Es gibts nichts zu löschen.");
+                        System.err.println("[Simulation] Es gibts nichts zu löschen.");
                         break;
                     case OFFICER_AND_BASE:
                     case POLICE_OFFICER:
-                        System.err.println("Der Akteur kann nicht gelöscht werden.");
+                        System.err.println("[Simulation] Der Akteur kann nicht gelöscht werden.");
                         break;
                     case FLAG:
                         landscape.deleteFlag(originFieldYX.getY(), originFieldYX.getX());
@@ -214,21 +230,21 @@ public class Controller {
                         try {
                             landscape.addFlag(flagToAdd);
                         } catch (LandscapeException e) {
-                            System.err.println(e.getMessage());
+                            System.err.println("[Simulation] " + e.getMessage());
                         }
                         break;
                     case UNARMED_TERRORIST:
                         try {
                             landscape.addUnarmedTerrorist(originFieldYX.getY(), originFieldYX.getX());
                         } catch (LandscapeException e) {
-                            System.err.println(e.getMessage());
+                            System.err.println("[Simulation] " + e.getMessage());
                         }
                         break;
                     case ARMED_TERRORIST:
                         try {
                             landscape.addArmedTerrorist(originFieldYX.getY(), originFieldYX.getX());
                         } catch (LandscapeException e) {
-                            System.err.println(e.getMessage());
+                            System.err.println("[Simulation] " + e.getMessage());
                         }
                         break;
                 }
@@ -243,24 +259,29 @@ public class Controller {
         }
     };
 
+    /**
+     * Controller initialize Methode
+     *
+     * @param landscape      Lanschaftsmodell
+     * @param landscapePanel JavaFX Panel
+     * @param code           Code
+     * @param provider       PropertyProvider
+     */
     @FXML
     public void initialize(Landscape landscape, LandscapePanel landscapePanel, String code, PropertyProvider provider) {
         this.propertyProvider = provider;
         resourceBundle = ResourceBundle.getBundle("bundles.language", new Locale(this.propertyProvider.getLanguage()));
 
-        System.out.println("Sprache startet mit Englisch");
+        System.out.println("[DEBUG] Sprache startet mit Englisch");
 
         this.language = new SimpleStringProperty();
         this.language.addListener((ChangeListener) (o, oldVal, newVal) -> this.translate());
         this.language.setValue(this.propertyProvider.getLanguage());
 
-
         this.landscape = landscape;
         this.landscapePanel = landscapePanel;
-        runner = new SimulationRunner(0, this.landscape);
-        slider.valueProperty().addListener(
-                (observable, oldValue, newValue) -> runner.setSpeed(newValue.doubleValue())
-        );
+        runner = new SimulationRunner(0, this.landscape, this);
+        slider.valueProperty().addListener((observable, oldValue, newValue) -> runner.setSpeed(newValue.doubleValue()));
 
         codeEditor.setText(code);
         this.compile(false);
@@ -268,6 +289,63 @@ public class Controller {
 
         tutorMenuController.setParentController(this);
         tutorMenuController.setRole(provider.getRole(), this.propertyProvider.getLanguage());
+
+        this.setSimulationControls(false, true, true);
+
+    }
+
+    private void translate() {
+        ResourceBundle.clearCache();
+        this.resourceBundle = ResourceBundle.getBundle("bundles.language",
+                new Locale(this.propertyProvider.getLanguage()));
+
+        if ("tutor".equals(this.propertyProvider.getLanguage())) {
+            this.tutorMenu.setText(this.resourceBundle.getString("menuTutor"));
+        } else {
+            this.tutorMenu.setText(this.resourceBundle.getString("menuStudent"));
+        }
+        this.editorMenu.setText(this.resourceBundle.getString("menuEditor"));
+        this.territoriumMenu.setText(this.resourceBundle.getString("menuTerritorium"));
+        this.avatarMainMenu.setText(this.resourceBundle.getString("menuAvatar"));
+        this.simulationMenu.setText(this.resourceBundle.getString("menuSimulation"));
+        this.beispieleMenu.setText(this.resourceBundle.getString("menuBeispiele"));
+        this.spracheMenu.setText(this.resourceBundle.getString("menuSprache"));
+
+        this.newItem.setText(this.resourceBundle.getString("menuItemNeu"));
+        this.openItem.setText(this.resourceBundle.getString("menuItemOeffnen"));
+        this.compileItem.setText(this.resourceBundle.getString("menuItemKompilieren"));
+        this.beendenItem.setText(this.resourceBundle.getString("menuItemBeenden"));
+
+        this.saveItemMenu.setText(this.resourceBundle.getString("menuItemSpeicher"));
+        this.loadItemMenu.setText(this.resourceBundle.getString("menuItemLaden"));
+        this.serializeItem.setText(this.resourceBundle.getString("menuItemSerialisieren"));
+        this.serializeItem2.setText(this.resourceBundle.getString("menuItemSerialisieren"));
+        this.resizeMenu.setText(this.resourceBundle.getString("menuItemGroesseAendern"));
+        this.avatarMenu.setText(this.resourceBundle.getString("menuItemAvatarVerschieben"));
+        this.baseMenu.setText(this.resourceBundle.getString("menuItemBaseVerschieben"));
+        this.flagMenu.setText(this.resourceBundle.getString("menuItemFlaggePlatzieren"));
+        this.terroristUnarmedMenu.setText(this.resourceBundle.getString("menuItemUnbewaffnetePlatzieren"));
+        this.terroristArmedMenu.setText(this.resourceBundle.getString("menuItemBewaffnetePlatieren"));
+        this.fieldMenu.setText(this.resourceBundle.getString("menuItemKachenLoeschen"));
+
+        this.flagsInHandItem.setText(this.resourceBundle.getString("menuItemFlaggenInHand"));
+        this.leftTurnItem.setText(this.resourceBundle.getString("menuItemLinkUm"));
+        this.forwardItem.setText(this.resourceBundle.getString("menuItemVor"));
+        this.pickItem.setText(this.resourceBundle.getString("menuItemNimm"));
+        this.dropItem.setText(this.resourceBundle.getString("menuItemGib"));
+        this.attackItem.setText(this.resourceBundle.getString("menuItemAttackieren"));
+
+        this.playItem.setText(this.resourceBundle.getString("menuItemStartFortsetzen"));
+        this.pauseItem.setText(this.resourceBundle.getString("menuItemPause"));
+        this.stopItem.setText(this.resourceBundle.getString("menuItemStopp"));
+
+        this.saveJDBC.setText(this.resourceBundle.getString("menuItemSpeicher"));
+        this.loadJDBC.setText(this.resourceBundle.getString("menuItemLaden"));
+
+        tutorMenuController.setRole(this.propertyProvider.getRole(), this.propertyProvider.getLanguage());
+
+        this.languageDE.setText(this.resourceBundle.getString("menuItemDeutsch"));
+        this.languageEN.setText(this.resourceBundle.getString("menuItemEnglisch"));
     }
 
     /**
@@ -276,34 +354,31 @@ public class Controller {
     private void compile(boolean withAlert) {
         this.saveCode();
 
-        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
-        Path programsFolder = Paths.get(Main.PROGAM_FOLDER);
+        Path codeFile = Paths.get(FileUtils.PROGAM_FOLDER, editorClass + ".java");
+        Path programsFolder = Paths.get(FileUtils.PROGAM_FOLDER);
 
         ClassLoader cl = getClassLoader(programsFolder);
 
         if (cl == null) {
-            System.err.println("Classloader konnte nicht geladen werden!");
+            System.out.println("[ERROR] Classloader konnte nicht geladen werden!");
             return;
         }
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         StandardJavaFileManager manager = compiler.getStandardFileManager(diagnostics, null, null);
-        Iterable<? extends JavaFileObject> units = manager.getJavaFileObjectsFromFiles(Collections.singleton(codeFile.toFile()));
+        Iterable<? extends JavaFileObject> units = manager
+                .getJavaFileObjectsFromFiles(Collections.singleton(codeFile.toFile()));
         JavaCompiler.CompilationTask task = compiler.getTask(null, manager, diagnostics, null, null, units);
 
-        System.out.println("Compilation success: " + task.call());
+        System.out.println("[DEBUG] Compilation success: " + task.call());
 
         if (!diagnostics.getDiagnostics().isEmpty()) {
             Diagnostic<?> diagnostic = diagnostics.getDiagnostics().get(0);
-            String compileMessage = "Quelle: " + diagnostic.getSource() +
-                    "\nNachricht: " +
-                    diagnostic.getMessage(null) +
-                    "\nZeile: " +
-                    diagnostic.getLineNumber();
+            String compileMessage = "Quelle: " + diagnostic.getSource() + "\nNachricht: " + diagnostic.getMessage(null)
+                    + "\nZeile: " + diagnostic.getLineNumber();
             if (withAlert) {
-                DialogProvider.alert(Alert.AlertType.ERROR, "Kompilierfehler", "Kompilierfehler",
-                        compileMessage);
+                DialogProvider.alert(Alert.AlertType.ERROR, "Kompilierfehler", "Kompilierfehler", compileMessage);
             }
             PoliceOfficer policeOfficer = new PoliceOfficer();
             this.landscape.updatePoliceOfficer(policeOfficer);
@@ -316,7 +391,6 @@ public class Controller {
                             "Ihr Programmcode wurde erfolgreich kompiliert!");
                 }
                 PoliceOfficer compiledOfficer = (PoliceOfficer) cl.loadClass(editorClass).newInstance();
-                System.out.println(compiledOfficer);
                 this.landscape.updatePoliceOfficer(compiledOfficer);
                 this.initializeContextMenu(compiledOfficer.getClass().getName());
                 this.deleteAndUpdateObserver();
@@ -333,19 +407,24 @@ public class Controller {
         landscapePanel.setOnContextMenuRequested(contextMenuHandler);
     }
 
+    public void setSimulationControls(boolean play, boolean pause, boolean stop) {
+        this.playButton.setDisable(play);
+        this.pauseButton.setDisable(pause);
+        this.stopButton.setDisable(stop);
+    }
+
     @FXML
     public void saveCode() {
-        String prefix = PREFIX_1 + editorClass + PREFIX_2;
-        Path codeFile = Paths.get(Main.PROGAM_FOLDER, editorClass + ".java");
+        String prefix = FileUtils.PREFIX_1 + editorClass + FileUtils.PREFIX_2;
+        Path codeFile = Paths.get(FileUtils.PROGAM_FOLDER, editorClass + ".java");
 
         StringBuilder builder = new StringBuilder(prefix);
-        builder.append(codeEditor.getText())
-                .append(POSTFIX);
+        builder.append(codeEditor.getText()).append(FileUtils.POSTFIX);
 
         try {
             Files.write(codeFile, builder.toString().getBytes());
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.out.println("[ERROR] " + e.getMessage());
         }
     }
 
@@ -361,7 +440,7 @@ public class Controller {
         return cl;
     }
 
-    private void deleteAndUpdateObserver() {
+    public void deleteAndUpdateObserver() {
         if (this.landscape.getPoliceOfficer() != null) {
             this.landscape.getPoliceOfficer().deleteObservers();
             this.landscape.getPoliceOfficer().addObserver(landscapePanel);
@@ -397,8 +476,10 @@ public class Controller {
     public void play() {
         if (!runner.running && !runner.paused) {
             new Thread(runner).start();
+            this.setSimulationControls(true, false, false);
         } else {
             runner.resume();
+            this.setSimulationControls(true, false, false);
         }
 
     }
@@ -406,23 +487,25 @@ public class Controller {
     @FXML
     public void pause() {
         runner.pause();
+        this.setSimulationControls(false, true, false);
     }
 
     @FXML
     public void stop() {
         runner.stop();
+        this.setSimulationControls(false, true, true);
     }
 
     @FXML
-    public void loadLandscape(ActionEvent event) {
+    public void loadLandscape() {
         LandscapeSerialization serialization = new LandscapeSerialization();
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(LANDSCAPE_FOLDER).toFile());
+        fileChooser.setInitialDirectory(Paths.get(FileUtils.LANDSCAPE_FOLDER).toFile());
         File landscapeFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
 
         if (landscapeFile == null) {
-            System.err.println("Keine Datei ausgewählt!");
+            System.err.println("[Simulation] Keine Datei ausgewählt!");
             return;
         }
 
@@ -432,55 +515,56 @@ public class Controller {
         if (fileName != null) {
             serialization.deserialize(this, landscapeFile, landscapePanel);
         } else {
-            System.err.println("Die ausgewählte Datei ist keine gültige Landscape-Datei!");
+            System.err.println("[Simulation] Die ausgewählte Datei ist keine gültige Landscape-Datei!");
         }
-
 
     }
 
     @FXML
-    public void saveLandscape(ActionEvent event) {
+    public void saveLandscape() {
         LandscapeSerialization serialization = new LandscapeSerialization();
 
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern",
+                "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(name -> {
-            Path directory = Paths.get(LANDSCAPE_FOLDER, name + ".landscape");
+            Path directory = Paths.get(FileUtils.LANDSCAPE_FOLDER, name + ".landscape");
             if (!Files.exists(directory)) {
                 serialization.serialize(this.landscape, directory);
             } else {
-                System.err.println(name + ".landscape existiert schon. Wähle einen anderen Namen aus!");
+                System.err.println("[Simulation] " + name + ".landscape existiert schon. Wähle einen anderen Namen aus!");
             }
         });
 
     }
 
     @FXML
-    public void saveXML(ActionEvent actionEvent) {
+    public void saveXML() {
 
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern (XML)", "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft abspeichern (XML)",
+                "Gebe den Landschaftsnamen ein", "speichern", "Dateiname");
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(name -> {
-            Path directory = Paths.get(XML_FOLDER, name + ".txml");
+            Path directory = Paths.get(FileUtils.XML_FOLDER, name + ".txml");
             if (!Files.exists(directory)) {
                 XMLSerialization.save(this.landscape, name);
             } else {
-                System.err.println(name + ".txml existiert schon. Wähle einen anderen Namen aus!");
+                System.err.println("[Simulation] " + name + ".txml existiert schon. Wähle einen anderen Namen aus!");
             }
         });
     }
 
     @FXML
-    public void loadXML(ActionEvent event) {
+    public void loadXML() {
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(XML_FOLDER).toFile());
+        fileChooser.setInitialDirectory(Paths.get(FileUtils.XML_FOLDER).toFile());
         File xmlFile = fileChooser.showOpenDialog(pane.getScene().getWindow());
 
         if (xmlFile == null) {
-            System.err.println("Keine TXML-Datei ausgewählt!");
+            System.err.println("[Simulation] Keine TXML-Datei ausgewählt!");
             return;
         }
 
@@ -490,69 +574,15 @@ public class Controller {
         if (fileName != null) {
             XMLSerialization.load(this, xmlFile);
         } else {
-            System.err.println("Die ausgewählte Datei ist keine gültige TXML-Datei!");
+            System.err.println("[Simulation] Die ausgewählte Datei ist keine gültige TXML-Datei!");
         }
 
     }
 
-    private void translate() {
-        ResourceBundle.clearCache();
-        this.resourceBundle = ResourceBundle
-                .getBundle("bundles.language", new Locale(this.propertyProvider.getLanguage()));
-
-        this.tutorMenu.setText(this.resourceBundle.getString("menuTutor"));
-        this.editorMenu.setText(this.resourceBundle.getString("menuEditor"));
-        this.territoriumMenu.setText(this.resourceBundle.getString("menuTerritorium"));
-        this.avatarMainMenu.setText(this.resourceBundle.getString("menuAvatar"));
-        this.simulationMenu.setText(this.resourceBundle.getString("menuSimulation"));
-        this.beispieleMenu.setText(this.resourceBundle.getString("menuBeispiele"));
-        this.spracheMenu.setText(this.resourceBundle.getString("menuSprache"));
-
-        this.newItem.setText(this.resourceBundle.getString("menuItemNeu"));
-        this.openItem.setText(this.resourceBundle.getString("menuItemOeffnen"));
-        this.compileItem.setText(this.resourceBundle.getString("menuItemKompilieren"));
-        this.printItem.setText(this.resourceBundle.getString("menuItemDrucken"));
-        this.beendenItem.setText(this.resourceBundle.getString("menuItemBeenden"));
-
-        this.saveItemMenu.setText(this.resourceBundle.getString("menuItemSpeicher"));
-        this.loadItemMenu.setText(this.resourceBundle.getString("menuItemLaden"));
-        this.saveImageAsItemMenu.setText(this.resourceBundle.getString("menuItemBildSpeichern"));
-        this.serializeItem.setText(this.resourceBundle.getString("menuItemSerialisieren"));
-        this.serializeItem2.setText(this.resourceBundle.getString("menuItemSerialisieren"));
-        this.serializeItem3.setText(this.resourceBundle.getString("menuItemSerialisieren"));
-        this.printItem2.setText(this.resourceBundle.getString("menuItemDrucken"));
-        this.resizeMenu.setText(this.resourceBundle.getString("menuItemGroesseAendern"));
-        this.avatarMenu.setText(this.resourceBundle.getString("menuItemAvatarVerschieben"));
-        this.baseMenu.setText(this.resourceBundle.getString("menuItemBaseVerschieben"));
-        this.flagMenu.setText(this.resourceBundle.getString("menuItemFlaggePlatzieren"));
-        this.terroristUnarmedMenu.setText(this.resourceBundle.getString("menuItemUnbewaffnetePlatzieren"));
-        this.terroristArmedMenu.setText(this.resourceBundle.getString("menuItemBewaffnetePlatieren"));
-        this.fieldMenu.setText(this.resourceBundle.getString("menuItemKachenLoeschen"));
-
-
-        this.flagsInHandItem.setText(this.resourceBundle.getString("menuItemFlaggenInHand"));
-        this.leftTurnItem.setText(this.resourceBundle.getString("menuItemLinkUm"));
-        this.forwardItem.setText(this.resourceBundle.getString("menuItemVor"));
-        this.pickItem.setText(this.resourceBundle.getString("menuItemNimm"));
-        this.dropItem.setText(this.resourceBundle.getString("menuItemGib"));
-        this.attackItem.setText(this.resourceBundle.getString("menuItemAttackieren"));
-
-        this.playItem.setText(this.resourceBundle.getString("menuItemStartFortsetzen"));
-        this.pauseItem.setText(this.resourceBundle.getString("menuItemPause"));
-        this.stopItem.setText(this.resourceBundle.getString("menuItemStopp"));
-
-        this.saveJDBC.setText(this.resourceBundle.getString("menuItemSpeicher"));
-        this.loadJDBC.setText(this.resourceBundle.getString("menuItemLaden"));
-
-        tutorMenuController.setRole(this.propertyProvider.getRole(), this.propertyProvider.getLanguage());
-
-        this.languageDE.setText(this.resourceBundle.getString("menuItemDeutsch"));
-        this.languageEN.setText(this.resourceBundle.getString("menuItemEnglisch"));
-    }
-
     @FXML
-    public void saveJDBC(ActionEvent actionEvent) {
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code abspeichern", "Gebe ein oder mehrere Tags ein", "Speichern", "Tags");
+    public void saveJDBC() {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code abspeichern",
+                "Gebe ein oder mehrere Tags ein", "Speichern", "Tags");
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(name -> {
@@ -575,8 +605,9 @@ public class Controller {
     }
 
     @FXML
-    public void loadJDBC(ActionEvent actionEvent) {
-        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code laden", "Gebe einen Tag ein", "Laden", "Tag");
+    public void loadJDBC() {
+        Dialog<String> dialog = DialogProvider.getSingleTextBoxDialog("Landschaft und Code laden", "Gebe einen Tag ein",
+                "Laden", "Tag");
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(name -> {
@@ -587,7 +618,8 @@ public class Controller {
             } else {
                 List<Example> examples = DatabaseManager.getExamplesOfTag(tags.get(0));
                 if (examples.isEmpty()) {
-                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig", "Es konnten keine Beispiele zu diesem Tag gefunden werden.");
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Ungültig",
+                            "Es konnten keine Beispiele zu diesem Tag gefunden werden.");
                 } else {
                     ChoiceDialog<Example> choiceDialog = DialogProvider.getExampleChoiceBox(examples);
                     Optional<Example> choiceResult = choiceDialog.showAndWait();
@@ -615,23 +647,26 @@ public class Controller {
     }
 
     @FXML
-    public void switchToGerman(ActionEvent event) {
+    public void switchToGerman() {
         this.propertyProvider.setLanguage("de");
         this.language.setValue("de");
     }
 
     @FXML
-    public void switchToEnglish(ActionEvent event) {
+    public void switchToEnglish() {
         this.propertyProvider.setLanguage("en");
         this.language.setValue("en");
     }
 
     @FXML
     private void hasFlags() {
-        if (this.landscape == null) return;
-        if (this.landscape.getPoliceOfficer() == null) return;
+        if (this.landscape == null)
+            return;
+        if (this.landscape.getPoliceOfficer() == null)
+            return;
         int count = this.landscape.getPoliceOfficer().getNumberOfFlags();
-        DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Anzahl der Flaggen", "Anzahl", "Der Officer hat " + count + " Flaggen.");
+        DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Anzahl der Flaggen", "Anzahl",
+                "Der Officer hat " + count + " Flaggen.");
     }
 
     @FXML
@@ -644,7 +679,7 @@ public class Controller {
         try {
             this.landscape.getPoliceOfficer().forward();
         } catch (MoveException ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("[Simulation] " + ex.getMessage());
         }
     }
 
@@ -653,7 +688,7 @@ public class Controller {
         try {
             this.landscape.getPoliceOfficer().pick();
         } catch (FlagException ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("[Simulation] " + ex.getMessage());
         }
     }
 
@@ -662,7 +697,7 @@ public class Controller {
         try {
             this.landscape.getPoliceOfficer().drop();
         } catch (FlagException | BaseException ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("[Simulation] " + ex.getMessage());
         }
     }
 
@@ -684,7 +719,7 @@ public class Controller {
         try {
             this.landscape.getPoliceOfficer().attack();
         } catch (PoliceException ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("[Simulation] " + ex.getMessage());
         }
     }
 
@@ -696,22 +731,26 @@ public class Controller {
 
         result.ifPresent(name -> {
             if (Helper.isValidClassName(name)) {
-                Path directory = Paths.get(Main.PROGAM_FOLDER, name + ".java");
+                Path directory = Paths.get(FileUtils.PROGAM_FOLDER, name + ".java");
                 if (!Files.exists(directory)) {
                     try {
                         Files.createFile(directory);
                         this.createAndStartSimulation(name, null);
+                        if ("tutor".equals(this.propertyProvider.getRole())) {
+                            DialogProvider.alert(Alert.AlertType.INFORMATION, "Neues Fenster", "Tutor-Fenster",
+                                    "In diesem neuen Fenster kannst du keine Studentenantworten entgegennehmen. Bitte benutze dafür das erste Fenster.");
+                        }
                     } catch (IOException e) {
-                        System.err.println(e.getMessage());
+                        System.err.println("[Simulation] " + e.getMessage());
                     }
                 } else {
-                    System.err.println(name + ".java existiert schon. Öffne diese Simulation oder wähle einen anderen Namen!");
+                    System.err.println(
+                            "[Simulation] " + name + ".java existiert schon. Öffne diese Simulation oder wähle einen anderen Namen!");
                 }
             } else {
-                System.err.println(name + "ist kein valider Klassenname!");
+                System.err.println("[Simulation] " + name + "ist kein valider Klassenname!");
             }
         });
-
 
     }
 
@@ -727,11 +766,11 @@ public class Controller {
     @FXML
     private void openSimulation() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(Main.PROGAM_FOLDER).toFile());
+        fileChooser.setInitialDirectory(Paths.get(FileUtils.PROGAM_FOLDER).toFile());
         File simulationToOpen = fileChooser.showOpenDialog(pane.getScene().getWindow());
 
         if (simulationToOpen == null) {
-            System.err.println("Du musst eine Officer-Klasse (.java) auswählen!");
+            System.err.println("[Simulation] Du musst eine Officer-Klasse (.java) auswählen!");
             return;
         }
 
@@ -739,11 +778,11 @@ public class Controller {
         String fileName = (file.contains(".java")) ? file.split("\\.")[0] : null;
 
         if (fileName != null && Main.simulations.constainsSimulation(fileName)) {
-            System.err.println("Diese Simulation ist bereits geöffnet!");
+            System.err.println("[Simulation] Diese Simulation ist bereits geöffnet!");
         } else if (fileName != null && !Main.simulations.constainsSimulation(fileName)) {
             String code = null;
             try {
-                String prefix = PREFIX_1 + fileName + PREFIX_2;
+                String prefix = FileUtils.PREFIX_1 + fileName + FileUtils.PREFIX_2;
                 code = new String(Files.readAllBytes(simulationToOpen.toPath()));
                 code = code.replace(prefix, "");
                 code = code.substring(0, code.length() - 1);
@@ -753,18 +792,18 @@ public class Controller {
             createAndStartSimulation(fileName, code);
 
         } else {
-            System.err.println("Die ausgewählte Datei ist keine gültige Java-Datei!");
+            System.err.println("[Simulation] Die ausgewählte Datei ist keine gültige Java-Datei!");
         }
-
 
     }
 
     @FXML
     private void territoriumGroup() {
-        disableStates(territoriumGroup);
+        disableStates();
         RadioMenuItem item = (RadioMenuItem) territoriumGroup.getSelectedToggle();
 
-        if (item == null) return;
+        if (item == null)
+            return;
         String str = item.getId();
 
         if (str.contains("resizeMenu")) {
@@ -793,8 +832,8 @@ public class Controller {
         }
     }
 
-    private void disableStates(ToggleGroup addingGroup) {
-        //if (isSimulationRunning()) return;
+    private void disableStates() {
+        // if (isSimulationRunning()) return;
 
         this.moveAvatarEnabled = false;
         this.moveBaseEnabled = false;
@@ -802,7 +841,6 @@ public class Controller {
         this.dragged = false;
         this.itemToAdd = Field.OUT_OF_FIELD;
         this.itemToDrag = Field.OUT_OF_FIELD;
-        System.err.println(addingGroup.getSelectedToggle());
     }
 
     private void resize() {
@@ -817,9 +855,9 @@ public class Controller {
                 int width = Integer.parseInt(hoeheBreite.getValue().trim());
                 this.landscape.resize(width, height);
             } catch (NumberFormatException ex) {
-                System.err.println("Es wurden nicht valide Zahlen eingegeben!");
+                System.err.println("[Simulation] Es wurden nicht valide Zahlen eingegeben!");
             } catch (LandscapeException ex) {
-                System.err.println("Es ist ein Fehler beim resizen aufgetreten.");
+                System.err.println("[Simulation] Es ist ein Fehler beim resizen aufgetreten.");
             }
         });
 
@@ -827,10 +865,11 @@ public class Controller {
 
     @FXML
     private void addingGroup() {
-        disableStates(addingGroup);
+        disableStates();
         ToggleButton button = (ToggleButton) addingGroup.getSelectedToggle();
 
-        if (button == null) return;
+        if (button == null)
+            return;
         String str = button.getId();
 
         if (str.contains("sizeButton")) {

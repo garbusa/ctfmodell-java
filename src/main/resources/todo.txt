@@ -1,5 +1,0 @@
-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!WIEDER REFACTORN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- synchronized in den Models
-- simulation controls disablen/enablen
-- sichtbar machen, das bei neuen fenster kein tutor modus möglich ist
-- refractoren

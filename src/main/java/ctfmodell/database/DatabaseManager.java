@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Hier finden alle Interaktionen mit der Datenbank statt
+ *
+ * @author Nick Garbusa
+ */
 @SuppressWarnings({"SqlDialectInspection", "StringConcatenationInsideStringBufferAppend"})
 public class DatabaseManager {
 
@@ -40,14 +45,14 @@ public class DatabaseManager {
     private static Connection connection = null;
 
     public static void createDatabase() {
-        System.out.println("Versuche Datenbank zu erstellen");
+        System.out.println("[DEBUG] Versuche Datenbank zu erstellen");
 
         try {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             Connection connection = DatabaseManager.getConnection();
 
             if (connection == null) {
-                System.err.println("Etwas ist schiefgelaufen");
+                System.out.println("[ERROR] Bei der Datenbank-Connection ist etwas schief gelaufen.");
                 return;
             }
 
@@ -66,9 +71,9 @@ public class DatabaseManager {
             if (tableDoesNotExists) {
                 stmt.execute(createExampleTable);
                 stmt.execute(createTagTable);
-                System.out.println("Datenbank wird erstellt");
+                System.out.println("[DEBUG] Datenbank wird erstellt");
             } else {
-                System.err.println("Datenbank wurde schon erstellt");
+                System.out.println("[DEBUG] Datenbank wurde schon erstellt");
             }
 
             stmt.close();
@@ -76,7 +81,7 @@ public class DatabaseManager {
             connection.close();
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Apache Derby Driver konnte nicht gefunden werden");
+            System.out.println("[ERROR] Apache Derby Driver konnte nicht gefunden werden");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -91,7 +96,7 @@ public class DatabaseManager {
                     connection = DriverManager.getConnection("jdbc:derby:" + dbName + ";create=true");
                 } catch (SQLException e) {
                     connection = null;
-                    System.err.println("JDBC Connection konnte nicht aufgebaut werden.");
+                    System.out.println("[DEBUG] JDBC Connection konnte nicht aufgebaut werden.");
                 }
             }
         } catch (SQLException e) {
@@ -261,7 +266,7 @@ public class DatabaseManager {
             connection = DriverManager.getConnection(
                     "jdbc:derby:" + dbName + ";shutdown=true");
         } catch (Exception e) {
-            System.out.println("Database Shutdown");
+            System.out.println("[DEBUG] Database Shutdown");
         }
     }
 

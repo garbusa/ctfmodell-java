@@ -2,6 +2,13 @@ package ctfmodell.model;
 
 import java.io.Serializable;
 
+/**
+ * Das Austausch Objekt für die Apache Derby Datenbank,
+ * welches primär den Editorcode und die Landschaft
+ * als XML-String hält
+ *
+ * @author Nick Garbusa
+ */
 public class Example implements Serializable {
 
     private int id;

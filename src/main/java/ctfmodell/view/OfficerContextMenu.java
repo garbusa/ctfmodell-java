@@ -3,8 +3,8 @@ package ctfmodell.view;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.model.annotation.Invisible;
-import ctfmodell.provider.SoundProvider;
 import ctfmodell.provider.MethodProvider;
+import ctfmodell.provider.SoundProvider;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
@@ -48,8 +48,8 @@ public class OfficerContextMenu extends ContextMenu {
 
     private void getNewMethods(String officerType) {
         PoliceOfficer officer = this.landscape.getPoliceOfficer();
-            Method[] methods = officer.getClass().getDeclaredMethods();
-            reflectAndAddMethods(methods, MethodProvider.Type.NEW, officerType);
+        Method[] methods = officer.getClass().getDeclaredMethods();
+        reflectAndAddMethods(methods, MethodProvider.Type.NEW, officerType);
     }
 
     private void reflectAndAddMethods(Method[] methods, MethodProvider.Type type, String officerType) {
@@ -119,14 +119,13 @@ public class OfficerContextMenu extends ContextMenu {
                 try {
                     finalMethodToExecute.invoke(this.landscape.getPoliceOfficer());
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    System.err.println(e.getCause().getMessage());
+                    System.err.println("[Simulation] " + e.getCause().getMessage());
                     SoundProvider.beep();
                 }
             });
             this.getItems().add(menuItem);
         }
     }
-
 
 
 }

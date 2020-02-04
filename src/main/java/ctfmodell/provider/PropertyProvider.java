@@ -5,6 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
+/**
+ * Lädt die simulation.properties und bietet Methoden, um z.B. die aktuelle
+ * Rolle zu erhalten
+ *
+ * @author Nick Garbusa
+ */
 public class PropertyProvider {
 
     private static String fileName = "simulator.properties";
@@ -15,7 +21,7 @@ public class PropertyProvider {
             FileInputStream fis = new FileInputStream(fileName);
             this.generateProperties(fis);
         } catch (IOException e) {
-            System.err.println("IOException, wenn nicht existent -> generieren | sonst properties nachschauen");
+            System.out.println("[DEBUG] IOException, wenn nicht existent -> generieren | sonst properties nachschauen");
         }
         this.checkAndGenerateProperties();
 
@@ -33,21 +39,6 @@ public class PropertyProvider {
         return this.simulationProperties.getProperty("tutorport");
     }
 
-    public String getLanguage() {
-        String language = this.simulationProperties.getProperty("language");
-
-        switch (language) {
-            case "en":
-                return "en";
-            default:
-                return "de";
-        }
-    }
-
-    public void setLanguage(String language) {
-        this.simulationProperties.setProperty("language", language);
-    }
-
     private void checkAndGenerateProperties() {
         File file = new File(fileName);
         Path path = file.toPath();
@@ -60,7 +51,7 @@ public class PropertyProvider {
                 this.generateProperties(fis);
 
             } catch (IOException e) {
-                System.err.println("Fehler beim Erstellen aufgetreten");
+                System.out.println("[ERROR] Fehler beim Erstellen der Properties aufgetreten");
             }
         }
 
@@ -70,6 +61,20 @@ public class PropertyProvider {
         boolean hasLanguage = this.simulationProperties.containsKey("language");
 
         this.completeProperties(hasRole, hasHost, hasPort, hasLanguage);
+    }
+
+    public String getLanguage() {
+        String language = this.simulationProperties.getProperty("language");
+
+        if ("en".equals(language)) {
+            return "en";
+        } else {
+            return "de";
+        }
+    }
+
+    public void setLanguage(String language) {
+        this.simulationProperties.setProperty("language", language);
     }
 
     private void completeProperties(boolean hasRole, boolean hasHost, boolean hasPort, boolean hasLanguage) {

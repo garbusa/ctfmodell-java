@@ -9,6 +9,15 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Das RMI Remote-Objekt, welches die Requests Queue für den Tutor realisiert
+ * Beinhaltet alle ankommenden Requests und bereits beantworteten Studentenanfragen
+ * <p>
+ * Tutor bezieht Anfragen aus {@link TutorialSystemImpl#requests}
+ * Student bezieht Anfragen aus {@link TutorialSystemImpl#finishedRequests}
+ *
+ * @author Nick Garbusa
+ */
 public class TutorialSystemImpl extends UnicastRemoteObject implements TutorialSystem {
 
     private Queue<StudentExample> requests;

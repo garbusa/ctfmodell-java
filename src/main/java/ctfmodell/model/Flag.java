@@ -1,5 +1,8 @@
 package ctfmodell.model;
 
+/**
+ * Flaggen Objekt
+ */
 public class Flag {
 
     private int xPos;
@@ -13,7 +16,7 @@ public class Flag {
         this.yPos = yPos;
     }
 
-    public int getxPos() {
+    int getxPos() {
         return xPos;
     }
 
@@ -21,7 +24,7 @@ public class Flag {
         this.xPos = xPos;
     }
 
-    public int getyPos() {
+    int getyPos() {
         return yPos;
     }
 

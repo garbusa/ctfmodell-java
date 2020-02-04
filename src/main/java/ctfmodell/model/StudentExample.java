@@ -2,6 +2,12 @@ package ctfmodell.model;
 
 import java.io.Serializable;
 
+/**
+ * Erbt von der {@link Example} Klasse und ist das Austausch-Objekt für
+ * das Tutor-System. Wurde erweitert durch eine studentId
+ *
+ * @author Nick Garbusa
+ */
 public class StudentExample extends Example implements Serializable {
 
     private String studentId;

@@ -11,6 +11,11 @@ import javafx.scene.control.Alert;
 import java.util.List;
 import java.util.Observable;
 
+/**
+ * Die Akteur Klasse. Beinhaltet alle Methoden um mit der Landschaft zu interagieren
+ *
+ * @author Nick Garbusa
+ */
 public class PoliceOfficer extends Observable {
 
     private int yPos;
@@ -32,6 +37,7 @@ public class PoliceOfficer extends Observable {
         this.hasWon = false;
     }
 
+    @Invisible
     public void main() {
 
     }
@@ -172,15 +178,6 @@ public class PoliceOfficer extends Observable {
         }
     }
 
-    private void checkEndAndClearForward(int y, int x, boolean isAttack) {
-        if (this.isNotEndOfField(y, x)) {
-            this.landscape.setField(y, x, Field.EMPTY, isAttack);
-        } else {
-            System.out.println("Koordinaten befinden sich außerhalb des Feldes!");
-            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x));
-        }
-    }
-
     public void drop() {
         Field actualField = this.getActualField();
         if (actualField != Field.OFFICER_AND_BASE) {
@@ -192,22 +189,28 @@ public class PoliceOfficer extends Observable {
         } else {
             this.numberOfFlags = 0;
             this.hasWon = true;
-            Platform.runLater(() -> {
-                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Mission", "Mission", "Du hast deine Mission erfüllt!");
-            });
+            Platform.runLater(() -> DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Mission", "Mission", "Du hast deine Mission erfüllt!"));
         }
     }
 
+    @Invisible
     private boolean hasFlags() {
         return this.numberOfFlags > 0;
     }
 
-    private boolean hasAllFlags() {
+    @SuppressWarnings("WeakerAccess")
+    public boolean hasAllFlags() {
         return this.landscape.getFlags().size() == 0;
     }
 
+    @Invisible
     public boolean hasWon() {
         return this.hasWon;
+    }
+
+    @Invisible
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public boolean isFree() {
@@ -296,19 +299,27 @@ public class PoliceOfficer extends Observable {
         return this.direction;
     }
 
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
+    @Invisible
     public int getNumberOfFlags() {
         return numberOfFlags;
     }
 
+    @Invisible
     public void setNumberOfFlags(int numberOfFlags) {
         this.numberOfFlags = numberOfFlags;
     }
 
+    @Invisible
     public void setLandscape(Landscape landscape) {
         this.landscape = landscape;
+    }
+
+    private void checkEndAndClearForward(int y, int x, boolean isAttack) {
+        if (this.isNotEndOfField(y, x)) {
+            this.landscape.setField(y, x, Field.EMPTY, isAttack);
+        } else {
+            System.out.println("[ERROR] Koordinaten befinden sich außerhalb des Feldes!");
+            throw new LandscapeException(String.format("Auf den Koordinaten (%d,%d) befindet sich kein exestierendes Feld!", y, x));
+        }
     }
 }

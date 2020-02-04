@@ -1,5 +1,8 @@
 package ctfmodell.util;
 
+/**
+ * Objekt, welches die x,y Koordinaten eines Feldes speichert
+ */
 public class Coordinates {
     private Integer y;
     private Integer x;

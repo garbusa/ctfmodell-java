@@ -7,6 +7,7 @@ import ctfmodell.model.enums.Direction;
 import ctfmodell.model.enums.Field;
 import ctfmodell.provider.DialogProvider;
 import ctfmodell.util.Coordinates;
+import ctfmodell.util.FileUtils;
 import javafx.scene.control.Alert;
 
 import javax.xml.stream.*;
@@ -17,14 +18,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-import static ctfmodell.Main.XML_FOLDER;
-
+/**
+ * Klasse, die für die XML Serialisierung und Deserialisierung zu ständig ist.
+ * Wird unteranderem auch für die Apache Derby Datenbank und das Tutor-System genutzt
+ *
+ * @author Nick Garbusa
+ */
 public class XMLSerialization {
 
 
     public static void save(Landscape landscape, String name) {
         try {
-            Path directory = Paths.get(XML_FOLDER, name + ".txml");
+            Path directory = Paths.get(FileUtils.XML_FOLDER, name + ".txml");
             File xmlFile = directory.toFile();
 
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
@@ -33,7 +38,7 @@ public class XMLSerialization {
             DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Speichern", "Landschaft wurde gespeichert!");
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("[Simulation] " + e.getMessage());
         }
     }
 
@@ -167,6 +172,7 @@ public class XMLSerialization {
         officer.setyPos(officerYPos);
 
         controller.landscape = landscape;
+        controller.deleteAndUpdateObserver();
         controller.landscape.reloadAfterDeserialization(officer);
 
         DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Laden", "Landschaft wurde geladen!");

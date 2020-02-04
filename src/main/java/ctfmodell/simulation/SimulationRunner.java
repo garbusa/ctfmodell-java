@@ -5,6 +5,7 @@ package ctfmodell.simulation;
   https://stackoverflow.com/questions/16758346/how-pause-and-then-resume-a-thread
 */
 
+import ctfmodell.controller.Controller;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.PoliceOfficer;
 import ctfmodell.provider.SoundProvider;
@@ -14,6 +15,13 @@ import javafx.application.Platform;
 import java.util.Observable;
 import java.util.Observer;
 
+/**
+ * Das Runnable, wo die Simulation läuft
+ * Starten, Pausieren und Stoppen der Simulation ist hier möglich (wird durch die
+ * Controls im Controller veranlasst)
+ *
+ * @author Nick Garbusa
+ */
 public class SimulationRunner implements Runnable, Observer {
 
     private final Object pauseLock = new Object();
@@ -21,16 +29,18 @@ public class SimulationRunner implements Runnable, Observer {
     public volatile boolean paused = false;
     private double speed;
     private Landscape landscape;
+    private Controller controller;
 
-    public void setLandscape(Landscape landscape) {
-        this.landscape = landscape;
-    }
-
-    public SimulationRunner(double speed, Landscape landscape) {
+    public SimulationRunner(double speed, Landscape landscape, Controller controller) {
+        this.controller = controller;
         this.speed = speed;
         this.landscape = landscape;
         landscape.addObserver(this);
         landscape.getPoliceOfficer().addObserver(this);
+    }
+
+    public void setLandscape(Landscape landscape) {
+        this.landscape = landscape;
     }
 
     @Override
@@ -38,14 +48,13 @@ public class SimulationRunner implements Runnable, Observer {
         this.running = true;
         try {
             landscape.getPoliceOfficer().main();
-            if (landscape.getPoliceOfficer().hasWon()) {
-
-            }
             this.running = false;
             this.paused = false;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("[Simulation] " + e.getMessage());
             SoundProvider.beep();
+        } finally {
+            this.controller.setSimulationControls(false, true, true);
         }
         this.running = false;
         this.paused = false;

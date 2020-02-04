@@ -1,5 +1,8 @@
 package ctfmodell.util;
 
+/**
+ * Statischer "Container" für die Größen des Feld-Canvas
+ */
 public class GraphicSize {
     public static final int RECT_SIZE = 35;
     public static final int GAP_SIZE = 1;

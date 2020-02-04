@@ -1,11 +1,11 @@
-package ctfmodell.tutor;
+package ctfmodell.controller;
 
 import ctfmodell.Main;
-import ctfmodell.controller.Controller;
 import ctfmodell.model.Landscape;
 import ctfmodell.model.StudentExample;
 import ctfmodell.provider.DialogProvider;
 import ctfmodell.serialization.XMLSerialization;
+import ctfmodell.tutor.Tutor;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
@@ -19,7 +19,13 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
-
+/**
+ * Abgekapselter Controller, der wieder in den Hauptcontroller inkludiert wird
+ * Enthält das Tutor-Menu und die nötigen Interaktionen zum absenden und empfangen von
+ * Tutor- oder Studentennachrichten
+ *
+ * @author Nick Garbusa
+ */
 public class TutorController {
 
     @FXML
@@ -148,19 +154,6 @@ public class TutorController {
         }
     }
 
-    private boolean connectionFailed() {
-        if (connectionFailed) {
-            Main.establishRMIConnection(this.role);
-        }
-
-        if (Tutor.tutorialSystem == null) {
-            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Keine Verbindung", "" +
-                    "Es konnte keine Verbindung zum Tutor aufgebaut werden!");
-            return true;
-        }
-        return false;
-    }
-
     private void loadAnswer() {
         if (connectionFailed()) return;
 
@@ -185,6 +178,10 @@ public class TutorController {
         }
     }
 
+    void setParentController(Controller controller) {
+        this.mainController = controller;
+    }
+
     private StudentExample deserializeExample(String studendId) throws XMLStreamException {
         Landscape landscape = mainController.landscape;
         String code = mainController.getCodeEditor().getText();
@@ -197,11 +194,7 @@ public class TutorController {
         return new StudentExample(studendId, code, landscapeXML);
     }
 
-    public void setParentController(Controller controller) {
-        this.mainController = controller;
-    }
-
-    public void setRole(String role, String language) {
+    void setRole(String role, String language) {
         this.role = role;
         setRoleMenu(language);
     }
@@ -218,6 +211,19 @@ public class TutorController {
         } else {
             this.sendOrLoadRequest.setDisable(true);
         }
+    }
+
+    private boolean connectionFailed() {
+        if (connectionFailed) {
+            Main.establishRMIConnection(this.role);
+        }
+
+        if (Tutor.tutorialSystem == null) {
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Keine Verbindung", "" +
+                    "Es konnte keine Verbindung zum Tutor aufgebaut werden!");
+            return true;
+        }
+        return false;
     }
 
 }

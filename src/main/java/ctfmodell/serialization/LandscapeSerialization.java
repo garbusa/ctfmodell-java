@@ -10,6 +10,11 @@ import javafx.scene.control.Alert;
 import java.io.*;
 import java.nio.file.Path;
 
+/**
+ * Klasse, die für die Serialisierung und Deserialisierung der Landschaft zuständig ist
+ *
+ * @author Nick Garbusa
+ */
 public class LandscapeSerialization {
 
     public void serialize(Landscape landscape, Path directory) {
@@ -19,7 +24,7 @@ public class LandscapeSerialization {
                     new FileOutputStream(directory.toFile());
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             landscape.setOfficerXPos(landscape.getPoliceOfficer().getxPos());
-            landscape.setOfficerXPos(landscape.getPoliceOfficer().getyPos());
+            landscape.setOfficerYPos(landscape.getPoliceOfficer().getyPos());
             landscape.setDirection(landscape.getPoliceOfficer().getDirection());
             landscape.setNumberOfFlags(landscape.getPoliceOfficer().getNumberOfFlags());
             out.writeObject(landscape);
@@ -29,13 +34,13 @@ public class LandscapeSerialization {
             DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Speichern", "Landschaft wurde gespeichert!");
 
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.err.println("[Simulation] " + e.getMessage());
         }
 
     }
 
     public void deserialize(Controller controller, File landscapeFile, LandscapePanel landscapePanel) {
-        Landscape loadedLandscape = null;
+        Landscape loadedLandscape;
         try {
             FileInputStream fileIn = new FileInputStream(landscapeFile);
             ObjectInputStream in = new ObjectInputStream(fileIn);
@@ -48,7 +53,7 @@ public class LandscapeSerialization {
             i.printStackTrace();
             return;
         } catch (ClassNotFoundException c) {
-            System.out.println("Employee class not found");
+            System.out.println("[ERROR] Employee class not found");
             c.printStackTrace();
             return;
         }
@@ -56,13 +61,12 @@ public class LandscapeSerialization {
         //Lade Landschaft ein
         PoliceOfficer policeOfficer = controller.landscape.getPoliceOfficer();
         policeOfficer.setyPos(loadedLandscape.getOfficerYPos());
-        policeOfficer.setxPos(loadedLandscape.getOfficerYPos());
+        policeOfficer.setxPos(loadedLandscape.getOfficerXPos());
         policeOfficer.setDirection(loadedLandscape.getDirection());
         policeOfficer.setNumberOfFlags(loadedLandscape.getNumberOfFlags());
 
-
         controller.landscape = loadedLandscape;
-        controller.landscape.addObserver(landscapePanel);
+        controller.deleteAndUpdateObserver();
         controller.landscape.reloadAfterDeserialization(policeOfficer);
 
         DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Laden", "Landschaft wurde geladen!");

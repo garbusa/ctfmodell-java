@@ -11,12 +11,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.rmi.registry.Registry;
 
+/**
+ * Das Tutorobjekt, wo das Remote-Objekt und die Registry gespeichert wird
+ * <p>
+ * Bietet Methoden für das Laden und Senden und Studentenanfragen für den Tutor
+ */
 public class Tutor {
 
     public static TutorialSystem tutorialSystem;
     public static Registry registry;
 
-    static void loadStudentExample(Controller controller, StudentExample example) {
+    public static void loadStudentExample(Controller controller, StudentExample example) {
         controller.getCodeEditor().setText(example.getCode());
 
         Reader r = new StringReader(example.getXml());
@@ -31,7 +36,7 @@ public class Tutor {
         }
     }
 
-    static void saveStudentExample(StudentExample example) {
+    public static void saveStudentExample(StudentExample example) {
         ((TutorialSystemImpl) tutorialSystem).saveAnswer(example);
     }
 
