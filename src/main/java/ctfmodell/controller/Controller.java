@@ -736,10 +736,6 @@ public class Controller {
                     try {
                         Files.createFile(directory);
                         this.createAndStartSimulation(name, null);
-                        if ("tutor".equals(this.propertyProvider.getRole())) {
-                            DialogProvider.alert(Alert.AlertType.INFORMATION, "Neues Fenster", "Tutor-Fenster",
-                                    "In diesem neuen Fenster kannst du keine Studentenantworten entgegennehmen. Bitte benutze dafür das erste Fenster.");
-                        }
                     } catch (IOException e) {
                         System.err.println("[Simulation] " + e.getMessage());
                     }
