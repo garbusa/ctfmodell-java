@@ -853,7 +853,12 @@ public class Controller {
             try {
                 int height = Integer.parseInt(hoeheBreite.getKey().trim());
                 int width = Integer.parseInt(hoeheBreite.getValue().trim());
-                this.landscape.resize(width, height);
+                if (height <= 100 && width <= 100) {
+                    this.landscape.resize(width, height);
+                } else {
+                    DialogProvider.alert(Alert.AlertType.ERROR, "Größe ändern", "Nicht erlaubte Größe",
+                            "Die maximale Größe eines Feldes beträgt 100x100!");
+                }
             } catch (NumberFormatException ex) {
                 System.err.println("[Simulation] Es wurden nicht valide Zahlen eingegeben!");
             } catch (LandscapeException ex) {
