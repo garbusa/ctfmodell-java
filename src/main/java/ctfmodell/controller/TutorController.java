@@ -39,8 +39,6 @@ public class TutorController {
 
     private Controller mainController;
     private String role = null;
-
-    private boolean connectionFailed = false;
     private ResourceBundle resourceBundle;
 
     @FXML
@@ -133,49 +131,37 @@ public class TutorController {
             if (connectionFailed()) return;
 
             StudentExample example = deserializeExample(studentId);
-            boolean sendRequestSuccess = Tutor.tutorialSystem.sendRequest(example);
+            Tutor.tutorialSystem.sendRequest(example);
 
-            if (sendRequestSuccess) {
-                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Versendet",
+
+            DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Versendet",
                         "Anfrage an den Tutor wurde erfolgreich versendet");
-                switchControlsEnable();
-            } else {
-                connectionFailed = true;
-                DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
-                        "Deine Anfrage konnte nicht versendet werden.");
-            }
+            switchControlsEnable();
+
 
 
         } catch (RemoteException | XMLStreamException e) {
-            connectionFailed = true;
+            Tutor.tutorialSystem = null;
             DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
                     "Deine Anfrage konnte nicht versendet werden.");
             //e.printStackTrace();
         }
     }
 
-    private void loadAnswer() {
-        if (connectionFailed()) return;
+    private boolean connectionFailed() {
+        if (Tutor.tutorialSystem == null) {
+            Main.establishRMIConnection(this.role);
 
-        StudentExample example;
-        try {
-            example = Tutor.tutorialSystem.checkResponse(studentId);
-            if (example == null) {
-                DialogProvider.alert(Alert.AlertType.INFORMATION, "Information", "Keine Antwort",
-                        "Es gibt momentan keine Antworten vom Tutor!");
+            if (Tutor.tutorialSystem == null) {
+                DialogProvider.alert(Alert.AlertType.ERROR, "Achtung", "Keine Verbindung zu Tutor", "" +
+                        "Es konnte keine Verbindung zum Tutor aufgebaut werden. Versuche es später erneut!");
+                return true;
             } else {
-                Tutor.loadStudentExample(mainController, example);
-                mainController.compile();
-                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Geladen",
-                        "Antwort vom Tutor wurde geladen!");
-                switchControlsEnable();
+                return false;
             }
-        } catch (RemoteException e) {
-            connectionFailed = true;
-            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
-                    "Es es beim laden der Tutor-Antwort ein Fehler aufgetreten!");
-            //e.printStackTrace();
         }
+
+        return false;
     }
 
     void setParentController(Controller controller) {
@@ -213,17 +199,28 @@ public class TutorController {
         }
     }
 
-    private boolean connectionFailed() {
-        if (connectionFailed) {
-            Main.establishRMIConnection(this.role);
-        }
+    private void loadAnswer() {
+        if (connectionFailed()) return;
 
-        if (Tutor.tutorialSystem == null) {
-            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Keine Verbindung", "" +
-                    "Es konnte keine Verbindung zum Tutor aufgebaut werden!");
-            return true;
+        StudentExample example;
+        try {
+            example = Tutor.tutorialSystem.checkResponse(studentId);
+            if (example == null) {
+                DialogProvider.alert(Alert.AlertType.INFORMATION, "Information", "Keine Antwort",
+                        "Es gibt momentan keine Antworten vom Tutor!");
+            } else {
+                Tutor.loadStudentExample(mainController, example);
+                mainController.compile();
+                DialogProvider.alert(Alert.AlertType.CONFIRMATION, "Erfolgreich", "Geladen",
+                        "Antwort vom Tutor wurde geladen!");
+                switchControlsEnable();
+            }
+        } catch (RemoteException e) {
+            Tutor.tutorialSystem = null;
+            DialogProvider.alert(Alert.AlertType.ERROR, "Fehler", "Fehler",
+                    "Es es beim laden der Tutor-Antwort ein Fehler aufgetreten!");
+            //e.printStackTrace();
         }
-        return false;
     }
 
 }

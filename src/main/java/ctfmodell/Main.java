@@ -124,6 +124,7 @@ public class Main extends Application {
             }
         } catch (RemoteException | NotBoundException e) {
             System.out.println("[DEBUG] Socket-Verbindung ist fehlgeschlagen");
+            e.printStackTrace();
         }
     }
 

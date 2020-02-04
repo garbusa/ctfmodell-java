@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
  */
 public interface TutorialSystem extends Remote {
 
-    Boolean sendRequest(StudentExample example) throws RemoteException;
+    void sendRequest(StudentExample example) throws RemoteException;
 
     StudentExample checkResponse(String id) throws RemoteException;
 

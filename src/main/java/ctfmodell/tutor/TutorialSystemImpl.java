@@ -29,9 +29,8 @@ public class TutorialSystemImpl extends UnicastRemoteObject implements TutorialS
         this.finishedRequests = new ArrayList<>();
     }
 
-    public Boolean sendRequest(StudentExample example) {
+    public void sendRequest(StudentExample example) {
         requests.add(example);
-        return true;
     }
 
     public StudentExample checkResponse(String id) {
