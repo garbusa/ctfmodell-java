@@ -92,7 +92,7 @@ public class TutorController {
             } else {
                 this.studendIdToAnswer = example.getStudentId();
                 Tutor.loadStudentExample(mainController, example);
-                mainController.compile();
+                //mainController.compile();
                 DialogProvider.alert(
                         Alert.AlertType.CONFIRMATION, "Anfragen", "Geladen",
                         "Anfrage vom Studenten wurde geladen"

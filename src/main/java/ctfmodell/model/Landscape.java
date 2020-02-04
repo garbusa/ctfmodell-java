@@ -430,10 +430,13 @@ public class Landscape extends Observable implements Serializable {
         switch (field) {
             case OFFICER_AND_BASE:
                 this.setField(y, x, Field.BASE, false);
+                break;
             case OFFICER_AND_FLAG:
                 this.setField(y, x, Field.FLAG, false);
+                break;
             case POLICE_OFFICER:
                 this.setField(y, x, Field.EMPTY, false);
+                break;
         }
 
         return this.getPoliceOfficer();

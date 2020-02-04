@@ -31,10 +31,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 
 @SuppressWarnings({"ConstantConditions", "Duplicates"})
-public class Main extends Application {
+public class MainStudent extends Application {
 
-    private static final PropertyProvider propertyProvider = new PropertyProvider("simulation.properties");
-    public static SimulationContainer simulations = new SimulationContainer();
+    private static final PropertyProvider propertyProvider = new PropertyProvider("simulation_student.properties");
+    private static SimulationContainer simulations = new SimulationContainer();
 
     public static void main(String[] args) {
         launch(args);
@@ -50,7 +50,7 @@ public class Main extends Application {
         createAndStartSimulation(primaryStage, "DefaultOfficer", defaultCode);
     }
 
-    public static void createAndStartSimulation(Stage primaryStage, String editorClass, String code) throws IOException {
+    private static void createAndStartSimulation(Stage primaryStage, String editorClass, String code) throws IOException {
         if (!Helper.isValidClassName(editorClass)) {
             System.err.println("[Simulation] " + editorClass + "ist kein valider Klassenname!");
             System.exit(0);
@@ -63,7 +63,7 @@ public class Main extends Application {
 
         establishRMIConnection(propertyProvider.getRole());
 
-        FXMLLoader loader = new FXMLLoader(Main.class.getClassLoader().getResource("main.fxml"));
+        FXMLLoader loader = new FXMLLoader(MainStudent.class.getClassLoader().getResource("main.fxml"));
         Parent root = loader.load();
 
         //Add Observers
@@ -78,6 +78,7 @@ public class Main extends Application {
         controller.initializeEventHandler();
         controller.setOfficerLabel(editorClass);
 
+
         //Add LandscapePanel to GUI
         SplitPane splitPane = (SplitPane) ((BorderPane) root).getCenter();
         VBox vBox = (VBox) splitPane.getItems().get(1);
@@ -89,7 +90,7 @@ public class Main extends Application {
         scrollPane.setContent(landscapePanel);
 
         primaryStage.setTitle("Capture The Flag Simulation [" + propertyProvider.getRole() + "]");
-        primaryStage.getIcons().add(new Image(Main.class.getClassLoader().getResourceAsStream("image/menu/police_with_flag.png")));
+        primaryStage.getIcons().add(new Image(MainStudent.class.getClassLoader().getResourceAsStream("image/menu/police_with_flag.png")));
         primaryStage.setScene(new Scene(root));
         simulations.addSimulation(editorClass);
 
@@ -104,7 +105,7 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    public static void establishRMIConnection(String role) {
+    private static void establishRMIConnection(String role) {
         if (simulations.getContainerSize() > 0) {
             return;
         }

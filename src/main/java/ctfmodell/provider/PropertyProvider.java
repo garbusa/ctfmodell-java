@@ -13,18 +13,18 @@ import java.util.Properties;
  */
 public class PropertyProvider {
 
-    private static String fileName = "simulator.properties";
+    private String fileName;
     private Properties simulationProperties;
 
-    public PropertyProvider() {
+    public PropertyProvider(String fileName) {
         try {
-            FileInputStream fis = new FileInputStream(fileName);
+            this.fileName = fileName;
+            FileInputStream fis = new FileInputStream(this.fileName);
             this.generateProperties(fis);
         } catch (IOException e) {
             System.out.println("[DEBUG] IOException, wenn nicht existent -> generieren | sonst properties nachschauen");
         }
         this.checkAndGenerateProperties();
-
     }
 
     public String getRole() {
